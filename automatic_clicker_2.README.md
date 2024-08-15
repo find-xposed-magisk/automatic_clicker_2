@@ -1,5 +1,5 @@
-# automatic_clicker_2
-"Automated control, visual operations, auto-clicker, process automation, RPA." 自动化控制、可视化操作、自动连点器、流程自动化、RPA
+# 项目名称
+Clicker-0.26-Bate（尚未发布）
 # 使用说明
 主文件为Clicker.py，运行即可。部分功能仍在开发中，可能会出现一些问题。
 
@@ -41,4 +41,11 @@ psutil
 ```txt
 pip install PyQt5 pyttsx4 pymsgbox pyautogui mouse keyboard pywinauto pandas selenium webdriver_manager pillow openpyxl requests system_hotkey pygments opencv-python baidu-aip chardet nuitka pyinstaller python-dateutil psutil
 ```
+# 贡献者
+FasterThanLight
 
+邮箱：federalsadler@sohu.com
+
+QQ：2309636438
+
+QQ交流群：308994839    [点击加入](https://qm.qq.com/q/3ih3PE16Mg)
