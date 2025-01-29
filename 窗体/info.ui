@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>282</width>
-    <height>56</height>
+    <height>49</height>
    </rect>
   </property>
   <property name="font">
@@ -30,7 +30,7 @@
       <string>正在运行中...按Esc键可终止运行...</string>
      </property>
      <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
     </widget>
    </item>
@@ -137,7 +137,7 @@
       <string>如果按下Esc没有退出，请再次执行一次最近操作即可退出</string>
      </property>
      <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
     </widget>
    </item>

@@ -24,9 +24,9 @@ import win32clipboard
 import win32con
 import win32gui
 import winsound
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPainter, QPen, QColor, QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QPainter, QPen, QColor, QPixmap
+from PySide6.QtWidgets import QWidget, QApplication
 from aip import AipOcr
 from dateutil.parser import parse
 
@@ -116,16 +116,16 @@ class TransparentWindow(QWidget):
         """pos(x,y, width, height)"""
         super().__init__()
         # 设置无边框窗口
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self.setWindowOpacity(0.5)  # 设置透明度
-        self.setAttribute(Qt.WA_TranslucentBackground)  # 设置背景透明
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)  # 设置背景透明
 
     def paintEvent(self, event):
         # 绘制边框
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setPen(
-            QPen(QColor(255, 0, 0), 5, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
+            QPen(QColor(255, 0, 0), 5, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
         )
         painter.drawRect(self.rect())
 
@@ -1333,7 +1333,7 @@ class MouseDrag:
         # 执行鼠标拖拽
         re_try = self.ins_dic.get("重复次数")
         for _ in range(re_try):
-            self.mouse_drag(start_position, end_position, duration_)
+            self.mouse_drag(start_position, end_position, int(duration_))
             time.sleep(self.time_sleep)
 
 

@@ -17,25 +17,11 @@ import re
 import time
 
 import openpyxl
-from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtCore import *
-from PyQt5.QtCore import QUrl, Qt
-from PyQt5.QtGui import QDesktopServices, QPixmap, QFont
-from PyQt5.QtWidgets import (
-    QMainWindow,
-    QTableWidgetItem,
-    QHeaderView,
-    QDialog,
-    QInputDialog,
-    QMenu,
-    QFileDialog,
-    QStyle,
-    QStatusBar,
-    QMessageBox,
-    QApplication,
-    QAction,
-    QSplashScreen,
-)
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import Signal, Qt, QUrl, QSharedMemory
+from PySide6.QtGui import QAction, QDesktopServices, QPixmap, QFont
+from PySide6.QtWidgets import QMainWindow, QStatusBar, QMessageBox, QMenu, QStyle, QTableWidgetItem, QHeaderView, \
+    QFileDialog, QInputDialog, QDialog, QApplication, QSplashScreen
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 from system_hotkey import SystemHotkey
@@ -51,9 +37,9 @@ from 分支执行窗口 import BranchWindow
 from 功能类 import close_browser
 from 导航窗口功能 import Na
 from 数据库操作 import *
-from 窗体.about import Ui_About
-from 窗体.mainwindow import Ui_MainWindow
-from 窗体.参数窗口 import Ui_Param
+from 窗体.about_ui import Ui_About
+from 窗体.mainwindow_ui import Ui_MainWindow
+from 窗体.参数窗口_ui import Ui_Param
 from 自动更新 import Check_Update, UpdateWindow
 from 设置窗口 import Setting
 from 资源文件夹窗口 import Global_s
@@ -117,9 +103,9 @@ def timer(func):
 
 class Main_window(QMainWindow, Ui_MainWindow):
     """主窗口"""
-    sigkeyhot = pyqtSignal(str, name="sigkeyhot")  # 自定义信号,用于快捷键
-    clear_signal = pyqtSignal()  # 自定义信号，textEdit清空信息，防止在全局快捷键调用时程序崩溃
-    show_branch_signal = pyqtSignal()  # 自定义信号，显示分支选择窗口，防止在全局快捷键调用时程序崩溃
+    sigkeyhot = Signal(str, name="sigkeyhot")  # 自定义信号,用于快捷键
+    clear_signal = Signal()  # 自定义信号，textEdit清空信息，防止在全局快捷键调用时程序崩溃
+    show_branch_signal = Signal()  # 自定义信号，显示分支选择窗口，防止在全局快捷键调用时程序崩溃
 
     def __init__(self):
         super().__init__()
@@ -188,7 +174,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.toolButton.clicked.connect(self.delete_branch)
         self.comboBox.currentIndexChanged.connect(self.get_data)
         # 右键菜单
-        self.tableWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.tableWidget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.tableWidget.customContextMenuRequested.connect(self.generateMenu)
         # 指令执行线程
         self.command_thread = CommandThread(self, None)
@@ -212,11 +198,15 @@ class Main_window(QMainWindow, Ui_MainWindow):
             """检查文件完整性"""
             # 检查命令集.db文件是否存在
             if not os.path.exists("命令集.db"):
-                QMessageBox.critical(self, "错误", "命令集.db文件不存在！\n请重新下载软件！")
+                QMessageBox.critical(
+                    self, "错误", "命令集.db文件不存在！\n请重新下载软件！", QMessageBox.StandardButton.Ok,
+                    QMessageBox.StandardButton.NoButton
+                )
                 sys.exit(1)
             # 检查ini文件是否存在
             if not os.path.exists("config.ini"):
-                QMessageBox.critical(self, "错误", "config.ini文件不存在！\n请重新下载软件！")
+                QMessageBox.critical(self, "错误", "config.ini文件不存在！\n请重新下载软件！",
+                                     QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.NoButton)
                 sys.exit(1)
 
         set_window_size(self)  # 获取上次退出时的窗口大小
@@ -239,20 +229,24 @@ class Main_window(QMainWindow, Ui_MainWindow):
         app_path = os.getcwd()
         # 检查ini文件是否存在
         if not os.path.exists(os.path.join(app_path, "config.ini")):
-            QMessageBox.critical(self, '致命错误', 'config.ini文件不存在！请重新下载！')
+            QMessageBox.critical(self, '致命错误', 'config.ini文件不存在！请重新下载！', QMessageBox.StandardButton.Ok,
+                                 QMessageBox.StandardButton.NoButton)
             sys.exit(1)
         # 检查命令集.db文件是否存在
         if not os.path.exists(os.path.join(app_path, "命令集.db")):
-            QMessageBox.critical(self, '致命错误', '命令集.db文件不存在！请重新下载！')
+            QMessageBox.critical(self, '致命错误', '命令集.db文件不存在！请重新下载！', QMessageBox.StandardButton.Ok,
+                                 QMessageBox.StandardButton.NoButton)
             sys.exit(1)
         # 检查开屏和qss文件夹是否存在
         if not os.path.exists(os.path.join(app_path, 'flat')):
-            QMessageBox.critical(self, '致命错误', 'flat文件夹不存在！')
+            QMessageBox.critical(self, '致命错误', 'flat文件夹不存在！', QMessageBox.StandardButton.Ok,
+                                 QMessageBox.StandardButton.NoButton)
             sys.exit(1)
         # 检查qss文件夹下是否有模型文件
         model_files = os.listdir(os.path.join(app_path, 'flat'))
         if not any(x.endswith('.qss') for x in model_files) or not any(x.endswith('.png') for x in model_files):
-            QMessageBox.critical(self, '致命错误', 'flat文件夹下没有文件！')
+            QMessageBox.critical(self, '致命错误', 'flat文件夹下没有文件！', QMessageBox.StandardButton.Ok,
+                                 QMessageBox.StandardButton.NoButton)
             sys.exit(1)
 
     def register_global_shortcut_keys(self):
@@ -294,7 +288,8 @@ class Main_window(QMainWindow, Ui_MainWindow):
                 self.pushButton_7.setText(f"暂停和恢复\t{'+'.join(global_shortcut['暂停和恢复'])}".upper())
         except Exception as e:
             print(e)
-            QMessageBox.critical(self, "错误", "全局快捷键已失效！")
+            QMessageBox.critical(self, "错误", "全局快捷键已失效！", QMessageBox.StandardButton.Ok,
+                                 QMessageBox.StandardButton.NoButton)
 
     def unregister_global_shortcut_keys(self):
         """注销全局忷键"""
@@ -342,8 +337,8 @@ class Main_window(QMainWindow, Ui_MainWindow):
                     if action.text() == file_path:
                         self.menuzv.removeAction(action)
                 QMessageBox.critical(
-                    self, "错误", "文件不存在！已经从最近打开文件中删除。"
-                )
+                    self, "错误", "文件不存在！已经从最近打开文件中删除。",
+                    QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.NoButton)
         else:
             for action in self.menuzv.actions():
                 if action.text() == file_path:
@@ -523,8 +518,9 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
         def clear_table():
             """清空表格和数据库"""
-            choice = QMessageBox.question(self, "提示", "确认清除所有指令吗？")
-            if choice == QMessageBox.Yes:
+            choice = QMessageBox.question(self, "提示", "确认清除所有指令吗？",
+                                          QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No)
+            if choice == QMessageBox.StandardButton.Yes:
                 clear_all_ins()
                 # 在ini中删除分支信息，保留主分支
                 for i in range(self.comboBox.count()):
@@ -560,18 +556,18 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
             run_ins = menu.addAction("运行选中指令")
             run_ins.setIcon(
-                self.style().standardIcon(QStyle.SP_MediaPlay)
+                self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay)
             )
 
             run_from_this_ins = menu.addAction("从当前行运行")
             run_from_this_ins.setIcon(
-                self.style().standardIcon(QStyle.SP_MediaPlay)
+                self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay)
             )
 
             menu.addSeparator()
             refresh = menu.addAction("刷新")
             refresh.setIcon(
-                self.style().standardIcon(QStyle.SP_BrowserReload)
+                self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
             )  # 设置图标
 
             modify_params = menu.addAction("查看参数")
@@ -579,11 +575,11 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
             up_ins = menu.addAction("上移")
             up_ins.setShortcut("Shift+↑")
-            up_ins.setIcon(self.style().standardIcon(QStyle.SP_ArrowUp))  # 设置图标
+            up_ins.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowUp))  # 设置图标
 
             down_ins = menu.addAction("下移")
             down_ins.setShortcut("Shift+↓")
-            down_ins.setIcon(self.style().standardIcon(QStyle.SP_ArrowDown))  # 设置图标
+            down_ins.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowDown))  # 设置图标
 
             menu.addSeparator()
             insert_ins_before = menu.addAction("在前面插入指令")
@@ -613,19 +609,19 @@ class Main_window(QMainWindow, Ui_MainWindow):
             go_branch = menu.addAction("转到分支")
             go_branch.setShortcut("Ctrl+G")
             go_branch.setIcon(
-                self.style().standardIcon(QStyle.SP_ArrowForward)
+                self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowForward)
             )  # 设置图标
 
             del_ins = menu.addAction("删除指令")
             del_ins.setShortcut("Delete")
             del_ins.setIcon(
-                self.style().standardIcon(QStyle.SP_DialogCancelButton)
+                self.style().standardIcon(QStyle.StandardPixmap.SP_DialogCancelButton)
             )  # 设置图标
 
             menu.addSeparator()
             del_branch = menu.addAction("删除当前分支指令")
             del_branch.setIcon(
-                self.style().standardIcon(QStyle.SP_DialogDiscardButton)
+                self.style().standardIcon(QStyle.StandardPixmap.SP_DialogDiscardButton)
             )  # 设置图标
 
             del_all_ins = menu.addAction("删除全部指令")
@@ -680,18 +676,18 @@ class Main_window(QMainWindow, Ui_MainWindow):
             setting_win = Setting(self)  # 设置窗体
             setting_win.tabWidget.setCurrentIndex(0)
             setting_win.setModal(True)
-            setting_win.exec_()
+            setting_win.exec()
         elif judge == "全局":
             global_s = Global_s(self)  # 全局设置窗口
             global_s.setModal(True)
-            global_s.exec_()
+            global_s.exec()
         elif judge == "导航":
             navigation = Na(self)  # 实例化导航页窗口
             navigation.show()
         elif judge == "关于":
             about = About(self)  # 设置关于窗体
             about.setModal(True)
-            about.exec_()
+            about.exec()
         elif judge == "分支选择":  # 分支选择窗口
             if not self.branch_win.isVisible():
                 self.branch_win.show()
@@ -719,7 +715,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
             ]
             shortcut_win = ShortcutTable(self, title, data)  # 快捷键说明窗口
             shortcut_win.setModal(True)
-            shortcut_win.exec_()
+            shortcut_win.exec()
 
     def get_data(self, row=None):
         """从数据库获取数据并存入表格
@@ -747,7 +743,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
             header = self.tableWidget.horizontalHeader()
             for col in range(header.count()):
                 if col != 0 and col != 4:
-                    header.setSectionResizeMode(col, QHeaderView.ResizeToContents)
+                    header.setSectionResizeMode(col, QHeaderView.ResizeMode.ResizeToContents)
             # 设置焦点
             if row is not None:
                 self.tableWidget.setCurrentCell(int(row), 0)
@@ -829,7 +825,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
                 parent=self,
                 caption="保存文件",
                 filter="(*.xlsx)",
-                directory=directory_path
+                dir=directory_path,
             )
             return (os.path.normpath(os.path.split(file_path)[0]),
                     os.path.normpath(os.path.split(file_path)[1])) \
@@ -848,9 +844,9 @@ class Main_window(QMainWindow, Ui_MainWindow):
             # 提示保存成功，是否打开文件夹
             if judge != "自动保存" and QMessageBox.question(
                     self, "提示", "指令数据保存成功！是否打开文件夹？",
-                    QMessageBox.Yes | QMessageBox.No,
-                    QMessageBox.No
-            ) == QMessageBox.Yes:
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                    QMessageBox.StandardButton.No
+            ) == QMessageBox.StandardButton.Yes:
                 os.startfile(save_path_)
             self.statusBar.showMessage(f"指令数据已保存至{save_path_}。", 3000)
 
@@ -923,7 +919,8 @@ class Main_window(QMainWindow, Ui_MainWindow):
                 wb.save(save_path)
                 prompt_save_success(save_path)  # 提示保存成功
         except PermissionError:
-            QMessageBox.critical(self, "错误", "保存失败，文件被占用！")
+            QMessageBox.critical(self, "错误", "保存失败，文件被占用！", QMessageBox.StandardButton.Ok,
+                                 QMessageBox.StandardButton.NoButton)
 
     def closeEvent(self, event):
         """关闭窗口事件"""
@@ -936,8 +933,8 @@ class Main_window(QMainWindow, Ui_MainWindow):
         if eval(get_setting_data_from_ini("Config", "退出提醒清空指令")):
             choice = QMessageBox.question(
                 self, "提示", "确定退出并清空所有指令？\n将自动保存当前指令数据。"
-            )
-            if choice == QMessageBox.Yes:
+                , QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No)
+            if choice == QMessageBox.StandardButton.Yes:
                 # 退出终止后台进程并清空数据库
                 self.save_data("自动保存")
                 event.accept()
@@ -981,7 +978,8 @@ class Main_window(QMainWindow, Ui_MainWindow):
                             con_.commit()
                     except Exception as e:
                         # 捕获并处理异常
-                        QMessageBox.warning(self, f"导入失败", f"ID重复或格式错误！{e}")
+                        QMessageBox.warning(self, f"导入失败", f"ID重复或格式错误！{e}", QMessageBox.StandardButton.Ok,
+                                            QMessageBox.StandardButton.NoButton)
             wb.close()
             close_database(cursor_, con_)
             self.load_branch_to_combobox()  # 重新加载分支列表
@@ -1102,7 +1100,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
     def create_branch(self):
         """创建分支"""
-        flag = Qt.WindowCloseButtonHint
+        flag = Qt.WindowType.WindowCloseButtonHint
         branch_name, ok = QInputDialog.getText(self, "创建分支", "请输入分支名称：", flags=flag)
         if ok:
             message = writes_to_branch_info(branch_name, '')
@@ -1115,7 +1113,8 @@ class Main_window(QMainWindow, Ui_MainWindow):
     def delete_branch(self):
         text = self.comboBox.currentText()
         if text == MAIN_FLOW:
-            QMessageBox.critical(self, "提示", "无法删除主分支！")
+            QMessageBox.critical(self, "提示", "无法删除主分支！", QMessageBox.StandardButton.Ok,
+                                 QMessageBox.StandardButton.NoButton)
         else:
             # 将combox显示的名称切换为主流程
             self.comboBox.setCurrentIndex(0)
@@ -1126,7 +1125,8 @@ class Main_window(QMainWindow, Ui_MainWindow):
                 self.load_branch_to_combobox()  # 重新加载分支列表
                 QMessageBox.information(self, "提示", "分支已删除！")
             else:
-                QMessageBox.critical(self, "提示", "分支删除失败！")
+                QMessageBox.critical(self, "提示", "分支删除失败！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
 
     def load_branch_to_combobox(self, text=None):
         """加载分支
@@ -1286,9 +1286,6 @@ class About(QDialog, Ui_About):
         # 初始化窗体
         self._parent = parent
         self.setupUi(self)
-        self.setWindowFlags(
-            self.windowFlags() & ~Qt.WindowContextHelpButtonHint
-        )  # 隐藏帮助按钮
         set_window_size(self)  # 获取上次退出时的窗口大小
         self.label_2.setText(f"版本：{CURRENT_VERSION}")  # 设置版本号
         self.label_7.setText('<a href="{}"><font color="red">{}</font></a>'.format(QQ_GROUP, QQ))
@@ -1319,9 +1316,6 @@ class Param(QDialog, Ui_Param):
         super().__init__(parent)
         # 初始化窗体
         self.setupUi(self)
-        self.setWindowFlags(
-            self.windowFlags() & ~Qt.WindowContextHelpButtonHint
-        )  # 隐藏帮助按钮
         set_window_size(self)  # 获取上次退出时的窗口大小
         self.pushButton.clicked.connect(self.modify_parameters)  # 保存参数
 
@@ -1350,12 +1344,9 @@ class QSSLoader:
 if __name__ == "__main__":
     # 自适应高分辨率
     # 强制启用高 DPI 感知模式
-    # 需要在创建 QApplication 之前设置环境变量
-    # QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-    # QCoreApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
     is_AA_EnableHighDpiScaling = eval(get_setting_data_from_ini("Config", "高DPI自适应"))
     if is_AA_EnableHighDpiScaling:
-        QtCore.QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+        QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     app = QtWidgets.QApplication(sys.argv)
     # 防多开
     share = QSharedMemory(APP_NAME)
@@ -1387,4 +1378,4 @@ if __name__ == "__main__":
         splash.finish(main_win)  # 隐藏启动界面
         splash.deleteLater()
 
-        sys.exit(app.exec_())
+        sys.exit(app.exec())

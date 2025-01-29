@@ -7,18 +7,18 @@ from contextlib import closing
 
 import pymsgbox
 import requests
-from PyQt5.QtCore import QThread, pyqtSignal, Qt
-from PyQt5.QtWidgets import QDialog
+from PySide6.QtCore import QThread, Signal, Qt
+from PySide6.QtWidgets import QDialog
 from dateutil.parser import parse
 
+from 窗体.update_ui import Ui_Update_UI
 from 软件信息 import INTERFACE, CURRENT_VERSION, DOWNLOAD_PAGE
-from 窗体.update import Ui_Update_UI
 
 
 class Check_Update(QThread):
     """自动更新"""
-    show_update_signal = pyqtSignal(str, str, name='show_update_signal')
-    show_update_window_signal = pyqtSignal(dict, name='show_update_window_signal')
+    show_update_signal = Signal(str, str, name='show_update_signal')
+    show_update_window_signal = Signal(dict, name='show_update_window_signal')
 
     def __init__(self, parent=None):
         super(Check_Update, self).__init__(parent)
@@ -105,9 +105,9 @@ class Check_Update(QThread):
 
 class Download_UpdatePack(QThread):
     """下载更新"""
-    download_signal = pyqtSignal(str, name='download_signal')
-    progress_signal = pyqtSignal(int, name='progress_signal')
-    finish_signal = pyqtSignal(name='finish_signal')
+    download_signal = Signal(str, name='download_signal')
+    progress_signal = Signal(int, name='progress_signal')
+    finish_signal = Signal(name='finish_signal')
 
     def __init__(self, parent=None):
         super(Download_UpdatePack, self).__init__(parent)
@@ -170,7 +170,6 @@ class UpdateWindow(QDialog, Ui_Update_UI):
     def __init__(self, parent=None, update_info_dic_: dict = None):
         super().__init__(parent)
         self.setupUi(self)
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)  # 隐藏帮助按钮
         self.update_info_dic = update_info_dic_
         self.progressBar.setValue(0)
         # 设置下载线程

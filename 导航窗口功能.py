@@ -5,22 +5,11 @@ import re
 import sqlite3
 
 import pyautogui
-from PyQt5 import QtCore
-from PyQt5.QtCore import QUrl, QRegExp, Qt
-from PyQt5.QtGui import (
-    QDesktopServices,
-    QImage,
-    QPixmap,
-    QIntValidator,
-    QRegExpValidator, QKeySequence,
-)
-from PyQt5.QtWidgets import (
-    QMessageBox,
-    QTreeWidgetItemIterator,
-    QFileDialog,
-    QWidget,
-    QApplication, QDialog, QColorDialog,
-)
+from PySide6 import QtCore
+from PySide6.QtCore import Qt, QRegularExpression, QUrl
+from PySide6.QtGui import QPixmap, QImage, QIntValidator, QRegularExpressionValidator, QDesktopServices, QKeySequence
+from PySide6.QtWidgets import QDialog, QMessageBox, QWidget, QTreeWidgetItemIterator, QApplication, QFileDialog, \
+    QColorDialog
 from dateutil.parser import parse
 from openpyxl.utils.exceptions import InvalidFileException
 from pandas import ExcelFile
@@ -73,8 +62,8 @@ from 数据库操作 import (
     close_database,
     get_variable_info
 )
-from 窗体.图像选择 import Ui_ImageSelect
-from 窗体.导航窗口 import Ui_navigation
+from 窗体.图像选择_ui import Ui_ImageSelect
+from 窗体.导航窗口_ui import Ui_navigation
 from 网页操作 import WebOption
 from 设置窗口 import Setting
 from 选择窗体 import Variable_selection_win, ShortcutTable
@@ -86,9 +75,6 @@ class ImageSelection(QDialog, Ui_ImageSelect):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-        self.setWindowFlags(
-            self.windowFlags() & ~Qt.WindowContextHelpButtonHint
-        )  # 隐藏帮助按钮
         self.load_images_name_to_listView()  # 加载图片名称到listView
         self.listView.clicked.connect(self.preview_image)  # 预览图片
         self.pushButton.clicked.connect(self.get_image_name)  # 获取图片名称
@@ -115,7 +101,7 @@ class ImageSelection(QDialog, Ui_ImageSelect):
             image = image_.scaled(
                 self.label.width(),
                 self.label.height(),
-                Qt.KeepAspectRatio,
+                Qt.AspectRatioMode.KeepAspectRatio,
             )
             self.label.setPixmap(QPixmap.fromImage(image))
 
@@ -135,7 +121,8 @@ class ImageSelection(QDialog, Ui_ImageSelect):
             current_list = model.stringList()
             # 检查是否已经存在相同的图片名称
             if image_name in current_list:
-                QMessageBox.warning(self, '警告', '该图像不能重复添加！')
+                QMessageBox.warning(self, '警告', '该图像不能重复添加！', QMessageBox.StandardButton.Ok,
+                                    QMessageBox.StandardButton.NoButton)
             else:
                 # 将新的图片名称添加到列表中
                 current_list.append(image_name)
@@ -155,8 +142,8 @@ class Na(QWidget, Ui_navigation):
         self.out_mes = OutputMessage(None, self)  # 输出信息
         self.setupUi(self)
         # 去除最大化最小化按钮
-        self.setWindowFlags(Qt.WindowCloseButtonHint)
-        self.setWindowModality(Qt.ApplicationModal)
+        self.setWindowFlags(Qt.WindowType.WindowCloseButtonHint)
+        self.setWindowModality(Qt.WindowModality.ApplicationModal)
         set_window_size(self)  # 获取上次退出时的窗口大小
         self.tabWidget.setCurrentIndex(0)  # 设置默认页
         self.treeWidget.expandAll()  # treeWidget全部展开
@@ -269,7 +256,7 @@ class Na(QWidget, Ui_navigation):
         self.tabWidget_2.setCurrentIndex(0)  # 设置到功能页面到预览页
         # 设置窗口的flag，否则加载异常
         flags = self.windowFlags()
-        self.setWindowFlags(flags | Qt.Window)
+        self.setWindowFlags(flags | Qt.WindowType.Window)
 
     def showEvent(self, a0) -> None:
         """显示窗口时，加载功能窗口的主要功能"""
@@ -353,7 +340,8 @@ class Na(QWidget, Ui_navigation):
                     func_selected("还原参数")
                     self.show_image_to_label(name)  # 显示图像
                 except Exception as e:
-                    QMessageBox.warning(self, "警告", "该指令参数错误", QMessageBox.Yes)
+                    QMessageBox.warning(self, "警告", "该指令参数错误", QMessageBox.StandardButton.Ok,
+                                        QMessageBox.StandardButton.NoButton)
                     print("还原参数错误", e)
 
         except ValueError:  # 如果没有找到对应的功能页，则跳过
@@ -394,7 +382,8 @@ class Na(QWidget, Ui_navigation):
                 select_branch_table_name = self.comboBox_10.currentText()
                 if self.comboBox_11.currentText() == "":
                     QMessageBox.critical(
-                        self, "错误", "分支表下无指令，请检查分支表名是否正确！"
+                        self, "错误", "分支表下无指令，请检查分支表名是否正确！", QMessageBox.StandardButton.Ok,
+                        QMessageBox.StandardButton.NoButton
                     )
                     raise ValueError
                 exception_handling_text = (
@@ -449,7 +438,8 @@ class Na(QWidget, Ui_navigation):
             except InvalidFileException:
                 excel_sheet_name = []
             except PermissionError:
-                QMessageBox.critical(self, "错误", "当前文件被占用，请关闭文件后重试！")
+                QMessageBox.critical(self, "错误", "当前文件被占用，请关闭文件后重试！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 excel_sheet_name = []
             comboBox_after.clear()
             comboBox_after.addItems(excel_sheet_name)
@@ -506,6 +496,7 @@ class Na(QWidget, Ui_navigation):
         :param pars_1:参数1
         :param function_name: 功能名称
         """
+
         def get_rgb_value():
             """获取颜色的rgb值"""
             # 获取鼠标位置的rgb值
@@ -587,7 +578,8 @@ class Na(QWidget, Ui_navigation):
         :param judge: 功能选择（快捷截图、打开文件夹）"""
         if judge == "快捷截图":
             if control_name.currentText() == "":
-                QMessageBox.warning(self, "警告", "未选择图像文件夹！", QMessageBox.Yes)
+                QMessageBox.warning(self, "警告", "未选择图像文件夹！", QMessageBox.StandardButton.Yes,
+                                    QMessageBox.StandardButton.NoButton)
             else:
                 # 隐藏主窗口
                 self.hide()
@@ -611,7 +603,8 @@ class Na(QWidget, Ui_navigation):
                 os.startfile(os.path.normpath(control_name.currentText()))
             else:
                 QMessageBox.warning(
-                    self, "警告", "未设置资源文件夹，请前往主页设置！", QMessageBox.Yes
+                    self, "警告", "未设置资源文件夹，请前往主页设置！", QMessageBox.StandardButton.Yes,
+                    QMessageBox.StandardButton.NoButton
                 )
 
         elif judge == "设置区域":
@@ -720,7 +713,8 @@ class Na(QWidget, Ui_navigation):
             close_database(cursor, con)
 
         except sqlite3.OperationalError:
-            QMessageBox.critical(self, "错误", "数据写入失败，请重试！")
+            QMessageBox.critical(self, "错误", "数据写入失败，请重试！", QMessageBox.StandardButton.Ok,
+                                 QMessageBox.StandardButton.NoButton)
 
     def save_data(self):
         """获取4个参数命令，并保存至数据库"""
@@ -758,7 +752,7 @@ class Na(QWidget, Ui_navigation):
                     image = image_.scaled(
                         self.label_43.width(),
                         self.label_43.height(),
-                        Qt.KeepAspectRatio,
+                        Qt.AspectRatioMode.KeepAspectRatio,
                     )
                     self.label_43.setPixmap(QPixmap.fromImage(image))
                 elif judge == "删除":
@@ -830,11 +824,13 @@ class Na(QWidget, Ui_navigation):
             # 检查参数是否有异常
             if (os.path.isdir(image_)) or (not os.path.exists(image_)):
                 QMessageBox.critical(
-                    self, "错误", "图像文件不存在，请检查图像文件是否存在！"
+                    self, "错误", "图像文件不存在，请检查图像文件是否存在！", QMessageBox.StandardButton.Ok,
+                    QMessageBox.StandardButton.NoButton
                 )
                 raise FileNotFoundError
             if self.groupBox_57.isChecked() and self.label_155.text() == "(0,0,0,0)":
-                QMessageBox.critical(self, "错误", "未设置识别区域！")
+                QMessageBox.critical(self, "错误", "未设置识别区域！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise FileNotFoundError
 
             return image_, parameter_dic_
@@ -1042,10 +1038,10 @@ class Na(QWidget, Ui_navigation):
                     self,
                     '删除图像',
                     f'是否删除本地图像：{selected_image}？\n删除后不可恢复。',
-                    QMessageBox.Yes | QMessageBox.No,
-                    QMessageBox.No
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                    QMessageBox.StandardButton.No
                 )
-                if reply == QMessageBox.Yes:
+                if reply == QMessageBox.StandardButton.Yes:
                     # 获取图像完整路径
                     image_path = matched_complete_path_from_resource_folders(selected_image)
                     # 刷新listView
@@ -1092,7 +1088,7 @@ class Na(QWidget, Ui_navigation):
                 image_ = image_.scaled(
                     self.label_43.width(),
                     self.label_43.height(),
-                    Qt.KeepAspectRatio,
+                    Qt.AspectRatioMode.KeepAspectRatio,
                 )
                 self.label_43.setPixmap(QPixmap.fromImage(image_))
                 self.tabWidget_2.setCurrentIndex(1)  # 设置到功能页面到预览页
@@ -1108,11 +1104,13 @@ class Na(QWidget, Ui_navigation):
             """从tab页获取参数"""
             images_name_list = self.listView.model().stringList() if self.listView.model() else []
             if not images_name_list:
-                QMessageBox.critical(self, "错误", "未添加任何图像！")
+                QMessageBox.critical(self, "错误", "未添加任何图像！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise FileNotFoundError
             if self.groupBox_73.isChecked():
                 if self.label_174.text() == "(0,0,0,0)":
-                    QMessageBox.critical(self, "错误", "未设置识别区域！")
+                    QMessageBox.critical(self, "错误", "未设置识别区域！", QMessageBox.StandardButton.Ok,
+                                         QMessageBox.StandardButton.NoButton)
                     raise FileNotFoundError
             # 返回参数字典
             image_ = '、'.join(images_name_list)
@@ -1238,7 +1236,8 @@ class Na(QWidget, Ui_navigation):
                 parameter_1 = "随机滚轮滑动"
             # 检查参数是否有异常
             if not self.lineEdit_3.text().isdigit() and self.groupBox_22.isChecked():
-                QMessageBox.critical(self, "错误", "滚动的距离未输入！")
+                QMessageBox.critical(self, "错误", "滚动的距离未输入！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 参数字典
             if parameter_1 == "随机滚轮滑动":
@@ -1280,7 +1279,8 @@ class Na(QWidget, Ui_navigation):
                     self,
                     "警告",
                     "特殊控件的文本输入仅支持输入英文大小写字母和数字！",
-                    QMessageBox.Yes,
+                    QMessageBox.StandardButton.Yes,
+                    QMessageBox.StandardButton.NoButton,
                 )
 
         if type_ == "按钮功能":
@@ -1330,7 +1330,8 @@ class Na(QWidget, Ui_navigation):
             }
             # 检查参数是否有异常
             if self.label_9.text() == "0" and self.label_10.text() == "0":
-                QMessageBox.critical(self, "错误", "未设置坐标，请设置坐标！")
+                QMessageBox.critical(self, "错误", "未设置坐标，请设置坐标！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             return parameter_dic_
 
@@ -1430,7 +1431,8 @@ class Na(QWidget, Ui_navigation):
                 }
                 if not time_judgment(parameter_dic_["时间"]):
                     QMessageBox.critical(
-                        self, "错误", "目标时间不能小于当前时间！时间已过。"
+                        self, "错误", "目标时间不能小于当前时间！时间已过。", QMessageBox.StandardButton.Ok,
+                        QMessageBox.StandardButton.NoButton
                     )
                     raise ValueError
             return parameter_dic_
@@ -1522,11 +1524,13 @@ class Na(QWidget, Ui_navigation):
             # 检查参数是否有异常
             if (os.path.isdir(image_)) or (not os.path.exists(image_)):
                 QMessageBox.critical(
-                    self, "错误", "图像文件不存在，请检查图像文件是否存在！"
+                    self, "错误", "图像文件不存在，请检查图像文件是否存在！", QMessageBox.StandardButton.Ok,
+                    QMessageBox.StandardButton.NoButton
                 )
                 raise FileNotFoundError
             if self.groupBox_61.isChecked() and self.label_160.text() == "(0,0,0,0)":
-                QMessageBox.critical(self, "错误", "未设置识别区域！")
+                QMessageBox.critical(self, "错误", "未设置识别区域！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise FileNotFoundError
             return image_, parameter_dic_
 
@@ -1593,7 +1597,8 @@ class Na(QWidget, Ui_navigation):
             # 检查参数是否有异常
             if (os.path.isdir(image)) or (not os.path.exists(image)):
                 QMessageBox.critical(
-                    self, "错误", "图像文件不存在，请检查图像文件是否存在！"
+                    self, "错误", "图像文件不存在，请检查图像文件是否存在！", QMessageBox.StandardButton.Ok,
+                    QMessageBox.StandardButton.NoButton
                 )
                 raise FileNotFoundError
             # 将命令写入数据库
@@ -1632,7 +1637,8 @@ class Na(QWidget, Ui_navigation):
                 x_, y_ = screen_size.width(), screen_size.height()
                 if x > x_ or y > y_:  # 如果坐标超过屏幕范围
                     QMessageBox.critical(
-                        self, "错误", f"坐标超过当前屏幕范围{x_, y_}，请重新设置！"
+                        self, "错误", f"坐标超过当前屏幕范围{x_, y_}，请重新设置！", QMessageBox.StandardButton.Ok,
+                        QMessageBox.StandardButton.NoButton
                     )
                     raise ValueError
 
@@ -1645,7 +1651,8 @@ class Na(QWidget, Ui_navigation):
                     "距离": self.lineEdit.text(),
                 }
                 if not self.lineEdit.text():
-                    QMessageBox.critical(self, "错误", "未设置距离！")
+                    QMessageBox.critical(self, "错误", "未设置距离！", QMessageBox.StandardButton.Ok,
+                                         QMessageBox.StandardButton.NoButton)
                     raise ValueError
             # 参数字典
             if self.groupBox_30.isChecked():
@@ -1660,7 +1667,8 @@ class Na(QWidget, Ui_navigation):
                     "持续": self.doubleSpinBox.value(),
                 }
                 if not self.lineEdit_29.text() or not self.lineEdit_30.text():
-                    QMessageBox.critical(self, "错误", "未设置坐标！")
+                    QMessageBox.critical(self, "错误", "未设置坐标！", QMessageBox.StandardButton.Ok,
+                                         QMessageBox.StandardButton.NoButton)
                     raise ValueError
                 # 检查坐标的x和y是超过屏幕
                 check_coordinate(
@@ -1672,7 +1680,8 @@ class Na(QWidget, Ui_navigation):
                     "变量": self.comboBox_61.currentText(),
                 }
                 if not self.comboBox_61.currentText():
-                    QMessageBox.critical(self, "错误", "未设置变量！")
+                    QMessageBox.critical(self, "错误", "未设置变量！", QMessageBox.StandardButton.Ok,
+                                         QMessageBox.StandardButton.NoButton)
                     raise ValueError
             return parameter_dic_
 
@@ -1817,7 +1826,8 @@ class Na(QWidget, Ui_navigation):
                 "按压时长": self.spinBox_27.value(),
             }
             if parameter_dic["按键"] == "":
-                QMessageBox.critical(self, "错误", "未设置按键，请设置按键！")
+                QMessageBox.critical(self, "错误", "未设置按键，请设置按键！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 将命令写入数据库
             func_info_dic = self.get_func_info()
@@ -1933,28 +1943,31 @@ class Na(QWidget, Ui_navigation):
                     "提示",
                     "启用该功能后，请在主页面中设置循环次数大于1，执行全部指令后，"
                     "循环执行时，单元格行号会自动递增。",
-                    QMessageBox.Ok,
+                    QMessageBox.StandardButton.Ok,
                 )
 
         def get_parameters():
             """获取参数"""
             # 检查是否有异常
             if not self.lineEdit_4.text():
-                QMessageBox.critical(self, "错误", "未设置单元格，请设置单元格！")
+                QMessageBox.critical(self, "错误", "未设置单元格，请设置单元格！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             if (
                     self.comboBox_12.currentText() == ""
                     or self.comboBox_13.currentText() == ""
             ):
                 QMessageBox.critical(
-                    self, "错误", "未设置工作簿或工作表，请设置工作簿或工作表！"
+                    self, "错误", "未设置工作簿或工作表，请设置工作簿或工作表！", QMessageBox.StandardButton.Ok,
+                    QMessageBox.StandardButton.NoButton
                 )
                 raise ValueError
             if (
                     self.comboBox_14.currentText() == ""
                     or self.comboBox_15.currentText() == ""
             ):
-                QMessageBox.critical(self, "错误", "未设置图像，请设置图像！")
+                QMessageBox.critical(self, "错误", "未设置图像，请设置图像！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 图像路径
             image_path = os.path.normpath(
@@ -2021,7 +2034,9 @@ class Na(QWidget, Ui_navigation):
         if type_ == "按钮功能":
             # 行号自动递增提示
             self.checkBox_3.clicked.connect(line_number_increasing)
-            self.lineEdit_4.setValidator(QRegExpValidator(QRegExp("[A-Za-z0-9]+")))
+            regex = QRegularExpression("^[A-Za-z0-9]*$")
+            validator = QRegularExpressionValidator(regex, self.lineEdit)
+            self.lineEdit_4.setValidator(validator)
             # 信息录入页面的快捷截图功能
             self.pushButton_5.clicked.connect(
                 lambda: self.quick_screenshot(self.comboBox_14, "快捷截图")
@@ -2082,9 +2097,10 @@ class Na(QWidget, Ui_navigation):
                     url
                 )  # 测试网页是否能打开
                 if is_succeed:
-                    QMessageBox.information(self, "提示", "连接成功！", QMessageBox.Yes)
+                    QMessageBox.information(self, "提示", "连接成功！", QMessageBox.StandardButton.Yes)
                 else:
-                    QMessageBox.critical(self, "错误", str_info)
+                    QMessageBox.critical(self, "错误", str_info, QMessageBox.StandardButton.Ok,
+                                         QMessageBox.StandardButton.NoButton)
 
             elif judge == "安装浏览器":
                 url = "https://google.cn/chrome/"
@@ -2096,9 +2112,9 @@ class Na(QWidget, Ui_navigation):
                     self,
                     "提示",
                     "确认下载浏览器驱动？",
-                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 )
-                if x == QMessageBox.Yes:
+                if x == QMessageBox.StandardButton.Yes:
                     print("下载浏览器驱动")
                     self.tabWidget_2.setCurrentIndex(2)
                     web_option = WebOption(self.out_mes)
@@ -2315,10 +2331,12 @@ class Na(QWidget, Ui_navigation):
                 "移动速度": self.spinBox_32.value(),
             }
             if self.label_59.text() == "0" and self.label_61.text() == "0":
-                QMessageBox.critical(self, "错误", "未设置开始位置！")
+                QMessageBox.critical(self, "错误", "未设置开始位置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             if self.label_65.text() == "0" and self.label_66.text() == "0":
-                QMessageBox.critical(self, "错误", "未设置结束位置！")
+                QMessageBox.critical(self, "错误", "未设置结束位置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             return parameter_dic_
 
@@ -2405,7 +2423,8 @@ class Na(QWidget, Ui_navigation):
             """获取参数"""
             # 检查参数是否有异常
             if self.comboBox_26.currentText() == "切换到指定frame" and not self.lineEdit_11.text():
-                QMessageBox.critical(self, "错误", "未设置frame！")
+                QMessageBox.critical(self, "错误", "未设置frame！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 获取参数字典
             if self.comboBox_26.currentText() == "切换到指定frame":
@@ -2455,13 +2474,16 @@ class Na(QWidget, Ui_navigation):
             """获取参数"""
             # 检查参数是否有异常
             if self.lineEdit_12.text() == "":
-                QMessageBox.critical(self, "错误", "元素未填写！")
+                QMessageBox.critical(self, "错误", "元素未填写！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             if self.comboBox_29.currentText() == "":
-                QMessageBox.critical(self, "错误", "未设置工作簿！")
+                QMessageBox.critical(self, "错误", "未设置工作簿！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             if self.lineEdit_13.text() == "":
-                QMessageBox.critical(self, "错误", "未填写工作表名！")
+                QMessageBox.critical(self, "错误", "未填写工作表名！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 异常处理
             timeout_type = "自动跳过" if self.radioButton_13.isChecked() \
@@ -2523,10 +2545,12 @@ class Na(QWidget, Ui_navigation):
             """获取参数"""
             # 检查参数是否有异常
             if self.lineEdit_14.text() == "":
-                QMessageBox.critical(self, "错误", "元素未填写！")
+                QMessageBox.critical(self, "错误", "元素未填写！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             if self.spinBox_10.value() == 0 and self.spinBox_11.value() == 0:
-                QMessageBox.critical(self, "错误", "未设置拖动距离！")
+                QMessageBox.critical(self, "错误", "未设置拖动距离！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 获取参数字典
             image_ = self.lineEdit_14.text()
@@ -2594,10 +2618,12 @@ class Na(QWidget, Ui_navigation):
             """获取参数"""
             # 检查参数是否有异常
             if self.comboBox_67.currentText() == "区域截图" and self.label_164.text() == "(0,0,0,0)":
-                QMessageBox.critical(self, "错误", "未设置区域！")
+                QMessageBox.critical(self, "错误", "未设置区域！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             if self.radioButton_9.isChecked() and self.lineEdit_16.text() == "":
-                QMessageBox.critical(self, "错误", "未设置图像名称！")
+                QMessageBox.critical(self, "错误", "未设置图像名称！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 获取参数字典
             if not self.lineEdit_16.text().endswith(".png"):  # 如果没有.png后缀则添加
@@ -2688,7 +2714,8 @@ class Na(QWidget, Ui_navigation):
             """获取参数"""
             # 检查参数是否有异常
             if self.lineEdit_15.text() == "":
-                QMessageBox.critical(self, "错误", "窗口未填写！")
+                QMessageBox.critical(self, "错误", "窗口未填写！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 获取参数字典
             parameter_dic_ = {
@@ -2751,7 +2778,8 @@ class Na(QWidget, Ui_navigation):
                 else self.textEdit_2.toPlainText()
             )
             if parameter_1_ == "" or parameter_2_ == "":
-                QMessageBox.critical(self, "错误", "联系人或消息内容不能为空！")
+                QMessageBox.critical(self, "错误", "联系人或消息内容不能为空！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 返回参数字典
             parameter_dic_ = {
@@ -2859,7 +2887,8 @@ class Na(QWidget, Ui_navigation):
             parameter_3_ = self.comboBox_62.currentText()  # 验证码类型
             # 检查参数是否有异常
             if parameter_1_ == "(0,0,0,0)":
-                QMessageBox.critical(self, "错误", "验证码识别区域未设置！")
+                QMessageBox.critical(self, "错误", "验证码识别区域未设置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 返回参数字典
             parameter_dic_ = {
@@ -2915,7 +2944,8 @@ class Na(QWidget, Ui_navigation):
         def get_parameters():
             # 检查参数是否有异常
             if self.groupBox_34.isChecked() and not self.textEdit_4.toPlainText():
-                QMessageBox.critical(self, "错误", "内容未输入！")
+                QMessageBox.critical(self, "错误", "内容未输入！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             if self.groupBox_32.isChecked():
                 parameter_dic_ = {
@@ -3128,7 +3158,8 @@ class Na(QWidget, Ui_navigation):
             """从tab页获取参数"""
             # 检查参数是否有异常
             if self.comboBox_37.currentText() == "" or self.comboBox_38.currentText() == "":
-                QMessageBox.critical(self, "错误", "分支参数错误！")
+                QMessageBox.critical(self, "错误", "分支参数错误！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 返回参数字典
             parameter_dic = {
@@ -3221,7 +3252,8 @@ class Na(QWidget, Ui_navigation):
             """从tab页获取参数"""
             # 检查参数是否有异常
             if self.lineEdit_21.text() == "":
-                QMessageBox.critical(self, "错误", "窗口标题未填！")
+                QMessageBox.critical(self, "错误", "窗口标题未填！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 返回参数字典
             parameter_dic_ = {
@@ -3283,16 +3315,19 @@ class Na(QWidget, Ui_navigation):
             # 检查参数是否有异常
             key_name = self.keySequenceEdit_2.keySequence().toString()
             if key_name == "":
-                QMessageBox.critical(self, "错误", "按键未设置！")
+                QMessageBox.critical(self, "错误", "按键未设置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             if key_name.count("+") >= 1:
-                QMessageBox.critical(self, "错误", "该功能暂不支持复合按键！")
+                QMessageBox.critical(self, "错误", "该功能暂不支持复合按键！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             if self.radioButton_21.isChecked() and (
                     self.comboBox_41.currentText() == ""
                     or self.comboBox_42.currentText() == ""
             ):
-                QMessageBox.critical(self, "错误", "分支异常，请先添加！")
+                QMessageBox.critical(self, "错误", "分支异常，请先添加！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 返回参数字典
             if self.radioButton_22.isChecked():  # 按键等待
@@ -3369,7 +3404,8 @@ class Na(QWidget, Ui_navigation):
             """从tab页获取参数"""
             # 检查参数是否有异常
             if self.comboBox_44.currentText() == "":
-                QMessageBox.critical(self, "错误", "变量未设置！")
+                QMessageBox.critical(self, "错误", "变量未设置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 返回参数字典
             parameter_dic_ = {
@@ -3442,13 +3478,16 @@ class Na(QWidget, Ui_navigation):
                     self.comboBox_45.currentText() == ""
                     or self.comboBox_46.currentText() == ""
             ):
-                QMessageBox.critical(self, "错误", "Excel路径未设置！")
+                QMessageBox.critical(self, "错误", "Excel路径未设置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             if self.lineEdit_23.text() == "":
-                QMessageBox.critical(self, "错误", "单元格未设置！")
+                QMessageBox.critical(self, "错误", "单元格未设置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             if self.comboBox_47.currentText() == "":
-                QMessageBox.critical(self, "错误", "变量未设置！")
+                QMessageBox.critical(self, "错误", "变量未设置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 返回参数字典
             image_ = f"{self.comboBox_45.currentText()}"
@@ -3495,14 +3534,14 @@ class Na(QWidget, Ui_navigation):
                     "提示",
                     "启用该功能后，请在主页面中设置循环次数大于1，执行全部指令后，"
                     "循环执行时，单元格行号会自动递增。",
-                    QMessageBox.Ok,
+                    QMessageBox.StandardButton.Ok,
                 )
 
         if type_ == "按钮功能":
             # 禁用中文输入
-            self.lineEdit_23.setValidator(
-                QRegExpValidator(QRegExp("[a-zA-Z0-9]{16}"), self)
-            )
+            regex = QRegularExpression("^[A-Za-z0-9]*$")
+            validator = QRegularExpressionValidator(regex, self.lineEdit)
+            self.lineEdit_23.setValidator(validator)
             self.checkBox_9.clicked.connect(line_number_increasing)
             self.comboBox_45.activated.connect(
                 lambda: self.find_controls("excel", "获取Excel")
@@ -3550,7 +3589,8 @@ class Na(QWidget, Ui_navigation):
             """从tab页获取参数"""
             # 检查参数是否有异常
             if self.comboBox_48.currentText() == "":
-                QMessageBox.critical(self, "错误", "变量未设置！")
+                QMessageBox.critical(self, "错误", "变量未设置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 参数字典
             parameter_dic_ = {
@@ -3602,7 +3642,8 @@ class Na(QWidget, Ui_navigation):
             """从tab页获取参数"""
             # 检查参数是否有异常
             if self.comboBox_73.currentText() == "":
-                QMessageBox.critical(self, "错误", "变量未设置！")
+                QMessageBox.critical(self, "错误", "变量未设置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 返回参数字典
             parameter_dic_ = {
@@ -3681,13 +3722,15 @@ class Na(QWidget, Ui_navigation):
                     or self.comboBox_50.currentText() == ""
                     or self.comboBox_51.currentText() == ""
             ):
-                QMessageBox.critical(self, "错误", "变量未设置！")
+                QMessageBox.critical(self, "错误", "变量未设置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             if (
                     self.comboBox_52.currentText() == ""
                     or self.comboBox_53.currentText() == ""
             ):
-                QMessageBox.critical(self, "错误", "分支未设置！")
+                QMessageBox.critical(self, "错误", "分支未设置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             return parameter_dic_, exception_handling_
 
@@ -3756,7 +3799,8 @@ class Na(QWidget, Ui_navigation):
             image_ = self.textEdit_5.toPlainText()  # 代码
             # 检查参数是否有异常
             if image_ == "":
-                QMessageBox.critical(self, "错误", "代码未编写！")
+                QMessageBox.critical(self, "错误", "代码未编写！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 返回参数字典
             parameter_dic_ = {
@@ -3823,7 +3867,7 @@ class Na(QWidget, Ui_navigation):
                 ("psutil", "系统监控"),
                 ("pywinauto", "Windows自动化")
             ]
-            shortcut_win = ShortcutTable(self, title, data,600)  # 快捷键说明窗口
+            shortcut_win = ShortcutTable(self, title, data, 600)  # 快捷键说明窗口
             shortcut_win.setWindowTitle("库的使用")
             shortcut_win.setModal(True)
             shortcut_win.exec_()
@@ -3897,7 +3941,8 @@ class Na(QWidget, Ui_navigation):
             """从tab页获取参数"""
             # 检查参数是否有异常
             if self.textEdit_7.toPlainText() == "":
-                QMessageBox.critical(self, "错误", "命令未填写！")
+                QMessageBox.critical(self, "错误", "命令未填写！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 返回参数字典
             image_ = self.textEdit_7.toPlainText()
@@ -3963,7 +4008,8 @@ class Na(QWidget, Ui_navigation):
             image_ = self.lineEdit_27.text()  # 文件路径
             # 检查参数是否有异常
             if image_ is None or image_ == "":
-                QMessageBox.critical(self, "错误", "文件路径未设置！")
+                QMessageBox.critical(self, "错误", "文件路径未设置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             return image_
 
@@ -3988,7 +4034,7 @@ class Na(QWidget, Ui_navigation):
             file_path, _ = QFileDialog.getOpenFileName(
                 parent=self,
                 caption="选择文件",
-                directory=os.path.join(os.path.expanduser("~"), "Desktop"),
+                dir=os.path.join(os.path.expanduser("~"), "Desktop"),
             )
             if file_path != "":  # 获取文件名称
                 # 设置文件路径
@@ -4022,14 +4068,17 @@ class Na(QWidget, Ui_navigation):
             # excel路径
             image_ = self.comboBox_57.currentText()
             if image_ == "":
-                QMessageBox.critical(self, "错误", "Excel路径未设置！")
+                QMessageBox.critical(self, "错误", "Excel路径未设置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 工作表
             if self.comboBox_58.currentText() == "":
-                QMessageBox.critical(self, "错误", "工作表未设置！")
+                QMessageBox.critical(self, "错误", "工作表未设置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             if self.lineEdit_28.text() == "":
-                QMessageBox.critical(self, "错误", "单元格未设置！")
+                QMessageBox.critical(self, "错误", "单元格未设置！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 参数字典
             parameter_dic_ = {
@@ -4040,9 +4089,9 @@ class Na(QWidget, Ui_navigation):
             }
             return image_, parameter_dic_
 
-        def put_parameters(image, parameter_dic_):
+        def put_parameters(image_, parameter_dic_):
             """将参数还原到控件"""
-            self.comboBox_57.setCurrentText(image)
+            self.comboBox_57.setCurrentText(image_)
             self.find_controls("excel", "写入单元格")
             self.comboBox_58.setCurrentText(parameter_dic_.get("工作表", ""))
             self.lineEdit_28.setText(parameter_dic_.get("单元格", ""))
@@ -4073,9 +4122,9 @@ class Na(QWidget, Ui_navigation):
                 lambda: self.merge_additional_functions("打开变量选择")
             )
             # 禁用中文输入
-            self.lineEdit_28.setValidator(
-                QRegExpValidator(QRegExp("[A-Za-z0-9]+"))
-            )
+            regex = QRegularExpression("^[A-Za-z0-9]*$")
+            validator = QRegularExpressionValidator(regex, self.lineEdit)
+            self.lineEdit_28.setValidator(validator)
             self.comboBox_57.activated.connect(
                 lambda: self.find_controls("excel", "写入单元格")
             )
@@ -4113,7 +4162,8 @@ class Na(QWidget, Ui_navigation):
             if (self.label_153.text() == "(0,0,0,0)") or (
                     self.comboBox_59.currentText() == ""
             ):
-                QMessageBox.warning(self, "警告", "参数不能为空！")
+                QMessageBox.warning(self, "警告", "参数不能为空！", QMessageBox.StandardButton.Ok,
+                                    QMessageBox.StandardButton.NoButton)
                 raise Exception
             parameter_dic_ = {
                 "区域": self.label_153.text(),
@@ -4158,7 +4208,8 @@ class Na(QWidget, Ui_navigation):
                     test_class.is_test = True
                     test_class.start_execute()
                 else:
-                    QMessageBox.warning(self, "提示", "OCR未设置！")
+                    QMessageBox.warning(self, "提示", "OCR未设置！", QMessageBox.StandardButton.Ok,
+                                        QMessageBox.StandardButton.NoButton)
                     open_setting_window()
 
             except Exception as e:
@@ -4236,7 +4287,8 @@ class Na(QWidget, Ui_navigation):
             """从tab页获取参数"""
             # 检查参数是否有异常
             if self.lineEdit_18.text() == "":
-                QMessageBox.critical(self, "错误", "窗口标题未填！")
+                QMessageBox.critical(self, "错误", "窗口标题未填！", QMessageBox.StandardButton.Ok,
+                                     QMessageBox.StandardButton.NoButton)
                 raise ValueError
             # 返回参数字典
             parameter_dic_ = {
@@ -4302,7 +4354,8 @@ class Na(QWidget, Ui_navigation):
             """从tab页获取参数"""
             if not judge:
                 if self.comboBox_74.currentText() == "" or self.comboBox_75.currentText() == "":
-                    QMessageBox.critical(self, "错误", "分支未设置！")
+                    QMessageBox.critical(self, "错误", "分支未设置！", QMessageBox.StandardButton.Ok,
+                                         QMessageBox.StandardButton.NoButton)
                     raise ValueError
             # 返回参数字典
             parameter_dic_ = {

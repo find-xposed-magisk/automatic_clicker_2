@@ -12,7 +12,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.vscode" />
       <excludeFolder url="file://$MODULE_DIR$/EXE_TEST" />
     </content>
-    <orderEntry type="jdk" jdkName="clicker" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.12 (automatic_clicker_2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PackageRequirementsSettings">

@@ -1,10 +1,10 @@
 import sys
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QPainter, QPen
-from PyQt5.QtWidgets import QApplication, QLabel, QDialog
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap, QPainter, QPen
+from PySide6.QtWidgets import QApplication, QLabel, QDialog
 
-from 窗体.clickposition import Ui_ClickPosition
+from 窗体.clickposition_ui import Ui_ClickPosition
 
 image_path_ = r'C:\Users\FS\Desktop\Clicker_test\qLcehE1sth.png'
 image_path_2 = r'C:\Users\FS\Desktop\Clicker_test\T5pQ785JMV.png'
@@ -17,9 +17,9 @@ class MyLabel(QLabel):
             self.pixmap = QPixmap(image_path)
         else:
             self.pixmap = QPixmap(100, 100)
-            self.pixmap.fill(Qt.white)
+            self.pixmap.fill(Qt.GlobalColor.white)
 
-        self.crosshair_color = Qt.red  # 十字框颜色
+        self.crosshair_color = Qt.GlobalColor.red  # 十字框颜色
         self.crosshair_thickness = 2  # 十字框粗细
         # 设置十字框初始位置为图像中心
         if position != '(0,0)' and position != '(随机,随机)':
@@ -28,8 +28,8 @@ class MyLabel(QLabel):
                 self.pixmap.width() // 2 + position_[0],
                 self.pixmap.height() // 2 + position_[1],
             )
-            self.parent().label_4.setText(str(position_[0]))
-            self.parent().label_5.setText(str(position_[1]))
+            self.parent.label_4.setText(str(position_[0]))
+            self.parent.label_5.setText(str(position_[1]))
         else:
             self.crosshair_position = (
                 self.pixmap.width() // 2,
@@ -41,8 +41,8 @@ class MyLabel(QLabel):
     def set_image_info(self):
         img_width = self.pixmap.width()
         img_height = self.pixmap.height()
-        self.parent().label_8.setText(str(img_width))
-        self.parent().label_9.setText(str(img_height))
+        self.parent.label_8.setText(str(img_width))
+        self.parent.label_9.setText(str(img_height))
 
     def paintEvent(self, event):
         super().paintEvent(event)
@@ -62,7 +62,7 @@ class MyLabel(QLabel):
 
         # 获取十字框的位置
         x, y = self.crosshair_position
-        painter.setPen(QPen(self.crosshair_color, self.crosshair_thickness, Qt.SolidLine))
+        painter.setPen(QPen(self.crosshair_color, self.crosshair_thickness, Qt.PenStyle.SolidLine))
 
         # 画水平线
         painter.drawLine(0, y + offset_y, self.width(), y + offset_y)
@@ -85,8 +85,8 @@ class MyLabel(QLabel):
         # 计算十字框在图像中的位置，中心为0,0
         x = self.crosshair_position[0] - self.pixmap.width() // 2
         y = self.crosshair_position[1] - self.pixmap.height() // 2
-        self.parent().label_4.setText(str(x))
-        self.parent().label_5.setText(str(y))
+        self.parent.label_4.setText(str(x))
+        self.parent.label_5.setText(str(y))
 
 
 class ClickPosition(QDialog, Ui_ClickPosition):
@@ -94,9 +94,6 @@ class ClickPosition(QDialog, Ui_ClickPosition):
         super().__init__(parent)
         self.setupUi(self)
         self.image_path = image_path
-        self.setWindowFlags(
-            self.windowFlags() & ~Qt.WindowContextHelpButtonHint
-        )  # 隐藏帮助按钮
         # 创建自定义的MyLabel实例，传入图像路径
         self.label = MyLabel(self, self.image_path, position)
         if position == '(随机,随机)':
@@ -115,9 +112,9 @@ class ClickPosition(QDialog, Ui_ClickPosition):
 
     def save_position(self):
         try:
-            tabWidget_title = self.parent().tabWidget.tabText(self.parent().tabWidget.currentIndex())
+            tabWidget_title = self.parent.tabWidget.tabText(self.parent.tabWidget.currentIndex())
             if tabWidget_title == '图像点击':
-                self.parent().label_176.setText(f'({self.label_4.text()},{self.label_5.text()})')
+                self.parent.label_176.setText(f'({self.label_4.text()},{self.label_5.text()})')
                 self.close()
         except Exception as e:
             print(f'保存数据出现错误: {e}')

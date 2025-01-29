@@ -1,12 +1,12 @@
 import os
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QStandardItemModel, QStandardItem
+from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 from ini控制 import set_window_size, save_window_size, extract_resource_folder_path, del_resource_folder_path, \
     writes_to_resource_folder_path, move_resource_folder_up_and_down
-from 窗体.global_s import Ui_Global
+from 窗体.global_s_ui import Ui_Global
 
 
 class Global_s(QDialog, Ui_Global):
@@ -16,8 +16,6 @@ class Global_s(QDialog, Ui_Global):
         super().__init__(parent)
 
         self.setupUi(self)
-        # 去除帮助按钮
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         set_window_size(self)  # 获取上次退出时的窗口大小
         # 绑定事件
         self.refresh_listview()  # 刷新listview
@@ -33,12 +31,13 @@ class Global_s(QDialog, Ui_Global):
         fil_path = QFileDialog.getExistingDirectory(
             parent=self,
             caption="选择存储目标图像的文件夹",
-            directory=os.path.expanduser("~")
+            dir=os.path.expanduser("~")
         )
         if fil_path != '':
             # 检查路径中是否有中文
             if any('\u4e00' <= char <= '\u9fff' for char in fil_path):
-                QMessageBox.critical(self, '警告', '资源文件夹路径中暂不允许含有中文字符，请重新选择！')
+                QMessageBox.critical(self, '警告', '资源文件夹路径中暂不允许含有中文字符，请重新选择！',
+                                     QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.NoButton)
                 return
             writes_to_resource_folder_path(os.path.normpath(fil_path))
         self.refresh_listview()
@@ -53,7 +52,8 @@ class Global_s(QDialog, Ui_Global):
             # 删除不存在的文件夹路径
             print(e)
             self.delete_listview()
-            QMessageBox.critical(self, '错误', '该文件夹路径不存在！已从列表中删除！')
+            QMessageBox.critical(self, '错误', '该文件夹路径不存在！已从列表中删除！', QMessageBox.StandardButton.Ok,
+                                 QMessageBox.StandardButton.NoButton)
 
     def delete_listview(self):
         """删除listview中选中的那行数据"""

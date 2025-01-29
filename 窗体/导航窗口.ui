@@ -6,14 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>801</width>
-    <height>826</height>
+    <width>638</width>
+    <height>667</height>
    </rect>
   </property>
   <property name="font">
    <font>
     <family>微软雅黑</family>
-    <weight>50</weight>
     <bold>false</bold>
    </font>
   </property>
@@ -57,7 +56,6 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <weight>75</weight>
          <italic>false</italic>
          <bold>true</bold>
          <underline>false</underline>
@@ -348,21 +346,20 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
        <property name="tabPosition">
-        <enum>QTabWidget::North</enum>
+        <enum>QTabWidget::TabPosition::North</enum>
        </property>
        <property name="tabShape">
-        <enum>QTabWidget::Rounded</enum>
+        <enum>QTabWidget::TabShape::Rounded</enum>
        </property>
        <property name="currentIndex">
         <number>42</number>
        </property>
        <property name="elideMode">
-        <enum>Qt::ElideNone</enum>
+        <enum>Qt::TextElideMode::ElideNone</enum>
        </property>
        <property name="usesScrollButtons">
         <bool>true</bool>
@@ -390,7 +387,7 @@
             <string>操作说明：将图像统一保存至某文件夹，点击添加文件夹即可。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -407,7 +404,7 @@
                 <string>当前文件夹：</string>
                </property>
                <property name="alignment">
-                <set>Qt::AlignCenter</set>
+                <set>Qt::AlignmentFlag::AlignCenter</set>
                </property>
               </widget>
              </item>
@@ -417,7 +414,7 @@
                 <string>暂无</string>
                </property>
                <property name="alignment">
-                <set>Qt::AlignCenter</set>
+                <set>Qt::AlignmentFlag::AlignCenter</set>
                </property>
                <property name="wordWrap">
                 <bool>false</bool>
@@ -435,7 +432,6 @@
              <property name="font">
               <font>
                <family>Microsoft YaHei</family>
-               <weight>75</weight>
                <bold>true</bold>
               </font>
              </property>
@@ -468,7 +464,6 @@ QPushButton:pressed {
              <property name="font">
               <font>
                <family>SimSun</family>
-               <weight>50</weight>
                <bold>false</bold>
               </font>
              </property>
@@ -487,7 +482,7 @@ QPushButton:pressed {
               <string>图像名称：</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -510,7 +505,7 @@ QPushButton:pressed {
               <string>文件夹名称：</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -520,23 +515,23 @@ QPushButton:pressed {
               <string>指令名称：</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
             </widget>
            </item>
            <item row="0" column="1" colspan="4">
             <widget class="QComboBox" name="comboBox_8">
              <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="currentText">
               <string/>
              </property>
              <property name="insertPolicy">
-              <enum>QComboBox::NoInsert</enum>
+              <enum>QComboBox::InsertPolicy::NoInsert</enum>
              </property>
              <property name="sizeAdjustPolicy">
-              <enum>QComboBox::AdjustToContents</enum>
+              <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
              </property>
             </widget>
            </item>
@@ -601,7 +596,7 @@ QPushButton:pressed {
                  <string>(0,0)</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -630,7 +625,7 @@ QPushButton:pressed {
                    <number>80</number>
                   </property>
                   <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
+                   <enum>Qt::Orientation::Horizontal</enum>
                   </property>
                  </widget>
                 </item>
@@ -667,7 +662,7 @@ QPushButton:pressed {
                  <string>(0,0,0,0)</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -686,7 +681,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_2">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -705,7 +700,7 @@ QPushButton:pressed {
             <item row="0" column="0" colspan="2">
              <widget class="QRadioButton" name="radioButton_2">
               <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
+               <enum>Qt::LayoutDirection::LeftToRight</enum>
               </property>
               <property name="text">
                <string>匹配不到指定图像时自动略过该指令</string>
@@ -730,7 +725,7 @@ QPushButton:pressed {
                  <string>秒数：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -913,10 +908,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -953,7 +948,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -994,7 +988,7 @@ QPushButton:pressed {
             <string>操作说明：遍历识别多个不同图像，如果有匹配则执行鼠标动作。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -1021,7 +1015,7 @@ QPushButton:pressed {
             }</string>
               </property>
               <property name="editTriggers">
-               <set>QAbstractItemView::NoEditTriggers</set>
+               <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
               </property>
              </widget>
             </item>
@@ -1038,7 +1032,6 @@ QPushButton:pressed {
                 <property name="font">
                  <font>
                   <family>Microsoft YaHei</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -1081,7 +1074,6 @@ QPushButton:pressed {
                 <property name="font">
                  <font>
                   <family>Microsoft YaHei</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -1239,7 +1231,7 @@ QPushButton:pressed {
                    <number>80</number>
                   </property>
                   <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
+                   <enum>Qt::Orientation::Horizontal</enum>
                   </property>
                  </widget>
                 </item>
@@ -1283,7 +1275,7 @@ QPushButton:pressed {
                  <string>(0,0,0,0)</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -1302,7 +1294,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_38">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1476,10 +1468,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -1516,7 +1508,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -1563,7 +1554,7 @@ QPushButton:pressed {
             <string>操作说明：按住“获取坐标”按钮，并移动鼠标。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -1595,7 +1586,6 @@ QPushButton:pressed {
                <property name="font">
                 <font>
                  <family>微软雅黑</family>
-                 <weight>75</weight>
                  <bold>true</bold>
                 </font>
                </property>
@@ -1603,7 +1593,7 @@ QPushButton:pressed {
                 <string>X：</string>
                </property>
                <property name="alignment">
-                <set>Qt::AlignCenter</set>
+                <set>Qt::AlignmentFlag::AlignCenter</set>
                </property>
               </widget>
              </item>
@@ -1612,7 +1602,6 @@ QPushButton:pressed {
                <property name="font">
                 <font>
                  <family>微软雅黑</family>
-                 <weight>75</weight>
                  <bold>true</bold>
                 </font>
                </property>
@@ -1620,7 +1609,7 @@ QPushButton:pressed {
                 <string>0</string>
                </property>
                <property name="alignment">
-                <set>Qt::AlignCenter</set>
+                <set>Qt::AlignmentFlag::AlignCenter</set>
                </property>
               </widget>
              </item>
@@ -1629,7 +1618,6 @@ QPushButton:pressed {
                <property name="font">
                 <font>
                  <family>微软雅黑</family>
-                 <weight>75</weight>
                  <bold>true</bold>
                 </font>
                </property>
@@ -1637,7 +1625,7 @@ QPushButton:pressed {
                 <string>Y：</string>
                </property>
                <property name="alignment">
-                <set>Qt::AlignCenter</set>
+                <set>Qt::AlignmentFlag::AlignCenter</set>
                </property>
               </widget>
              </item>
@@ -1646,7 +1634,6 @@ QPushButton:pressed {
                <property name="font">
                 <font>
                  <family>微软雅黑</family>
-                 <weight>75</weight>
                  <bold>true</bold>
                 </font>
                </property>
@@ -1654,7 +1641,7 @@ QPushButton:pressed {
                 <string>0</string>
                </property>
                <property name="alignment">
-                <set>Qt::AlignCenter</set>
+                <set>Qt::AlignmentFlag::AlignCenter</set>
                </property>
               </widget>
              </item>
@@ -1668,7 +1655,7 @@ QPushButton:pressed {
                 <string>指令名称：</string>
                </property>
                <property name="alignment">
-                <set>Qt::AlignCenter</set>
+                <set>Qt::AlignmentFlag::AlignCenter</set>
                </property>
               </widget>
              </item>
@@ -1715,7 +1702,7 @@ QPushButton:pressed {
                 <string>自定义次数：</string>
                </property>
                <property name="alignment">
-                <set>Qt::AlignCenter</set>
+                <set>Qt::AlignmentFlag::AlignCenter</set>
                </property>
               </widget>
              </item>
@@ -1725,10 +1712,10 @@ QPushButton:pressed {
                 <bool>true</bool>
                </property>
                <property name="layoutDirection">
-                <enum>Qt::LeftToRight</enum>
+                <enum>Qt::LayoutDirection::LeftToRight</enum>
                </property>
                <property name="alignment">
-                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
                </property>
                <property name="maximum">
                 <number>999</number>
@@ -1742,7 +1729,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_5">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1916,10 +1903,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -1956,7 +1943,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -2017,7 +2003,7 @@ QPushButton:pressed {
                  <string>移动距离（像素）：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -2051,7 +2037,7 @@ QPushButton:pressed {
                  <string>移动方向：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -2097,7 +2083,7 @@ QPushButton:pressed {
                  <string>随机类型：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -2126,14 +2112,14 @@ QPushButton:pressed {
                  <string>X：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QLineEdit" name="lineEdit_29">
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -2143,14 +2129,14 @@ QPushButton:pressed {
                  <string>Y：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QLineEdit" name="lineEdit_30">
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -2164,7 +2150,7 @@ QPushButton:pressed {
                  <string>持续时间：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -2211,7 +2197,7 @@ QPushButton:pressed {
                <string>变量名称：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -2231,7 +2217,7 @@ QPushButton:pressed {
                <string>（与“获取鼠标位置”指令配合）</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -2241,7 +2227,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -2415,10 +2401,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -2455,7 +2441,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -2502,7 +2487,7 @@ QPushButton:pressed {
             <string>操作说明：暂无。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -2545,7 +2530,7 @@ QPushButton:pressed {
                  <number>100</number>
                 </property>
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                </widget>
               </item>
@@ -2562,7 +2547,7 @@ QPushButton:pressed {
                  <string>指令名称：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -2586,7 +2571,7 @@ QPushButton:pressed {
                  <string>鼠标按压时长：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -2596,10 +2581,10 @@ QPushButton:pressed {
                  <bool>true</bool>
                 </property>
                 <property name="layoutDirection">
-                 <enum>Qt::LeftToRight</enum>
+                 <enum>Qt::LayoutDirection::LeftToRight</enum>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                 <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                 <property name="minimum">
                  <number>1</number>
@@ -2621,7 +2606,7 @@ QPushButton:pressed {
                  <string>点击次数：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -2631,7 +2616,7 @@ QPushButton:pressed {
                  <string>点击时间间隔：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -2673,7 +2658,7 @@ QPushButton:pressed {
                  <number>100</number>
                 </property>
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                </widget>
               </item>
@@ -2700,7 +2685,7 @@ QPushButton:pressed {
                <string>按键：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -2729,7 +2714,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_4">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -2758,7 +2743,7 @@ QPushButton:pressed {
             <string>操作说明：暂无。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -2786,13 +2771,13 @@ QPushButton:pressed {
             <item>
              <widget class="QLabel" name="label_14">
               <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
+               <enum>Qt::LayoutDirection::LeftToRight</enum>
               </property>
               <property name="text">
                <string>等待时长：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -2802,7 +2787,6 @@ QPushButton:pressed {
                <font>
                 <family>微软雅黑</family>
                 <pointsize>9</pointsize>
-                <weight>50</weight>
                 <bold>false</bold>
                </font>
               </property>
@@ -2857,7 +2841,7 @@ QPushButton:pressed {
                <string>最小时间：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -2896,7 +2880,7 @@ QPushButton:pressed {
                <string>最大时间：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -2953,7 +2937,7 @@ QPushButton:pressed {
                <string>等待至指定时间：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -2970,7 +2954,7 @@ QPushButton:pressed {
                <string>时间检测频率（毫秒）：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -3020,7 +3004,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_16">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -3049,7 +3033,7 @@ QPushButton:pressed {
             <string>操作说明：暂无。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -3237,10 +3221,10 @@ QPushButton:pressed {
                    </colorrole>
                    <colorrole role="ButtonText">
                     <brush brushstyle="SolidPattern">
-                     <color alpha="255">
-                      <red>255</red>
-                      <green>255</green>
-                      <blue>255</blue>
+                     <color alpha="92">
+                      <red>0</red>
+                      <green>0</green>
+                      <blue>0</blue>
                      </color>
                     </brush>
                    </colorrole>
@@ -3277,7 +3261,6 @@ QPushButton:pressed {
                 <property name="font">
                  <font>
                   <family>Microsoft YaHei</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -3359,7 +3342,7 @@ QPushButton:pressed {
                  <string>超时报错秒数：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -3404,7 +3387,7 @@ QPushButton:pressed {
                    <number>80</number>
                   </property>
                   <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
+                   <enum>Qt::Orientation::Horizontal</enum>
                   </property>
                  </widget>
                 </item>
@@ -3448,7 +3431,7 @@ QPushButton:pressed {
                  <string>(0,0,0,0)</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -3467,7 +3450,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_8">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -3496,7 +3479,7 @@ QPushButton:pressed {
             <string>操作说明：当包含指定标题内容的应用窗口获取到焦点，则结束等待。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -3524,7 +3507,7 @@ QPushButton:pressed {
                <string>窗口标题包含：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -3537,7 +3520,7 @@ QPushButton:pressed {
                <string>毫秒</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -3547,7 +3530,7 @@ QPushButton:pressed {
                <string>最大等待时长：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -3557,7 +3540,7 @@ QPushButton:pressed {
                <string>窗口检测频率：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -3567,7 +3550,7 @@ QPushButton:pressed {
                <string>秒</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -3616,7 +3599,7 @@ QPushButton:pressed {
                <string>窗口等待类型：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -3640,7 +3623,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_37">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -3733,14 +3716,14 @@ QPushButton:pressed {
                <string>变量名称：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
             <item row="2" column="0">
              <spacer name="horizontalSpacer_7">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -3755,7 +3738,6 @@ QPushButton:pressed {
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -3770,7 +3752,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_29">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -3944,10 +3926,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -3984,7 +3966,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -4031,7 +4012,7 @@ QPushButton:pressed {
             <string>操作说明：暂无。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -4064,7 +4045,7 @@ QPushButton:pressed {
                  <string>滚动距离：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -4074,7 +4055,7 @@ QPushButton:pressed {
                  <string>滚动方向：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -4147,7 +4128,7 @@ QPushButton:pressed {
                  <string>最大距离：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -4157,7 +4138,7 @@ QPushButton:pressed {
                  <string>最小距离：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -4183,7 +4164,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_3">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -4219,7 +4200,7 @@ QPushButton:pressed {
             <string>操作说明：暂无。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -4240,7 +4221,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>微软雅黑</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -4262,9 +4242,12 @@ QPushButton:pressed {
             <widget class="QTextEdit" name="textEdit">
              <property name="html">
               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'微软雅黑','微软雅黑'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'微软雅黑'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'黑体,黑体';&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="placeholderText">
@@ -4287,7 +4270,7 @@ p, li { white-space: pre-wrap; }
             <string>操作说明：在输入框中按下对应的按键。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -4306,7 +4289,7 @@ p, li { white-space: pre-wrap; }
                <string>按键名称：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -4315,12 +4298,11 @@ p, li { white-space: pre-wrap; }
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
               <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
+               <enum>Qt::LayoutDirection::LeftToRight</enum>
               </property>
              </widget>
             </item>
@@ -4330,7 +4312,7 @@ p, li { white-space: pre-wrap; }
                <string>按压时长（毫秒）：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -4353,7 +4335,7 @@ p, li { white-space: pre-wrap; }
          <item>
           <spacer name="verticalSpacer_36">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -4410,7 +4392,7 @@ p, li { white-space: pre-wrap; }
                 <item>
                  <spacer name="horizontalSpacer_26">
                   <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
+                   <enum>Qt::Orientation::Horizontal</enum>
                   </property>
                   <property name="sizeHint" stdset="0">
                    <size>
@@ -4441,7 +4423,7 @@ p, li { white-space: pre-wrap; }
             <item>
              <spacer name="horizontalSpacer_28">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -4470,7 +4452,7 @@ p, li { white-space: pre-wrap; }
             </sizepolicy>
            </property>
            <property name="frameShadow">
-            <enum>QFrame::Plain</enum>
+            <enum>QFrame::Shadow::Plain</enum>
            </property>
            <property name="lineWidth">
             <number>1</number>
@@ -4479,10 +4461,10 @@ p, li { white-space: pre-wrap; }
             <string>重要提示：当选择此指令时，请在主界面中打开“无限循环”功能。</string>
            </property>
            <property name="textFormat">
-            <enum>Qt::PlainText</enum>
+            <enum>Qt::TextFormat::PlainText</enum>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -4503,7 +4485,7 @@ p, li { white-space: pre-wrap; }
                  <string>当鼠标中键按下时，模拟鼠标左键点击</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                 <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                 <property name="wordWrap">
                  <bool>false</bool>
@@ -4529,7 +4511,7 @@ p, li { white-space: pre-wrap; }
                  <string>次</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                 <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -4538,7 +4520,7 @@ p, li { white-space: pre-wrap; }
             <item row="0" column="0">
              <spacer name="horizontalSpacer">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -4551,7 +4533,7 @@ p, li { white-space: pre-wrap; }
             <item row="1" column="1">
              <widget class="QRadioButton" name="radioButton_zi">
               <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
+               <enum>Qt::LayoutDirection::LeftToRight</enum>
               </property>
               <property name="text">
                <string>结束等待：</string>
@@ -4564,7 +4546,7 @@ p, li { white-space: pre-wrap; }
                <string>当鼠标中键按下时，自动执行该指令后的所有指令</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
               <property name="wordWrap">
                <bool>false</bool>
@@ -4574,7 +4556,7 @@ p, li { white-space: pre-wrap; }
             <item row="0" column="1">
              <widget class="QRadioButton" name="radioButton">
               <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
+               <enum>Qt::LayoutDirection::LeftToRight</enum>
               </property>
               <property name="text">
                <string>模拟点击：</string>
@@ -4587,7 +4569,7 @@ p, li { white-space: pre-wrap; }
             <item row="1" column="0">
              <spacer name="horizontalSpacer_2">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -4600,7 +4582,7 @@ p, li { white-space: pre-wrap; }
             <item row="0" column="3">
              <spacer name="horizontalSpacer_11">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -4613,7 +4595,7 @@ p, li { white-space: pre-wrap; }
             <item row="1" column="3">
              <spacer name="horizontalSpacer_12">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -4629,7 +4611,7 @@ p, li { white-space: pre-wrap; }
          <item>
           <spacer name="verticalSpacer_9">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -4652,7 +4634,7 @@ p, li { white-space: pre-wrap; }
             <string>操作说明：按下获取坐标按钮并拖动鼠标，即可显示鼠标当前的位置。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -4673,7 +4655,7 @@ p, li { white-space: pre-wrap; }
                  <string>开始位置：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -4689,7 +4671,6 @@ p, li { white-space: pre-wrap; }
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -4697,7 +4678,7 @@ p, li { white-space: pre-wrap; }
                  <string>X</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -4706,7 +4687,6 @@ p, li { white-space: pre-wrap; }
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -4714,7 +4694,7 @@ p, li { white-space: pre-wrap; }
                  <string>0</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -4723,7 +4703,6 @@ p, li { white-space: pre-wrap; }
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -4731,7 +4710,7 @@ p, li { white-space: pre-wrap; }
                  <string>0</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -4740,7 +4719,6 @@ p, li { white-space: pre-wrap; }
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -4748,7 +4726,7 @@ p, li { white-space: pre-wrap; }
                  <string>Y</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -4768,7 +4746,6 @@ p, li { white-space: pre-wrap; }
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -4776,7 +4753,7 @@ p, li { white-space: pre-wrap; }
                  <string>Y</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -4785,7 +4762,6 @@ p, li { white-space: pre-wrap; }
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -4793,7 +4769,7 @@ p, li { white-space: pre-wrap; }
                  <string>X</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -4803,7 +4779,7 @@ p, li { white-space: pre-wrap; }
                  <string>结束位置：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -4812,7 +4788,6 @@ p, li { white-space: pre-wrap; }
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -4820,7 +4795,7 @@ p, li { white-space: pre-wrap; }
                  <string>0</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -4829,7 +4804,6 @@ p, li { white-space: pre-wrap; }
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -4837,7 +4811,7 @@ p, li { white-space: pre-wrap; }
                  <string>0</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -4848,7 +4822,7 @@ p, li { white-space: pre-wrap; }
               <item>
                <spacer name="horizontalSpacer_13">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -4861,7 +4835,7 @@ p, li { white-space: pre-wrap; }
               <item>
                <widget class="QCheckBox" name="checkBox_8">
                 <property name="layoutDirection">
-                 <enum>Qt::LeftToRight</enum>
+                 <enum>Qt::LayoutDirection::LeftToRight</enum>
                 </property>
                 <property name="autoFillBackground">
                  <bool>false</bool>
@@ -4874,7 +4848,7 @@ p, li { white-space: pre-wrap; }
               <item>
                <spacer name="horizontalSpacer_14">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -4887,7 +4861,7 @@ p, li { white-space: pre-wrap; }
               <item>
                <spacer name="horizontalSpacer_15">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -4903,7 +4877,7 @@ p, li { white-space: pre-wrap; }
                  <bool>false</bool>
                 </property>
                 <property name="layoutDirection">
-                 <enum>Qt::LeftToRight</enum>
+                 <enum>Qt::LayoutDirection::LeftToRight</enum>
                 </property>
                 <property name="autoFillBackground">
                  <bool>false</bool>
@@ -4925,7 +4899,7 @@ p, li { white-space: pre-wrap; }
               <item>
                <spacer name="horizontalSpacer_16">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -4940,7 +4914,7 @@ p, li { white-space: pre-wrap; }
             <item>
              <spacer name="verticalSpacer_42">
               <property name="orientation">
-               <enum>Qt::Vertical</enum>
+               <enum>Qt::Orientation::Vertical</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -4958,7 +4932,7 @@ p, li { white-space: pre-wrap; }
                  <string>鼠标移动速度：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -4987,7 +4961,7 @@ p, li { white-space: pre-wrap; }
          <item>
           <spacer name="verticalSpacer_10">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -5006,7 +4980,7 @@ p, li { white-space: pre-wrap; }
             <item>
              <spacer name="horizontalSpacer_30">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -5026,7 +5000,7 @@ p, li { white-space: pre-wrap; }
             <item>
              <spacer name="horizontalSpacer_31">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -5203,10 +5177,10 @@ p, li { white-space: pre-wrap; }
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -5243,7 +5217,6 @@ p, li { white-space: pre-wrap; }
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -5290,7 +5263,7 @@ QPushButton:pressed {
             <string>操作说明：判断目标像素点的颜色，执行对应的控制。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -5317,7 +5290,7 @@ QPushButton:pressed {
               <item row="0" column="3">
                <spacer name="horizontalSpacer_29">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -5332,7 +5305,6 @@ QPushButton:pressed {
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -5348,7 +5320,6 @@ QPushButton:pressed {
                   <property name="font">
                    <font>
                     <family>微软雅黑</family>
-                    <weight>75</weight>
                     <bold>true</bold>
                    </font>
                   </property>
@@ -5356,7 +5327,7 @@ QPushButton:pressed {
                    <string>X：</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignCenter</set>
+                   <set>Qt::AlignmentFlag::AlignCenter</set>
                   </property>
                  </widget>
                 </item>
@@ -5365,7 +5336,6 @@ QPushButton:pressed {
                   <property name="font">
                    <font>
                     <family>微软雅黑</family>
-                    <weight>75</weight>
                     <bold>true</bold>
                    </font>
                   </property>
@@ -5373,7 +5343,7 @@ QPushButton:pressed {
                    <string>0</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignCenter</set>
+                   <set>Qt::AlignmentFlag::AlignCenter</set>
                   </property>
                  </widget>
                 </item>
@@ -5382,7 +5352,6 @@ QPushButton:pressed {
                   <property name="font">
                    <font>
                     <family>微软雅黑</family>
-                    <weight>75</weight>
                     <bold>true</bold>
                    </font>
                   </property>
@@ -5390,7 +5359,7 @@ QPushButton:pressed {
                    <string>Y：</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignCenter</set>
+                   <set>Qt::AlignmentFlag::AlignCenter</set>
                   </property>
                  </widget>
                 </item>
@@ -5399,7 +5368,6 @@ QPushButton:pressed {
                   <property name="font">
                    <font>
                     <family>微软雅黑</family>
-                    <weight>75</weight>
                     <bold>true</bold>
                    </font>
                   </property>
@@ -5407,7 +5375,7 @@ QPushButton:pressed {
                    <string>0</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignCenter</set>
+                   <set>Qt::AlignmentFlag::AlignCenter</set>
                   </property>
                  </widget>
                 </item>
@@ -5416,7 +5384,7 @@ QPushButton:pressed {
               <item row="0" column="0">
                <spacer name="horizontalSpacer_27">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -5434,7 +5402,7 @@ QPushButton:pressed {
                    <string>允许色彩误差：</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignCenter</set>
+                   <set>Qt::AlignmentFlag::AlignCenter</set>
                   </property>
                  </widget>
                 </item>
@@ -5455,7 +5423,6 @@ QPushButton:pressed {
                 <property name="font">
                  <font>
                   <family>Microsoft YaHei</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -5510,7 +5477,7 @@ QPushButton:pressed {
                    <string>R:</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignCenter</set>
+                   <set>Qt::AlignmentFlag::AlignCenter</set>
                   </property>
                  </widget>
                 </item>
@@ -5534,7 +5501,7 @@ QPushButton:pressed {
                    <string>G:</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignCenter</set>
+                   <set>Qt::AlignmentFlag::AlignCenter</set>
                   </property>
                  </widget>
                 </item>
@@ -5544,7 +5511,7 @@ QPushButton:pressed {
                    <string>B:</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignCenter</set>
+                   <set>Qt::AlignmentFlag::AlignCenter</set>
                   </property>
                  </widget>
                 </item>
@@ -5566,7 +5533,7 @@ QPushButton:pressed {
                  <string>色彩预览</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -5599,7 +5566,7 @@ QPushButton:pressed {
                  <string>分支名称：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -5626,7 +5593,7 @@ QPushButton:pressed {
                  <string>开始位置：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -5638,7 +5605,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_41">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -5812,10 +5779,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -5852,7 +5819,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -5899,7 +5865,7 @@ QPushButton:pressed {
             <string>操作说明：将Excel表中的值填入到对应的图像窗口控件中。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -6081,10 +6047,10 @@ QPushButton:pressed {
                 </colorrole>
                 <colorrole role="ButtonText">
                  <brush brushstyle="SolidPattern">
-                  <color alpha="255">
-                   <red>255</red>
-                   <green>255</green>
-                   <blue>255</blue>
+                  <color alpha="92">
+                   <red>0</red>
+                   <green>0</green>
+                   <blue>0</blue>
                   </color>
                  </brush>
                 </colorrole>
@@ -6121,7 +6087,6 @@ QPushButton:pressed {
              <property name="font">
               <font>
                <family>Microsoft YaHei</family>
-               <weight>75</weight>
                <bold>true</bold>
               </font>
              </property>
@@ -6174,7 +6139,7 @@ QPushButton:pressed {
             <item row="0" column="1">
              <widget class="QComboBox" name="comboBox_12">
               <property name="sizeAdjustPolicy">
-               <enum>QComboBox::AdjustToContents</enum>
+               <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
               </property>
              </widget>
             </item>
@@ -6217,7 +6182,7 @@ QPushButton:pressed {
             <item row="0" column="1">
              <widget class="QComboBox" name="comboBox_14">
               <property name="sizeAdjustPolicy">
-               <enum>QComboBox::AdjustToContents</enum>
+               <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
               </property>
              </widget>
             </item>
@@ -6240,7 +6205,7 @@ QPushButton:pressed {
               <item>
                <spacer name="horizontalSpacer_17">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -6260,7 +6225,7 @@ QPushButton:pressed {
               <item>
                <spacer name="horizontalSpacer_18">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -6273,7 +6238,7 @@ QPushButton:pressed {
               <item>
                <spacer name="horizontalSpacer_19">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -6293,7 +6258,7 @@ QPushButton:pressed {
               <item>
                <spacer name="horizontalSpacer_20">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -6311,7 +6276,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_7">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -6347,7 +6312,7 @@ QPushButton:pressed {
                    <string>秒数：</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                   </property>
                  </widget>
                 </item>
@@ -6542,10 +6507,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -6582,7 +6547,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -6629,7 +6593,7 @@ QPushButton:pressed {
             <string>操作说明：暂无。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -6727,7 +6691,7 @@ QPushButton:pressed {
                  </palette>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -6737,7 +6701,7 @@ QPushButton:pressed {
                  <string>输入网址：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -6749,7 +6713,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_20">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -6765,7 +6729,7 @@ QPushButton:pressed {
             <string>若连接失败，或无法启动浏览器：</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -6809,7 +6773,7 @@ QPushButton:pressed {
             <string>操作说明：暂无。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -6924,7 +6888,7 @@ QPushButton:pressed {
               <item>
                <spacer name="horizontalSpacer_3">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -6939,7 +6903,6 @@ QPushButton:pressed {
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -6956,7 +6919,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_6">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -7016,7 +6979,7 @@ QPushButton:pressed {
                  <string>秒数：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -7044,7 +7007,7 @@ QPushButton:pressed {
             <string>操作说明：暂无。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -7206,7 +7169,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_21">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -7235,7 +7198,7 @@ QPushButton:pressed {
             <string>操作说明：暂无。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -7263,7 +7226,7 @@ QPushButton:pressed {
                <string>切换指令：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -7313,7 +7276,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_11">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -7336,7 +7299,7 @@ QPushButton:pressed {
             <string>操作说明：该指令可将网页中的表格元素，保存至指定的Excel文件中。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -7396,7 +7359,7 @@ QPushButton:pressed {
                  <string>Excel工作簿名称：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -7406,7 +7369,7 @@ QPushButton:pressed {
                  <string>新工作表名：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -7428,7 +7391,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_12">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -7488,7 +7451,7 @@ QPushButton:pressed {
                  <string>秒数：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -7516,7 +7479,7 @@ QPushButton:pressed {
             <string>操作说明：暂无。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -7537,7 +7500,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>微软雅黑</family>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -7590,7 +7552,7 @@ QPushButton:pressed {
                <string>X距离：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -7607,7 +7569,7 @@ QPushButton:pressed {
                <string>Y距离：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -7624,7 +7586,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_13">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -7684,7 +7646,7 @@ QPushButton:pressed {
                  <string>秒数：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -7712,7 +7674,7 @@ QPushButton:pressed {
             <string>操作说明：暂无</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -7743,7 +7705,7 @@ QPushButton:pressed {
                <string>(0,0,0,0)</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -7852,7 +7814,7 @@ QPushButton:pressed {
                <string>变量名称：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -7861,7 +7823,6 @@ QPushButton:pressed {
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -7883,7 +7844,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_19">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -8060,10 +8021,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -8100,7 +8061,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -8147,7 +8107,7 @@ QPushButton:pressed {
             <string>操作说明：切换网页窗口。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -8196,7 +8156,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_15">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -8225,7 +8185,7 @@ QPushButton:pressed {
             <string>操作说明：截图当前屏幕。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -8253,7 +8213,7 @@ QPushButton:pressed {
                <string>截图类型：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -8277,7 +8237,7 @@ QPushButton:pressed {
                <string>(0,0,0,0)</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -8300,7 +8260,7 @@ QPushButton:pressed {
             <item>
              <spacer name="horizontalSpacer_22">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -8330,7 +8290,7 @@ QPushButton:pressed {
             <item>
              <spacer name="horizontalSpacer_23">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -8357,7 +8317,7 @@ QPushButton:pressed {
                  <string>文件夹名称:</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -8370,7 +8330,7 @@ QPushButton:pressed {
                  <string>图像名称：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -8384,7 +8344,7 @@ QPushButton:pressed {
               <item>
                <spacer name="horizontalSpacer_24">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -8409,7 +8369,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_14">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -8583,10 +8543,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -8623,7 +8583,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -8664,7 +8623,7 @@ QPushButton:pressed {
             <string>操作说明：请确保打开微信的快捷键为默认“ctrl+alt+w”。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -8685,7 +8644,7 @@ QPushButton:pressed {
                  <string>发送给：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -8709,7 +8668,7 @@ QPushButton:pressed {
                  <string>联系人名字：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -8739,7 +8698,7 @@ QPushButton:pressed {
                  <string>消息类型：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -8775,7 +8734,7 @@ QPushButton:pressed {
                  <string>消息内容：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -8786,7 +8745,7 @@ QPushButton:pressed {
               <item>
                <spacer name="horizontalSpacer_5">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -8801,7 +8760,6 @@ QPushButton:pressed {
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -8815,7 +8773,7 @@ QPushButton:pressed {
             <item>
              <spacer name="verticalSpacer_27">
               <property name="orientation">
-               <enum>Qt::Vertical</enum>
+               <enum>Qt::Orientation::Vertical</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -8992,10 +8950,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -9032,7 +8990,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -9256,7 +9213,7 @@ QPushButton:pressed {
                  <number>200</number>
                 </property>
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                </widget>
               </item>
@@ -9274,7 +9231,6 @@ QPushButton:pressed {
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -9289,7 +9245,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_17">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -9463,10 +9419,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -9503,7 +9459,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -9552,7 +9507,7 @@ QPushButton:pressed {
                  <string>窗口标题：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -9562,7 +9517,7 @@ QPushButton:pressed {
                  <string/>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                 <property name="placeholderText">
                  <string>请输入窗口标题...</string>
@@ -9579,7 +9534,7 @@ QPushButton:pressed {
                  <string>提示信息：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -9589,7 +9544,7 @@ QPushButton:pressed {
                  <string/>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                 <property name="placeholderText">
                  <string>请输入提示信息...</string>
@@ -9606,7 +9561,7 @@ QPushButton:pressed {
                  <string>等待时间：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -9629,14 +9584,14 @@ QPushButton:pressed {
                  <string>秒</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <spacer name="horizontalSpacer_4">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -9654,7 +9609,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_18">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -9828,10 +9783,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -9868,7 +9823,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -9915,7 +9869,7 @@ QPushButton:pressed {
                <string>操作类型：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -9956,14 +9910,14 @@ QPushButton:pressed {
                <string>窗口标题（包含）：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
             <item row="2" column="1">
              <widget class="QCheckBox" name="checkBox_5">
               <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
+               <enum>Qt::LayoutDirection::LeftToRight</enum>
               </property>
               <property name="text">
                <string>如果未找到窗口则报错</string>
@@ -9979,7 +9933,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_25">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -10153,10 +10107,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -10193,7 +10147,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -10242,7 +10195,7 @@ QPushButton:pressed {
                  <string>对话框标题：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -10252,7 +10205,7 @@ QPushButton:pressed {
                  <string/>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                 <property name="placeholderText">
                  <string>输入标题...</string>
@@ -10265,7 +10218,7 @@ QPushButton:pressed {
                  <string>图标类型：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -10299,7 +10252,7 @@ QPushButton:pressed {
                  <string>对话框内容：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -10309,7 +10262,7 @@ QPushButton:pressed {
                  <string/>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                 <property name="placeholderText">
                  <string>输入提示信息...</string>
@@ -10324,7 +10277,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_22">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -10498,10 +10451,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -10539,7 +10492,6 @@ QPushButton:pressed {
             <font>
              <family>Microsoft YaHei</family>
              <pointsize>-1</pointsize>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -10587,7 +10539,7 @@ QPushButton:pressed {
                <string>分支名称：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -10600,7 +10552,7 @@ QPushButton:pressed {
                <string>开始位置：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -10613,7 +10565,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_23">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -10642,7 +10594,7 @@ QPushButton:pressed {
                <string>流程类型：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -10661,7 +10613,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_24">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -10690,7 +10642,7 @@ QPushButton:pressed {
                <string>时间格式：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -10761,14 +10713,14 @@ QPushButton:pressed {
                <string>变量名称：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
             <item row="2" column="0">
              <spacer name="horizontalSpacer_6">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -10783,7 +10735,6 @@ QPushButton:pressed {
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -10798,7 +10749,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_28">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -10972,10 +10923,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -11012,7 +10963,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -11059,7 +11009,7 @@ QPushButton:pressed {
             <string>操作说明：与“移动鼠标”指令搭配使用。</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -11090,14 +11040,14 @@ QPushButton:pressed {
                <string>变量名称：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
             <item row="2" column="0">
              <spacer name="horizontalSpacer_10">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -11112,7 +11062,6 @@ QPushButton:pressed {
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -11127,7 +11076,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_35">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -11156,7 +11105,7 @@ QPushButton:pressed {
                <string>按键：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -11193,7 +11142,7 @@ QPushButton:pressed {
                  <string>分支名称：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -11213,7 +11162,7 @@ QPushButton:pressed {
                  <string>开始位置：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -11239,7 +11188,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_26">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -11268,7 +11217,7 @@ QPushButton:pressed {
                <string>对话框标题：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -11285,7 +11234,7 @@ QPushButton:pressed {
                <string>提示信息：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -11314,14 +11263,14 @@ QPushButton:pressed {
                <string>变量名称：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
             <item row="2" column="0">
              <spacer name="horizontalSpacer_8">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -11336,7 +11285,6 @@ QPushButton:pressed {
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -11351,7 +11299,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_30">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -11383,14 +11331,14 @@ QPushButton:pressed {
                <string>变量名称：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
             <item row="2" column="0">
              <spacer name="horizontalSpacer_25">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -11405,7 +11353,6 @@ QPushButton:pressed {
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -11420,7 +11367,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_40">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -11594,10 +11541,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -11634,7 +11581,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -11734,7 +11680,6 @@ QPushButton:pressed {
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -11798,7 +11743,7 @@ QPushButton:pressed {
                <string>分支名称：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -11811,7 +11756,7 @@ QPushButton:pressed {
                <string>开始位置：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -11824,7 +11769,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_31">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -11855,15 +11800,17 @@ QPushButton:pressed {
                  <font>
                   <family>Cascadia Code</family>
                   <pointsize>10</pointsize>
-                  <weight>50</weight>
                   <bold>false</bold>
                  </font>
                 </property>
                 <property name="html">
                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Cascadia Code','微软雅黑','微软雅黑'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Cascadia Code'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Cascadia Code,微软雅黑,微软雅黑';&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="placeholderText">
@@ -11876,7 +11823,6 @@ p, li { white-space: pre-wrap; }
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -11890,7 +11836,6 @@ p, li { white-space: pre-wrap; }
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -11927,7 +11872,7 @@ p, li { white-space: pre-wrap; }
                <string>代码中的return值:</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -11944,7 +11889,7 @@ p, li { white-space: pre-wrap; }
                <string>变量名称:</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -12118,10 +12063,10 @@ p, li { white-space: pre-wrap; }
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -12158,7 +12103,6 @@ p, li { white-space: pre-wrap; }
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -12207,15 +12151,17 @@ QPushButton:pressed {
                  <font>
                   <family>Cascadia Code</family>
                   <pointsize>10</pointsize>
-                  <weight>50</weight>
                   <bold>false</bold>
                  </font>
                 </property>
                 <property name="html">
                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Cascadia Code','微软雅黑','微软雅黑'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Cascadia Code'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Cascadia Code,微软雅黑,微软雅黑';&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="placeholderText">
@@ -12228,7 +12174,6 @@ p, li { white-space: pre-wrap; }
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -12242,7 +12187,6 @@ p, li { white-space: pre-wrap; }
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -12265,7 +12209,7 @@ p, li { white-space: pre-wrap; }
             <item>
              <widget class="QComboBox" name="comboBox_72">
               <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
+               <enum>Qt::LayoutDirection::LeftToRight</enum>
               </property>
               <property name="styleSheet">
                <string notr="true"/>
@@ -12274,10 +12218,10 @@ p, li { white-space: pre-wrap; }
                <bool>false</bool>
               </property>
               <property name="insertPolicy">
-               <enum>QComboBox::NoInsert</enum>
+               <enum>QComboBox::InsertPolicy::NoInsert</enum>
               </property>
               <property name="sizeAdjustPolicy">
-               <enum>QComboBox::AdjustToContents</enum>
+               <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
               </property>
               <item>
                <property name="text">
@@ -12354,7 +12298,7 @@ p, li { white-space: pre-wrap; }
          <item>
           <spacer name="verticalSpacer_39">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -12528,10 +12472,10 @@ p, li { white-space: pre-wrap; }
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -12568,7 +12512,6 @@ p, li { white-space: pre-wrap; }
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -12621,7 +12564,6 @@ QPushButton:pressed {
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -12643,7 +12585,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_32">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -12817,10 +12759,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -12857,7 +12799,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -12906,7 +12847,7 @@ QPushButton:pressed {
                  <string>Excel工作簿：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -12919,7 +12860,7 @@ QPushButton:pressed {
                  <string>工作表名：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -12932,7 +12873,7 @@ QPushButton:pressed {
                  <string>单元格：</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -12950,7 +12891,7 @@ QPushButton:pressed {
               <item>
                <spacer name="horizontalSpacer_21">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -12972,7 +12913,6 @@ QPushButton:pressed {
                 <property name="font">
                  <font>
                   <family>微软雅黑</family>
-                  <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
@@ -13002,7 +12942,7 @@ QPushButton:pressed {
             <item row="1" column="0">
              <spacer name="horizontalSpacer_9">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -13017,7 +12957,6 @@ QPushButton:pressed {
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -13032,7 +12971,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_33">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -13206,10 +13145,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -13246,7 +13185,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -13295,7 +13233,7 @@ QPushButton:pressed {
                  <string>(0,0,0,0)</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -13326,7 +13264,7 @@ QPushButton:pressed {
                <string>变量名称：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -13335,7 +13273,6 @@ QPushButton:pressed {
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -13357,7 +13294,7 @@ QPushButton:pressed {
          <item>
           <spacer name="verticalSpacer_34">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -13531,10 +13468,10 @@ QPushButton:pressed {
               </colorrole>
               <colorrole role="ButtonText">
                <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                <color alpha="92">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -13571,7 +13508,6 @@ QPushButton:pressed {
            <property name="font">
             <font>
              <family>Microsoft YaHei</family>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -13621,7 +13557,7 @@ QPushButton:pressed {
               <string>报错后：</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -13635,7 +13571,7 @@ QPushButton:pressed {
            <item row="2" column="0" colspan="4">
             <widget class="QLineEdit" name="lineEdit_5">
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="placeholderText">
               <string>输入指令备注信息...</string>
@@ -13669,7 +13605,7 @@ QPushButton:pressed {
            <item row="0" column="1">
             <widget class="QSpinBox" name="spinBox">
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
              <property name="minimum">
               <number>1</number>
@@ -13685,7 +13621,7 @@ QPushButton:pressed {
               <string>分支名称：</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -13695,7 +13631,7 @@ QPushButton:pressed {
               <string>开始位置：</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -13712,7 +13648,7 @@ QPushButton:pressed {
               <string>重复次数：</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -13739,7 +13675,7 @@ QPushButton:pressed {
               <string>暂无</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -13845,7 +13781,6 @@ QPushButton:pressed {
          <property name="font">
           <font>
            <family>微软雅黑</family>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>

@@ -1,12 +1,13 @@
 import ctypes
+import sys
 
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QDialog, QHeaderView
+from PySide6 import QtWidgets
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QCursor
+from PySide6.QtWidgets import QDialog, QHeaderView, QApplication
 
 from ini控制 import get_branch_info, set_window_size, save_window_size
-from 窗体.分支执行 import Ui_Branch
+from 窗体.分支执行_ui import Ui_Branch
 
 
 class BranchWindow(QDialog, Ui_Branch):
@@ -15,8 +16,8 @@ class BranchWindow(QDialog, Ui_Branch):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Tool)
-        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.tableWidget.doubleClicked.connect(self.open_select_option)
         self.tableWidget.installEventFilter(self)  # 安装事件过滤器,重新设置表格的快捷键
 
@@ -27,7 +28,7 @@ class BranchWindow(QDialog, Ui_Branch):
         for row, (name, short_desc, repeat_times) in enumerate(branch_info):
             for col, text in enumerate((name, short_desc)):
                 item = QtWidgets.QTableWidgetItem(text)
-                item.setTextAlignment(Qt.AlignCenter)
+                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.tableWidget.setItem(row, col, item)
             # 在第三列添加QSpinBox控件
             spin_box = QtWidgets.QSpinBox()
@@ -35,7 +36,7 @@ class BranchWindow(QDialog, Ui_Branch):
             spin_box.setMaximum(1000000)
             spin_box.setMinimum(-1)
             spin_box.setValue(repeat_times)
-            spin_box.setAlignment(Qt.AlignCenter)
+            spin_box.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.tableWidget.setCellWidget(row, 2, spin_box)
         # 将焦点设置到第一行
         self.tableWidget.setCurrentCell(0, 0)
@@ -113,96 +114,93 @@ class BranchWindow(QDialog, Ui_Branch):
     def key_name_to_qt_key(key_name) -> int:
         """Convert a key name to its corresponding Qt key value."""
         key_mapping = {
-            '0': Qt.Key_0,
-            '1': Qt.Key_1,
-            '2': Qt.Key_2,
-            '3': Qt.Key_3,
-            '4': Qt.Key_4,
-            '5': Qt.Key_5,
-            '6': Qt.Key_6,
-            '7': Qt.Key_7,
-            '8': Qt.Key_8,
-            '9': Qt.Key_9,
-            'A': Qt.Key_A,
-            'B': Qt.Key_B,
-            'C': Qt.Key_C,
-            'D': Qt.Key_D,
-            'E': Qt.Key_E,
-            'F': Qt.Key_F,
-            'G': Qt.Key_G,
-            'H': Qt.Key_H,
-            'I': Qt.Key_I,
-            'J': Qt.Key_J,
-            'K': Qt.Key_K,
-            'L': Qt.Key_L,
-            'M': Qt.Key_M,
-            'N': Qt.Key_N,
-            'O': Qt.Key_O,
-            'P': Qt.Key_P,
-            'Q': Qt.Key_Q,
-            'R': Qt.Key_R,
-            'S': Qt.Key_S,
-            'T': Qt.Key_T,
-            'U': Qt.Key_U,
-            'V': Qt.Key_V,
-            'W': Qt.Key_W,
-            'X': Qt.Key_X,
-            'Y': Qt.Key_Y,
-            'Z': Qt.Key_Z,
-            'F1': Qt.Key_F1,
-            'F2': Qt.Key_F2,
-            'F3': Qt.Key_F3,
-            'F4': Qt.Key_F4,
-            'F5': Qt.Key_F5,
-            'F6': Qt.Key_F6,
-            'F7': Qt.Key_F7,
-            'F8': Qt.Key_F8,
-            'F9': Qt.Key_F9,
-            'F10': Qt.Key_F10,
-            'F11': Qt.Key_F11,
-            'F12': Qt.Key_F12,
-            'Esc': Qt.Key_Escape,
-            'Return': Qt.Key_Return,
-            'Space': Qt.Key_Space,
-            'Tab': Qt.Key_Tab,
-            'Backspace': Qt.Key_Backspace,
-            'Ins': Qt.Key_Insert,
-            'Del': Qt.Key_Delete,
-            'Home': Qt.Key_Home,
-            'End': Qt.Key_End,
-            'PgUp': Qt.Key_PageUp,
-            'PgDown': Qt.Key_PageDown,
-            'Left': Qt.Key_Left,
-            'Up': Qt.Key_Up,
-            'Right': Qt.Key_Right,
-            'Down': Qt.Key_Down,
-            'Shift': Qt.Key_Shift,
-            'Control': Qt.Key_Control,
-            'Alt': Qt.Key_Alt,
-            'Meta': Qt.Key_Meta,
-            '.': Qt.Key_Period,
-            ',': Qt.Key_Comma,
-            '/': Qt.Key_Slash,
-            '\\': Qt.Key_Backslash,
-            '[': Qt.Key_BracketLeft,
-            ']': Qt.Key_BracketRight,
-            '-': Qt.Key_Minus,
-            '=': Qt.Key_Equal,
-            '`': Qt.Key_QuoteLeft,
-            ';': Qt.Key_Semicolon,
-            "'": Qt.Key_Apostrophe,
-            '{': Qt.Key_BraceLeft,
-            '}': Qt.Key_BraceRight,
-            'Ctrl': Qt.Key_Control,
+            '0': Qt.Key.Key_0,
+            '1': Qt.Key.Key_1,
+            '2': Qt.Key.Key_2,
+            '3': Qt.Key.Key_3,
+            '4': Qt.Key.Key_4,
+            '5': Qt.Key.Key_5,
+            '6': Qt.Key.Key_6,
+            '7': Qt.Key.Key_7,
+            '8': Qt.Key.Key_8,
+            '9': Qt.Key.Key_9,
+            'A': Qt.Key.Key_A,
+            'B': Qt.Key.Key_B,
+            'C': Qt.Key.Key_C,
+            'D': Qt.Key.Key_D,
+            'E': Qt.Key.Key_E,
+            'F': Qt.Key.Key_F,
+            'G': Qt.Key.Key_G,
+            'H': Qt.Key.Key_H,
+            'I': Qt.Key.Key_I,
+            'J': Qt.Key.Key_J,
+            'K': Qt.Key.Key_K,
+            'L': Qt.Key.Key_L,
+            'M': Qt.Key.Key_M,
+            'N': Qt.Key.Key_N,
+            'O': Qt.Key.Key_O,
+            'P': Qt.Key.Key_P,
+            'Q': Qt.Key.Key_Q,
+            'R': Qt.Key.Key_R,
+            'S': Qt.Key.Key_S,
+            'T': Qt.Key.Key_T,
+            'U': Qt.Key.Key_U,
+            'V': Qt.Key.Key_V,
+            'W': Qt.Key.Key_W,
+            'X': Qt.Key.Key_X,
+            'Y': Qt.Key.Key_Y,
+            'Z': Qt.Key.Key_Z,
+            'F1': Qt.Key.Key_F1,
+            'F2': Qt.Key.Key_F2,
+            'F3': Qt.Key.Key_F3,
+            'F4': Qt.Key.Key_F4,
+            'F5': Qt.Key.Key_F5,
+            'F6': Qt.Key.Key_F6,
+            'F7': Qt.Key.Key_F7,
+            'F8': Qt.Key.Key_F8,
+            'F9': Qt.Key.Key_F9,
+            'F10': Qt.Key.Key_F10,
+            'F11': Qt.Key.Key_F11,
+            'F12': Qt.Key.Key_F12,
+            'Esc': Qt.Key.Key_Escape,
+            'Return': Qt.Key.Key_Return,
+            'Space': Qt.Key.Key_Space,
+            'Tab': Qt.Key.Key_Tab,
+            'Backspace': Qt.Key.Key_Backspace,
+            'Ins': Qt.Key.Key_Insert,
+            'Del': Qt.Key.Key_Delete,
+            'Home': Qt.Key.Key_Home,
+            'End': Qt.Key.Key_End,
+            'PgUp': Qt.Key.Key_PageUp,
+            'PgDown': Qt.Key.Key_PageDown,
+            'Left': Qt.Key.Key_Left,
+            'Up': Qt.Key.Key_Up,
+            'Right': Qt.Key.Key_Right,
+            'Down': Qt.Key.Key_Down,
+            'Shift': Qt.Key.Key_Shift,
+            'Control': Qt.Key.Key_Control,
+            'Alt': Qt.Key.Key_Alt,
+            'Meta': Qt.Key.Key_Meta,
+            '.': Qt.Key.Key_Period,
+            ',': Qt.Key.Key_Comma,
+            '/': Qt.Key.Key_Slash,
+            '\\': Qt.Key.Key_Backslash,
+            '[': Qt.Key.Key_BracketLeft,
+            ']': Qt.Key.Key_BracketRight,
+            '-': Qt.Key.Key_Minus,
+            '=': Qt.Key.Key_Equal,
+            '`': Qt.Key.Key_QuoteLeft,
+            ';': Qt.Key.Key_Semicolon,
+            "'": Qt.Key.Key_Apostrophe,
+            '{': Qt.Key.Key_BraceLeft,
+            '}': Qt.Key.Key_BraceRight,
+            'Ctrl': Qt.Key.Key_Control,
         }
         return key_mapping.get(key_name, None)
 
 
 if __name__ == '__main__':
-    import sys
-    from PyQt5.QtWidgets import QApplication
-
     app = QApplication(sys.argv)
     window = BranchWindow()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

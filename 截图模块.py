@@ -5,13 +5,13 @@ import string
 import tkinter as tk
 
 import pyautogui
-from PyQt5 import QtGui
-from PyQt5.QtCore import Qt, QRegExp
-from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtWidgets import QDialog, QMessageBox
+from PySide6 import QtGui
+from PySide6.QtCore import Qt, QRegularExpression
+from PySide6.QtGui import QRegularExpressionValidator
+from PySide6.QtWidgets import QDialog, QMessageBox
 
 from ini控制 import extract_resource_folder_path
-from 窗体.image_preview import Ui_Image
+from 窗体.image_preview_ui import Ui_Image
 
 
 class ImagePreview(QDialog, Ui_Image):
@@ -20,9 +20,11 @@ class ImagePreview(QDialog, Ui_Image):
         self.setupUi(self)
         self.im_bytes = im_bytes  # 图片的二进制数据
         self.im_b = im_b  # 图片的二进制数据
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.load_setting_data()  # 加载设置数据
-        self.lineEdit.setValidator(QRegExpValidator(QRegExp("[a-zA-Z0-9]{16}"), self))
+        # 创建正则表达式，只允许字母和数字
+        regex = QRegularExpression("^[A-Za-z0-9]*$")
+        validator = QRegularExpressionValidator(regex, self.lineEdit)
+        self.lineEdit.setValidator(validator)
         # 按钮事件
         self.pushButton.clicked.connect(self.save_image)
         self.lineEdit.setText(f'{self.generate_random_alphanumeric(10)}')
@@ -55,7 +57,8 @@ class ImagePreview(QDialog, Ui_Image):
             with open(file_path, 'wb') as f:
                 f.write(self.im_bytes.getvalue())
         else:
-            QMessageBox.warning(self, '警告', '文件夹路径不存在，保存失败！')
+            QMessageBox.warning(self, '警告', '文件夹路径不存在，保存失败！', QMessageBox.StandardButton.Ok,
+                                QMessageBox.StandardButton.NoButton)
         # 关闭窗口
         self.accept()
 

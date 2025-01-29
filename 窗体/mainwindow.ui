@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>565</width>
-    <height>743</height>
+    <width>430</width>
+    <height>521</height>
    </rect>
   </property>
   <property name="font">
@@ -96,21 +96,20 @@
       <property name="font">
        <font>
         <family>Microsoft YaHei UI</family>
-        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
       <property name="tabPosition">
-       <enum>QTabWidget::North</enum>
+       <enum>QTabWidget::TabPosition::North</enum>
       </property>
       <property name="tabShape">
-       <enum>QTabWidget::Rounded</enum>
+       <enum>QTabWidget::TabShape::Rounded</enum>
       </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
       <property name="elideMode">
-       <enum>Qt::ElideMiddle</enum>
+       <enum>Qt::TextElideMode::ElideMiddle</enum>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -139,7 +138,7 @@
           <item>
            <spacer name="verticalSpacer">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -163,7 +162,7 @@
           <item>
            <spacer name="verticalSpacer_3">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -187,7 +186,7 @@
           <item>
            <spacer name="verticalSpacer_2">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -309,13 +308,12 @@
            <font>
             <family>Microsoft YaHei UI</family>
             <pointsize>8</pointsize>
-            <weight>50</weight>
             <italic>false</italic>
             <bold>false</bold>
            </font>
           </property>
           <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
+           <enum>Qt::FocusPolicy::StrongFocus</enum>
           </property>
           <property name="styleSheet">
            <string notr="true">QTableWidget {
@@ -327,19 +325,19 @@
            <number>16</number>
           </property>
           <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
+           <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
           </property>
           <property name="alternatingRowColors">
            <bool>false</bool>
           </property>
           <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
+           <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
           </property>
           <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
+           <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
           </property>
           <property name="gridStyle">
-           <enum>Qt::SolidLine</enum>
+           <enum>Qt::PenStyle::SolidLine</enum>
           </property>
           <property name="rowCount">
            <number>0</number>
@@ -363,56 +361,35 @@
            <property name="text">
             <string>图像名称</string>
            </property>
-           <property name="textAlignment">
-            <set>AlignCenter</set>
-           </property>
           </column>
           <column>
            <property name="text">
             <string>键鼠指令</string>
-           </property>
-           <property name="textAlignment">
-            <set>AlignCenter</set>
            </property>
           </column>
           <column>
            <property name="text">
             <string>分支处理</string>
            </property>
-           <property name="textAlignment">
-            <set>AlignCenter</set>
-           </property>
           </column>
           <column>
            <property name="text">
             <string>指令备注</string>
-           </property>
-           <property name="textAlignment">
-            <set>AlignCenter</set>
            </property>
           </column>
           <column>
            <property name="text">
             <string>参数</string>
            </property>
-           <property name="textAlignment">
-            <set>AlignCenter</set>
-           </property>
           </column>
           <column>
            <property name="text">
             <string>重复</string>
            </property>
-           <property name="textAlignment">
-            <set>AlignCenter</set>
-           </property>
           </column>
           <column>
            <property name="text">
             <string>ID</string>
-           </property>
-           <property name="textAlignment">
-            <set>AlignCenter</set>
            </property>
           </column>
          </widget>
@@ -470,7 +447,7 @@
                <string>当前分支：</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -511,7 +488,6 @@
               <property name="font">
                <font>
                 <family>Microsoft YaHei</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -661,10 +637,10 @@ QPushButton:pressed {
             <disabled>
              <colorrole role="Button">
               <brush brushstyle="SolidPattern">
-               <color alpha="255">
-                <red>255</red>
-                <green>0</green>
-                <blue>0</blue>
+               <color alpha="77">
+                <red>249</red>
+                <green>249</green>
+                <blue>249</blue>
                </color>
               </brush>
              </colorrole>
@@ -679,10 +655,10 @@ QPushButton:pressed {
              </colorrole>
              <colorrole role="ButtonText">
               <brush brushstyle="SolidPattern">
-               <color alpha="255">
-                <red>120</red>
-                <green>120</green>
-                <blue>120</blue>
+               <color alpha="92">
+                <red>0</red>
+                <green>0</green>
+                <blue>0</blue>
                </color>
               </brush>
              </colorrole>
@@ -720,7 +696,6 @@ QPushButton:pressed {
            <font>
             <family>微软雅黑</family>
             <pointsize>10</pointsize>
-            <weight>75</weight>
             <italic>false</italic>
             <bold>true</bold>
            </font>
@@ -788,7 +763,6 @@ QPushButton:pressed {
       <property name="font">
        <font>
         <family>微软雅黑</family>
-        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
@@ -832,6 +806,24 @@ QPushButton:pressed {
                <red>120</red>
                <green>120</green>
                <blue>120</blue>
+              </color>
+             </brush>
+            </colorrole>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="77">
+               <red>249</red>
+               <green>249</green>
+               <blue>249</blue>
+              </color>
+             </brush>
+            </colorrole>
+            <colorrole role="ButtonText">
+             <brush brushstyle="SolidPattern">
+              <color alpha="92">
+               <red>0</red>
+               <green>0</green>
+               <blue>0</blue>
               </color>
              </brush>
             </colorrole>
@@ -879,6 +871,24 @@ QPushButton:pressed {
                <red>120</red>
                <green>120</green>
                <blue>120</blue>
+              </color>
+             </brush>
+            </colorrole>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="77">
+               <red>249</red>
+               <green>249</green>
+               <blue>249</blue>
+              </color>
+             </brush>
+            </colorrole>
+            <colorrole role="ButtonText">
+             <brush brushstyle="SolidPattern">
+              <color alpha="92">
+               <red>0</red>
+               <green>0</green>
+               <blue>0</blue>
               </color>
              </brush>
             </colorrole>
@@ -959,7 +969,6 @@ QPushButton:pressed {
          <property name="font">
           <font>
            <family>SimSun</family>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -1007,6 +1016,24 @@ QPushButton:pressed {
                <red>120</red>
                <green>120</green>
                <blue>120</blue>
+              </color>
+             </brush>
+            </colorrole>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="77">
+               <red>249</red>
+               <green>249</green>
+               <blue>249</blue>
+              </color>
+             </brush>
+            </colorrole>
+            <colorrole role="ButtonText">
+             <brush brushstyle="SolidPattern">
+              <color alpha="92">
+               <red>0</red>
+               <green>0</green>
+               <blue>0</blue>
               </color>
              </brush>
             </colorrole>
@@ -1063,7 +1090,6 @@ QPushButton:pressed {
       <property name="font">
        <font>
         <family>微软雅黑</family>
-        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
@@ -1094,7 +1120,6 @@ QPushButton:pressed {
          <property name="font">
           <font>
            <family>Microsoft YaHei</family>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -1126,7 +1151,6 @@ QPushButton:pressed {
          <property name="font">
           <font>
            <family>微软雅黑</family>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -1140,7 +1164,6 @@ QPushButton:pressed {
          <property name="font">
           <font>
            <family>微软雅黑</family>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -1166,8 +1189,8 @@ QPushButton:pressed {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>565</width>
-     <height>26</height>
+     <width>430</width>
+     <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">

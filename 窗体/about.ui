@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>311</width>
-    <height>455</height>
+    <width>218</width>
+    <height>396</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -53,7 +53,7 @@
           <bool>true</bool>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -154,7 +154,6 @@
           <font>
            <family>微软雅黑</family>
            <pointsize>13</pointsize>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -162,7 +161,7 @@
           <string>Clicker</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -171,7 +170,7 @@
      <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -188,7 +187,7 @@
      <item row="0" column="0">
       <spacer name="horizontalSpacer_7">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -201,7 +200,7 @@
      <item row="0" column="2">
       <spacer name="horizontalSpacer_8">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -217,7 +216,6 @@
         <font>
          <family>微软雅黑</family>
          <pointsize>10</pointsize>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
@@ -225,7 +223,7 @@
         <string>版本：v0.25 Bate</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -239,7 +237,6 @@
         <font>
          <family>Microsoft YaHei</family>
          <pointsize>-1</pointsize>
-         <weight>75</weight>
          <italic>false</italic>
          <bold>true</bold>
         </font>
@@ -275,7 +272,6 @@ QPushButton:pressed {
         <font>
          <family>Microsoft YaHei</family>
          <pointsize>-1</pointsize>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
@@ -317,7 +313,7 @@ QPushButton:pressed {
       <string>PyAutoGUI可视化，自动处理需要大量重复操作鼠标键盘的事件。</string>
      </property>
      <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -338,7 +334,6 @@ QPushButton:pressed {
         <font>
          <family>Microsoft YaHei</family>
          <pointsize>-1</pointsize>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
@@ -374,7 +369,7 @@ QPushButton:pressed {
      <item row="1" column="0">
       <spacer name="horizontalSpacer_5">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -411,7 +406,7 @@ QPushButton:pressed {
      <item row="1" column="2">
       <spacer name="horizontalSpacer_6">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -428,7 +423,7 @@ QPushButton:pressed {
      <item>
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -481,7 +476,7 @@ QPushButton:pressed {
      <item>
       <spacer name="horizontalSpacer_4">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -505,7 +500,7 @@ QPushButton:pressed {
       <string>federalsadler@sohu.com Copyright (c) [2022] </string>
      </property>
      <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

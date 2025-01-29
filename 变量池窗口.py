@@ -1,11 +1,11 @@
 import sys
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5.QtWidgets import QDialog, QMenu, QAction, QStyle, QApplication
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QStandardItemModel, QStandardItem, QAction
+from PySide6.QtWidgets import QDialog, QMenu, QStyle, QApplication
 
 from 数据库操作 import get_value_from_variable_table, set_value_to_variable_table
-from 窗体.variablepool import Ui_VariablePool
+from 窗体.variablepool_ui import Ui_VariablePool
 
 
 class VariablePool_Win(QDialog, Ui_VariablePool):
@@ -15,14 +15,12 @@ class VariablePool_Win(QDialog, Ui_VariablePool):
         super().__init__(parent)
         # 初始化变量池窗口
         self.setupUi(self)
-        self.setWindowFlags(
-            self.windowFlags() & ~Qt.WindowContextHelpButtonHint
-        )  # 隐藏帮助按钮
         self.set_style()  # 设置窗体样式
         # 添加右键菜单
-        self.tableView.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.tableView.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.tableView.customContextMenuRequested.connect(self.open_menu)
         self.load_data()  # 加载数据
+        self.parent = parent
 
     def set_style(self):
         """设置窗体样式"""
@@ -71,9 +69,9 @@ class VariablePool_Win(QDialog, Ui_VariablePool):
         menu.addAction(add_row_action)
         menu.addAction(delete_row_action)
         # 设置图标
-        add_row_action.setIcon(self.style().standardIcon(QStyle.SP_FileDialogNewFolder))
+        add_row_action.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogNewFolder))
         delete_row_action.setIcon(
-            self.style().standardIcon(QStyle.SP_DialogDiscardButton)
+            self.style().standardIcon(QStyle.StandardPixmap.SP_DialogDiscardButton)
         )
         # 绑定事件
         add_row_action.triggered.connect(self.add_row)
@@ -111,13 +109,13 @@ class VariablePool_Win(QDialog, Ui_VariablePool):
         set_value_to_variable_table(variable_list)
 
         # 父窗口加载数据
-        if self.parent():
+        if self.parent:
             try:  # 重新加载父窗口的数据，用于选择窗口的变量更新
-                self.parent().load_lists("变量选择")
+                self.parent.load_lists("变量选择")
             except AttributeError:
                 pass
             try:  # 重新加载父窗口的数据，用于导航窗口的变量更新
-                self.parent().tab_widget_change()
+                self.parent.tab_widget_change()
             except AttributeError:
                 pass
 
@@ -126,4 +124,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = VariablePool_Win()
     win.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

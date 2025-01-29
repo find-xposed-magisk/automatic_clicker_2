@@ -8,8 +8,7 @@
 # EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
 # MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 # See the Mulan PSL v2 for more details.
-
-from PyQt5.QtCore import *
+from PySide6.QtCore import QThread, Signal, QMutex, QWaitCondition
 
 from functions import system_prompt_tone
 from ini控制 import get_branch_info
@@ -19,9 +18,9 @@ from 数据库操作 import extracted_ins_from_database, extracted_ins_target_id
 
 class CommandThread(QThread):
     """指令线程"""
-    send_message = pyqtSignal(str, name='send_message')
-    finished_signal = pyqtSignal(str, name='finished_signal')
-    send_type_and_id = pyqtSignal(str, str, name='send_type_and_id')
+    send_message = Signal(str, name='send_message')
+    finished_signal = Signal(str, name='finished_signal')
+    send_type_and_id = Signal(str, str, name='send_type_and_id')
 
     def __init__(self, main_window, navigation):
         super(CommandThread, self).__init__(parent=None)

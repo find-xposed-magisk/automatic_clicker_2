@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>426</width>
-    <height>310</height>
+    <width>335</width>
+    <height>253</height>
    </rect>
   </property>
   <property name="font">
@@ -33,7 +33,7 @@
    <item row="1" column="0" colspan="4">
     <widget class="QListView" name="listView">
      <property name="editTriggers">
-      <set>QAbstractItemView::NoEditTriggers</set>
+      <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
      </property>
     </widget>
    </item>

@@ -1,12 +1,14 @@
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QCursor
-from PyQt5.QtWidgets import QDialog, QHeaderView, QTableWidgetItem
+import sys
+
+from PySide6 import QtWidgets
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QStandardItemModel, QStandardItem, QCursor
+from PySide6.QtWidgets import QDialog, QHeaderView, QTableWidgetItem, QApplication
 
 from ini控制 import set_window_size, save_window_size, get_branch_info
 from 变量池窗口 import VariablePool_Win
 from 数据库操作 import get_variable_info
-from 窗体.branchwin import Ui_branch
+from 窗体.branchwin_ui import Ui_branch
 
 
 class Variable_selection_win(QDialog, Ui_branch):
@@ -15,7 +17,7 @@ class Variable_selection_win(QDialog, Ui_branch):
     def __init__(self, parent=None, modes='分支选择'):
         super().__init__(parent)
         self.setupUi(self)
-        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self.modes = modes
         # 根据不同的模式设置窗体样式
         self.set_window_style(self.modes)
@@ -115,15 +117,15 @@ class Variable_selection_win(QDialog, Ui_branch):
         if obj == self.listView:
             if event.type() == 6:  # 键盘按下事件
                 key_to_row = {  # 数字键对应的行
-                    Qt.Key_1: 1,
-                    Qt.Key_2: 2,
-                    Qt.Key_3: 3,
-                    Qt.Key_4: 4,
-                    Qt.Key_5: 5,
-                    Qt.Key_6: 6,
-                    Qt.Key_7: 7,
-                    Qt.Key_8: 8,
-                    Qt.Key_9: 9,
+                    Qt.Key.Key_1: 1,
+                    Qt.Key.Key_2: 2,
+                    Qt.Key.Key_3: 3,
+                    Qt.Key.Key_4: 4,
+                    Qt.Key.Key_5: 5,
+                    Qt.Key.Key_6: 6,
+                    Qt.Key.Key_7: 7,
+                    Qt.Key.Key_8: 8,
+                    Qt.Key.Key_9: 9,
                 }
                 # 检查事件的键是否在字典中
                 if event.key() in key_to_row:
@@ -143,11 +145,8 @@ class ShortcutTable(QDialog):
         self.table.setColumnCount(2)
         if title:
             self.table.setHorizontalHeaderLabels(title)
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.verticalHeader().setVisible(False)
-        self.setWindowFlags(
-            self.windowFlags() & ~Qt.WindowContextHelpButtonHint
-        )  # 隐藏帮助按钮
 
         self.button = QtWidgets.QPushButton("我知道了")
         self.button.clicked.connect(self.close)
@@ -156,11 +155,11 @@ class ShortcutTable(QDialog):
             self.table.setRowCount(len(data))
             for row, (shortcut, description) in enumerate(data):
                 shortcut_item = QTableWidgetItem(shortcut)
-                shortcut_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-                shortcut_item.setTextAlignment(Qt.AlignCenter)
+                shortcut_item.setFlags(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled)
+                shortcut_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 description_item = QTableWidgetItem(description)
-                description_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-                description_item.setTextAlignment(Qt.AlignCenter)
+                description_item.setFlags(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled)
+                description_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.table.setItem(row, 0, shortcut_item)
                 self.table.setItem(row, 1, description_item)
 
@@ -173,12 +172,10 @@ class ShortcutTable(QDialog):
         # 获取表格的总高度，设置窗口的高度
         table_height = self.table.verticalHeader().length()
         self.resize(width, table_height + 150)
-        self.table.setFocusPolicy(Qt.NoFocus)
+        self.table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
 
 if __name__ == '__main__':
-    import sys
-    from PyQt5.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
     window = Variable_selection_win()

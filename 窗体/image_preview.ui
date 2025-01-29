@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>373</width>
-    <height>351</height>
+    <width>328</width>
+    <height>299</height>
    </rect>
   </property>
   <property name="font">
@@ -29,7 +29,7 @@
       <string>图像预览</string>
      </property>
      <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
     </widget>
    </item>
@@ -41,7 +41,7 @@
         <string>文件夹路径：</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -146,7 +146,7 @@
         <string>图像名称：</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -257,7 +257,6 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
@@ -271,7 +270,6 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>

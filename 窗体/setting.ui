@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>426</width>
-    <height>604</height>
+    <width>354</width>
+    <height>487</height>
    </rect>
   </property>
   <property name="font">
@@ -41,7 +41,6 @@
          <property name="font">
           <font>
            <family>微软雅黑</family>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -54,7 +53,6 @@
             <property name="font">
              <font>
               <family>微软雅黑</family>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -71,7 +69,6 @@
             <property name="font">
              <font>
               <family>微软雅黑</family>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -88,7 +85,6 @@
             <property name="font">
              <font>
               <family>微软雅黑</family>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -172,12 +168,30 @@
                  </color>
                 </brush>
                </colorrole>
+               <colorrole role="Button">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="77">
+                  <red>249</red>
+                  <green>249</green>
+                  <blue>249</blue>
+                 </color>
+                </brush>
+               </colorrole>
                <colorrole role="Text">
                 <brush brushstyle="SolidPattern">
                  <color alpha="255">
                   <red>120</red>
                   <green>120</green>
                   <blue>120</blue>
+                 </color>
+                </brush>
+               </colorrole>
+               <colorrole role="ButtonText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="92">
+                  <red>0</red>
+                  <green>0</green>
+                  <blue>0</blue>
                  </color>
                 </brush>
                </colorrole>
@@ -196,7 +210,6 @@
             <property name="font">
              <font>
               <family>微软雅黑</family>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -216,7 +229,6 @@
          <property name="font">
           <font>
            <family>微软雅黑</family>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -231,7 +243,6 @@
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>50</weight>
                 <bold>false</bold>
                </font>
               </property>
@@ -258,14 +269,14 @@
                <number>200</number>
               </property>
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
              </widget>
             </item>
             <item row="4" column="1" colspan="2">
              <widget class="QSpinBox" name="spinBox">
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
               <property name="minimum">
                <number>0</number>
@@ -280,7 +291,6 @@
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>50</weight>
                 <bold>false</bold>
                </font>
               </property>
@@ -297,7 +307,6 @@
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -321,7 +330,7 @@
                <number>200</number>
               </property>
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
              </widget>
             </item>
@@ -351,7 +360,6 @@
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -365,7 +373,6 @@
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>50</weight>
                 <bold>false</bold>
                </font>
               </property>
@@ -379,7 +386,6 @@
               <property name="font">
                <font>
                 <family>微软雅黑</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -415,7 +421,7 @@
              <string>secretKey：</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignCenter</set>
+             <set>Qt::AlignmentFlag::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -428,7 +434,7 @@
              <string>appId：</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignCenter</set>
+             <set>Qt::AlignmentFlag::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -441,7 +447,7 @@
              <string>apiKey：</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignCenter</set>
+             <set>Qt::AlignmentFlag::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -477,7 +483,7 @@
              <string>Token：</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignCenter</set>
+             <set>Qt::AlignmentFlag::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -487,7 +493,7 @@
        <item>
         <spacer name="verticalSpacer_2">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -516,7 +522,7 @@
              <string>开始运行：</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignCenter</set>
+             <set>Qt::AlignmentFlag::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -529,7 +535,7 @@
              <string>结束运行：</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignCenter</set>
+             <set>Qt::AlignmentFlag::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -542,7 +548,7 @@
              <string>分支选择：</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignCenter</set>
+             <set>Qt::AlignmentFlag::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -555,7 +561,7 @@
              <string>暂停和恢复：</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignCenter</set>
+             <set>Qt::AlignmentFlag::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -568,7 +574,7 @@
        <item>
         <spacer name="verticalSpacer_3">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -588,7 +594,7 @@
        <item row="0" column="0" colspan="2">
         <widget class="QTableWidget" name="tableWidget">
          <property name="editTriggers">
-          <set>QAbstractItemView::NoEditTriggers</set>
+          <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
          </property>
          <attribute name="horizontalHeaderCascadingSectionResizes">
           <bool>false</bool>
@@ -603,24 +609,15 @@
           <property name="text">
            <string>分支名称</string>
           </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
          </column>
          <column>
           <property name="text">
            <string>快捷键</string>
           </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
          </column>
          <column>
           <property name="text">
            <string>重复次数</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
           </property>
          </column>
         </widget>
@@ -668,7 +665,7 @@
    <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -692,7 +689,6 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
@@ -724,7 +720,7 @@
      <item row="0" column="0">
       <widget class="QCheckBox" name="checkBox">
        <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
+        <enum>Qt::LayoutDirection::LeftToRight</enum>
        </property>
        <property name="styleSheet">
         <string notr="true"/>
