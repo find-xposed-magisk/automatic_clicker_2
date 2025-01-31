@@ -5,17 +5,7 @@ from PySide6.QtWidgets import QDialog, QHeaderView, QMessageBox
 from system_hotkey import SystemHotkey
 
 from functions import is_hotkey_valid
-from ini控制 import (
-    update_settings_in_ini,
-    get_setting_data_from_ini,
-    set_window_size,
-    save_window_size,
-    get_global_shortcut,
-    set_global_shortcut,
-    get_branch_info,
-    writes_to_branch_info,
-    del_branch_info, move_branch_info
-)
+from ini控制 import IniControl
 from 窗体.setting_ui import Ui_Setting
 
 BAIDU_OCR = 'https://ai.baidu.com/tech/ocr'
@@ -29,7 +19,8 @@ class Setting(QDialog, Ui_Setting):
         super().__init__(parent)
         # 初始化设置窗口
         self.setupUi(self)
-        set_window_size(self)  # 获取上次退出时的窗口大小
+        self.ini = IniControl()
+        self.ini.set_window_size(self)  # 获取上次退出时的窗口大小
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         # 绑定快捷键事件
         self.main_window_open = True  # 设置窗口是否是主窗口打开，如果不是则不注册全局快捷键，并隐藏快捷键设置
@@ -70,7 +61,7 @@ class Setting(QDialog, Ui_Setting):
                 key_sequence = key_sequence_edit_.keySequence().toString().lower().split('+')
                 key_sequence = [key.replace('ctrl', 'control') for key in key_sequence]
                 if is_hotkey_valid(hotkey, key_sequence):
-                    set_global_shortcut(**{action_: key_sequence})
+                    self.ini.set_global_shortcut(**{action_: key_sequence})
                 else:
                     QMessageBox.information(
                         self, '提醒',
@@ -85,7 +76,7 @@ class Setting(QDialog, Ui_Setting):
         model = self.radioButton.text() if self.radioButton.isChecked() else \
             self.radioButton_2.text() if self.radioButton_2.isChecked() else None
         # 更新ini文件
-        update_settings_in_ini(
+        self.ini.update_settings_in_ini(
             'Config',
             时间间隔=str(self.horizontalSlider_2.value() / 1000),
             持续时间=str(self.horizontalSlider_3.value() / 1000),
@@ -97,7 +88,7 @@ class Setting(QDialog, Ui_Setting):
             任务完成后显示主窗口=str(True if self.checkBox_4.isChecked() else False),
             高DPI自适应=str(True if self.checkBox_5.isChecked() else False)
         )
-        update_settings_in_ini(
+        self.ini.update_settings_in_ini(
             '三方接口',
             appId=str(self.lineEdit.text()),
             apiKey=str(self.lineEdit_2.text()),
@@ -139,7 +130,7 @@ class Setting(QDialog, Ui_Setting):
         """加载设置数据库中的数据"""
         self.checkBox_5.toggled.disconnect()  # 断开信号槽连接，避免触发高DPI自适应
         # 加载设置数据
-        setting_data_dic = get_setting_data_from_ini(
+        setting_data_dic = self.ini.get_setting_data_from_ini(
             'Config',
             '时间间隔',
             '持续时间',
@@ -160,7 +151,7 @@ class Setting(QDialog, Ui_Setting):
             self.radioButton.setChecked(True)
             self.change_mode('普通模式')
 
-        app_data_dic = get_setting_data_from_ini(
+        app_data_dic = self.ini.get_setting_data_from_ini(
             '三方接口',
             'appId',
             'apiKey',
@@ -185,7 +176,7 @@ class Setting(QDialog, Ui_Setting):
         self.lineEdit_6.setText(app_data_dic.get('云码Token', ''))
 
         # 加载快捷键设置
-        global_shortcut_dic = get_global_shortcut()
+        global_shortcut_dic = self.ini.get_global_shortcut()
         self.keySequenceEdit.setKeySequence('+'.join(global_shortcut_dic['开始运行']))
         self.keySequenceEdit_2.setKeySequence('+'.join(global_shortcut_dic['结束运行']))
         self.keySequenceEdit_3.setKeySequence('+'.join(global_shortcut_dic['分支选择']))
@@ -213,7 +204,7 @@ class Setting(QDialog, Ui_Setting):
 
     def load_branch_info(self):
         """向表格中加载分支信息"""
-        branch_info = get_branch_info()
+        branch_info = self.ini.get_branch_info()
         if branch_info:
             # 在表格中写入数据，branch_info为列表，每个元素为元组
             self.tableWidget.setRowCount(len(branch_info))
@@ -259,7 +250,7 @@ class Setting(QDialog, Ui_Setting):
             branch_info.append((branch_name, key_sequence, repeat_times))
         # 写入分支信息到ini文件
         for branch_name, key_sequence, repeat_times in branch_info:
-            writes_to_branch_info(branch_name, key_sequence, repeat_times)
+            self.ini.writes_to_branch_info(branch_name, key_sequence, repeat_times)
 
     def add_branch(self):
         """添加分支"""
@@ -277,7 +268,7 @@ class Setting(QDialog, Ui_Setting):
                                      QMessageBox.StandardButton.NoButton)
                 return
             # 在ini文件中添加分支信息
-            writes_to_branch_info(branch_name, '', 1)
+            self.ini.writes_to_branch_info(branch_name, '', 1)
             self.load_branch_info()  # 刷新表格
             # 选中新添加的分支，最后一行
             self.tableWidget.selectRow(self.tableWidget.rowCount() - 1)
@@ -291,7 +282,7 @@ class Setting(QDialog, Ui_Setting):
                 QMessageBox.critical(self, '错误', '主流程不能删除，也不能移动！', QMessageBox.StandardButton.Ok,
                                      QMessageBox.StandardButton.NoButton)
                 return
-            if del_branch_info(branch_name):
+            if self.ini.del_branch_info(branch_name):
                 self.load_branch_info()
             else:
                 QMessageBox.critical(self, '错误', '删除分支失败！请重试！', QMessageBox.StandardButton.Ok,
@@ -303,7 +294,7 @@ class Setting(QDialog, Ui_Setting):
         selected_row = self.tableWidget.currentRow()
         if selected_row != -1:
             branch_name = self.tableWidget.item(selected_row, 0).text()
-            if move_branch_info(branch_name, direction):
+            if self.ini.move_branch_info(branch_name, direction):
                 self.load_branch_info()
                 self.tableWidget.selectRow(
                     selected_row - 1 if direction == 'up' else selected_row + 1
@@ -320,7 +311,7 @@ class Setting(QDialog, Ui_Setting):
 
     def closeEvent(self, event):
         # 窗口大小
-        save_window_size(self.width(), self.height(), self.windowTitle())
+        self.ini.save_window_size(self.width(), self.height(), self.windowTitle())
         if self.main_window_open:  # 如果是主窗口打开
             # 注册全局快捷键
             self.parent().register_global_shortcut_keys()

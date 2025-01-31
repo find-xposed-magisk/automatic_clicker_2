@@ -5,9 +5,9 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QCursor
 from PySide6.QtWidgets import QDialog, QHeaderView, QTableWidgetItem, QApplication
 
-from ini控制 import set_window_size, save_window_size, get_branch_info
+from ini控制 import IniControl
 from 变量池窗口 import VariablePool_Win
-from 数据库操作 import get_variable_info
+from 数据库操作 import DatabaseOperation
 from 窗体.branchwin_ui import Ui_branch
 
 
@@ -17,7 +17,9 @@ class Variable_selection_win(QDialog, Ui_branch):
     def __init__(self, parent=None, modes='分支选择'):
         super().__init__(parent)
         self.setupUi(self)
-        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
+        self.ini = IniControl()  # 创建ini对象
+        self.db = DatabaseOperation()  # 创建数据库对象
+        # self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self.modes = modes
         # 根据不同的模式设置窗体样式
         self.set_window_style(self.modes)
@@ -53,10 +55,10 @@ class Variable_selection_win(QDialog, Ui_branch):
                 model.appendRow(QStandardItem(item))
 
         if modes == '分支选择':
-            branch_list = get_branch_info(True)
+            branch_list = self.ini.get_branch_info(True)
             add_listview(branch_list, self.listView)
         elif modes == '变量选择':
-            variable_list = get_variable_info('list')
+            variable_list = self.db.get_variable_info('list')
             add_listview(variable_list, self.listView)
 
     def open_select_option(self):
@@ -101,7 +103,7 @@ class Variable_selection_win(QDialog, Ui_branch):
 
     def showEvent(self, a0) -> None:
         # 设置窗口大小
-        set_window_size(self)
+        self.ini.set_window_size(self)
         # 移动窗口到鼠标位置
         cursor_pos = QCursor.pos()
         # 移动窗口使窗口中心与鼠标位置重合
@@ -110,7 +112,7 @@ class Variable_selection_win(QDialog, Ui_branch):
 
     def closeEvent(self, event):
         # 保存窗体大小
-        save_window_size(self.width(), self.height(), self.windowTitle())
+        self.ini.save_window_size(self.width(), self.height(), self.windowTitle())
 
     def eventFilter(self, obj, event):
         # 重写self.tableWidget的快捷键事件

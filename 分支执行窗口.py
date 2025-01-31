@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QDialog, QHeaderView, QApplication
 
-from ini控制 import get_branch_info, set_window_size, save_window_size
+from ini控制 import IniControl
 from 窗体.分支执行_ui import Ui_Branch
 
 
@@ -16,6 +16,7 @@ class BranchWindow(QDialog, Ui_Branch):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
+        self.ini = IniControl()  # 创建ini对象
         self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.tableWidget.doubleClicked.connect(self.open_select_option)
@@ -23,7 +24,7 @@ class BranchWindow(QDialog, Ui_Branch):
 
     def load_branch_data(self):
         """加载分支数据"""
-        branch_info = get_branch_info()
+        branch_info = self.ini.get_branch_info()
         self.tableWidget.setRowCount(len(branch_info))
         for row, (name, short_desc, repeat_times) in enumerate(branch_info):
             for col, text in enumerate((name, short_desc)):
@@ -86,7 +87,7 @@ class BranchWindow(QDialog, Ui_Branch):
 
     def showEvent(self, a0) -> None:
         # 设置窗口大小
-        set_window_size(self)
+        self.ini.set_window_size(self)
         # 移动窗口到鼠标位置
         cursor_pos = QCursor.pos()
         # 移动窗口使窗口中心与鼠标位置重合
@@ -97,14 +98,14 @@ class BranchWindow(QDialog, Ui_Branch):
 
     def closeEvent(self, event):
         # 保存窗体大小
-        save_window_size(self.width(), self.height(), self.windowTitle())
+        self.ini.save_window_size(self.width(), self.height(), self.windowTitle())
         self.set_caps_lock_status('close')  # 关闭大写锁定
 
     def eventFilter(self, obj, event):
         # 重写self.tableWidget的快捷键事件
         if obj == self.tableWidget:
             if event.type() == 6:  # 键盘按下事件
-                branch_info = get_branch_info()
+                branch_info = self.ini.get_branch_info()
                 for i, (name, key_str, repeat_times) in enumerate(branch_info):
                     if event.key() == self.key_name_to_qt_key(key_str):
                         self.trigger_using_number_keys(i + 1)

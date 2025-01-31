@@ -6,11 +6,11 @@ import tkinter as tk
 
 import pyautogui
 from PySide6 import QtGui
-from PySide6.QtCore import Qt, QRegularExpression
+from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import QDialog, QMessageBox
 
-from ini控制 import extract_resource_folder_path
+from ini控制 import IniControl
 from 窗体.image_preview_ui import Ui_Image
 
 
@@ -18,6 +18,7 @@ class ImagePreview(QDialog, Ui_Image):
     def __init__(self, im_bytes, im_b, parent=None):
         super().__init__(parent)
         self.setupUi(self)
+        self.ini = IniControl()  # 创建ini对象
         self.im_bytes = im_bytes  # 图片的二进制数据
         self.im_b = im_b  # 图片的二进制数据
         self.load_setting_data()  # 加载设置数据
@@ -30,7 +31,7 @@ class ImagePreview(QDialog, Ui_Image):
         self.lineEdit.setText(f'{self.generate_random_alphanumeric(10)}')
 
     def load_setting_data(self):
-        folder_path_list = extract_resource_folder_path()
+        folder_path_list = self.ini.extract_resource_folder_path()
         self.comboBox.clear()
         self.comboBox.addItems(folder_path_list)
 

@@ -10,10 +10,7 @@
 # See the Mulan PSL v2 for more details.
 from PySide6.QtCore import QThread, Signal, QMutex, QWaitCondition
 
-from functions import system_prompt_tone
-from ini控制 import get_branch_info
 from 功能类 import *
-from 数据库操作 import extracted_ins_from_database, extracted_ins_target_id_from_database
 
 
 class CommandThread(QThread):
@@ -28,6 +25,8 @@ class CommandThread(QThread):
         self.main_window = main_window
         self.navigation = navigation
         self.out_mes = OutputMessage(self, self.navigation)
+        self.ini = IniControl()
+        self.db = DatabaseOperation()
         # 循环控制
         self.number: int = 1  # 在窗体中显示循环次数
         self.number_cycles: int = 0  # 循环次数
@@ -78,13 +77,13 @@ class CommandThread(QThread):
         # 不断尝试获取指令列表，直到成功
         while True:
             if self.run_mode[0] == '全部指令':
-                list_instructions = extracted_ins_from_database()
+                list_instructions = self.db.extracted_ins_from_database()
                 current_index = 0
             elif self.run_mode[0] == '单行指令':
-                list_instructions = extracted_ins_target_id_from_database(self.run_mode[1])
+                list_instructions = self.db.extracted_ins_target_id_from_database(self.run_mode[1])
                 current_index = 0
             elif self.run_mode[0] == '从当前行运行':
-                list_instructions = extracted_ins_from_database()
+                list_instructions = self.db.extracted_ins_from_database()
                 current_index = self.run_mode[1]
             # 如果获取失败，等待一段时间再尝试
             if list_instructions is None:
@@ -237,7 +236,7 @@ class CommandThread(QThread):
 
                     # 提示异常并暂停
                     elif exception_handling == '提示异常并暂停':
-                        system_prompt_tone('执行异常')
+                        self.ini.system_prompt_tone('执行异常')
                         self.show_message(f'ID为{str_id}的指令执行异常，已提示异常并暂停。')
                         # 弹出带有OK按钮的提示框
                         choice = pymsgbox.confirm(
@@ -255,7 +254,7 @@ class CommandThread(QThread):
 
                     # 抛出异常并停止
                     elif exception_handling == '提示异常并停止':
-                        system_prompt_tone('执行异常')
+                        self.ini.system_prompt_tone('执行异常')
                         self.show_message(f'ID为{str_id}的指令执行异常，已提示异常并停止。')
                         # 弹出提示框
                         pymsgbox.alert(
@@ -269,7 +268,7 @@ class CommandThread(QThread):
 
                     # 终止所有任务
                     elif exception_handling == '终止所有任务':
-                        system_prompt_tone('执行异常')
+                        self.ini.system_prompt_tone('执行异常')
                         self.show_message(f'ID为{str_id}的指令触发‘终止流程’指令。')
                         current_index += 1
                         self.start_state = False
@@ -280,7 +279,7 @@ class CommandThread(QThread):
                         self.show_message(f'转到分支：{exception_handling}')
                         target_branch_name = exception_handling.split('-')[0]  # 分支表名
                         # 目标分支表名在分支表名中的索引
-                        self.branch_table_name = get_branch_info(True)
+                        self.branch_table_name = self.ini.get_branch_info(True)
                         branch_table_name_index = self.branch_table_name.index(target_branch_name)
                         # 分支表中要跳转的指令索引
                         branch_ins_index = exception_handling.split('-')[1]

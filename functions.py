@@ -1,19 +1,35 @@
 import datetime
+import os
 import re
-import time
 import typing
 
-import winsound
 import win32con
 import win32gui
 from system_hotkey import SystemHotkey, user32
 
-from ini控制 import get_setting_data_from_ini
+
+def timer(func):
+    def func_wrapper(*args, **kwargs):
+        from time import time
+
+        time_start = time()
+        result = func(*args, **kwargs)
+        time_end = time()
+        time_spend = time_end - time_start
+        print("%s cost time: %.3f s" % (func.__name__, time_spend))
+        return result
+
+    return func_wrapper
 
 
 def get_str_now_time():
     """获取当前时间"""
     return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+
+def get_current_folder() -> str:
+    """获取当前文件夹"""
+    return os.path.dirname(os.path.abspath(__file__))
 
 
 def line_number_increment(old_value, number=1):
@@ -29,42 +45,6 @@ def line_number_increment(old_value, number=1):
     new_cell_position = (column_letters + str(new_line_number)).upper()
     new_cell_position = new_cell_position
     return new_cell_position
-
-
-def show_normal_window_with_specified_title(title):
-    """将指定标题的窗口正常显示"""
-
-    def get_window_titles(hwnd, titles):
-        titles[hwnd] = win32gui.GetWindowText(hwnd)
-
-    if eval(get_setting_data_from_ini('Config', '任务完成后显示主窗口')):
-        hwnd_title = {}
-        win32gui.EnumWindows(get_window_titles, hwnd_title)
-
-        for h, t in hwnd_title.items():
-            if t == title:
-                try:
-                    time.sleep(0.5)
-                    win32gui.ShowWindow(h, win32con.SW_SHOWNORMAL)  # 正常显示窗口
-                except Exception as e:
-                    print(f"主窗口显示出现错误: {e}")
-                break
-
-
-def system_prompt_tone(judge: str):
-    """系统提示音
-    :param judge: 判断类型（线程结束、全局快捷键、执行异常）"""
-    try:
-        is_tone = eval(get_setting_data_from_ini('Config', '系统提示音'))
-        if judge == '线程结束' and is_tone:
-            for i_ in range(3):
-                winsound.Beep(500, 300)
-        elif judge == '全局快捷键' and is_tone:
-            winsound.Beep(500, 300)
-        elif judge == '执行异常' and is_tone:
-            winsound.Beep(1000, 1000)
-    except Exception as e:
-        print('系统提示音错误！', e)
 
 
 def is_hotkey_valid(hkobj: SystemHotkey, hk: typing.List[str]):
@@ -83,6 +63,7 @@ def is_hotkey_valid(hkobj: SystemHotkey, hk: typing.List[str]):
 
 def show_window(title):
     """将指定标题的窗口正常显示，主要用于主窗口显示"""
+
     def get_window_titles(hwnd, titles):
         titles[hwnd] = win32gui.GetWindowText(hwnd)
 

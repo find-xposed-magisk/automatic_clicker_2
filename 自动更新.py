@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import re
 import time
 import webbrowser
 from contextlib import closing
@@ -51,11 +52,11 @@ class Check_Update(QThread):
                 "更新内容": data.get('desc'),
                 "更新时间": time_13_to_date(data.get('updateTime')),
                 "强制更新": data.get('forceUpdate'),
-                "下载地址": data.get('download').split('，'),
-                "完成后打开": data.get('完成后需要打开的文件', '').split('，'),
-                "检测程序": data.get('检测程序', ''),
-                "需要关闭的文件": data.get('需要关闭的文件', '').split('，'),
-                "需要删除的文件": data.get('需要删除的文件', '').split('，'),
+                "下载地址": re.split(r'[，,]', data.get('download')),
+                "完成后打开": re.split(r'[，,]', data.get('完成后需要打开的文件', '')),
+                "检测程序": re.split(r'[，,]', data.get('检测程序', '')),
+                "需要关闭的文件": re.split(r'[，,]', data.get('需要关闭的文件', '')),
+                "需要删除的文件": re.split(r'[，,]', data.get('需要删除的文件', '')),
                 "前往下载网页": data.get('前往下载网页', ''),
                 "解压文件名": data.get('解压文件名', ''),
             }
@@ -65,12 +66,11 @@ class Check_Update(QThread):
 
     def run(self):
 
-        def open_update_window(update_info_dic_: dict):
+        def open_update_window(update_info_dic__: dict):
             """打开更新窗口
-            :param update_info_dic_: 更新信息字典
+            :param update_info_dic__: 更新信息字典
             """
-            # 打开更新下载窗口
-            self.show_update_window_signal.emit(update_info_dic_)
+            self.show_update_window_signal.emit(update_info_dic__)
 
         update_info_dic = self.get_update_info()
         if update_info_dic is None:
@@ -78,8 +78,10 @@ class Check_Update(QThread):
             self.show_update_signal.emit('网络故障无法连接到服务器！\n\n请检查网络连接！', '错误')
             return
 
-        new_version = update_info_dic.get('版本号')
-        if CURRENT_VERSION == new_version:
+        new_version_str = update_info_dic.get('版本号')
+        new_version = int(re.sub(r'\D', '', new_version_str))  # 提取版本号中的数字
+        current_version = int(re.sub(r'\D', '', CURRENT_VERSION))  # 提取当前版本号中的数字
+        if current_version >= new_version:
             if self.is_show_info:
                 self.show_update_signal.emit('当前已是最新版本！', '信息')
             return
@@ -87,7 +89,7 @@ class Check_Update(QThread):
         if update_info_dic.get('强制更新'):
             open_update_window(update_info_dic)
         else:
-            text = (f"发现新版本：{new_version}，"
+            text = (f"发现新版本：{new_version_str}，"
                     f"\n\n{update_info_dic['更新内容']}"
                     f"\n\n是否更新？")
             reply = pymsgbox.confirm(
@@ -100,7 +102,10 @@ class Check_Update(QThread):
                 if update_info_dic.get('前往下载网页') == '否':
                     open_update_window(update_info_dic)
                 else:
-                    webbrowser.open(DOWNLOAD_PAGE)
+                    if update_info_dic.get('前往下载网页') != '是':
+                        webbrowser.open(update_info_dic.get('前往下载网页'))
+                    else:
+                        webbrowser.open(DOWNLOAD_PAGE)
 
 
 class Download_UpdatePack(QThread):

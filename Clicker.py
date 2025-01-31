@@ -14,6 +14,7 @@ import collections
 import json
 import os.path
 import re
+import sys
 import time
 
 import openpyxl
@@ -26,12 +27,9 @@ from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 from system_hotkey import SystemHotkey
 
-from functions import get_str_now_time, system_prompt_tone, show_normal_window_with_specified_title, is_hotkey_valid, \
+from functions import get_str_now_time, is_hotkey_valid, \
     show_window
 from icon import Icon
-from ini控制 import set_window_size, save_window_size, get_setting_data_from_ini, update_settings_in_ini, \
-    get_global_shortcut, writes_to_branch_info, del_branch_info, ini_to_excel, excel_to_ini, get_branch_repeat_times, \
-    set_branch_repeat_times, set_current_branch, get_current_branch
 from main_work import CommandThread
 from 分支执行窗口 import BranchWindow
 from 功能类 import close_browser
@@ -111,9 +109,12 @@ class Main_window(QMainWindow, Ui_MainWindow):
         super().__init__()
         # 初始化窗体
         self.setupUi(self)
+        self.setWindowTitle(f"{APP_NAME} {CURRENT_VERSION}")
         # 窗口和信息
         self.statusBar = QStatusBar()
         self.setStatusBar(self.statusBar)  # 实例化状态栏
+        self.db = DatabaseOperation()  # 实例化数据库操作
+        self.ini = IniControl()  # 实例化ini文件操作
         self.icon = Icon()  # 实例化图标
         self.check_file_integrity()  # 检查文件完整性
         self.add_recent_to_fileMenu()  # 将最近文件添加到菜单中
@@ -122,7 +123,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.update_thread = Check_Update(self)  # 自动更新线程
         self.update_thread.show_update_signal.connect(self.update_Qmessage)
         self.update_thread.show_update_window_signal.connect(self.update_window)
-        is_update = eval(get_setting_data_from_ini("Config", "启动检查更新"))
+        is_update = eval(self.ini.get_setting_data_from_ini("Config", "启动检查更新"))
         if is_update:
             self.check_update_software(False)
         # 显示导不同的窗口
@@ -209,14 +210,14 @@ class Main_window(QMainWindow, Ui_MainWindow):
                                      QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.NoButton)
                 sys.exit(1)
 
-        set_window_size(self)  # 获取上次退出时的窗口大小
-        branch_name = get_current_branch()
+        self.ini.set_window_size(self)  # 获取上次退出时的窗口大小
+        branch_name = self.ini.get_current_branch()
         self.comboBox.setCurrentIndex(self.comboBox.findText(branch_name) if branch_name else 0)
         # 缩小tableWidget行高
         self.tableWidget.verticalHeader().setDefaultSectionSize(20)
         check_file_integrity()  # 检查文件完整性
         # 显示工具栏
-        judge = eval(get_setting_data_from_ini("Config", "显示工具栏"))
+        judge = eval(self.ini.get_setting_data_from_ini("Config", "显示工具栏"))
         self.toolBar.setVisible(judge)
         self.actiong.setChecked(judge)
         # 注册全局快捷键
@@ -252,7 +253,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
     def register_global_shortcut_keys(self):
         """注册全局快捷键"""
         # 从ini文件中获取全局快捷键
-        global_shortcut = get_global_shortcut()
+        global_shortcut = self.ini.get_global_shortcut()
         # 检查快捷键是否有效，无效则弹出提示
         try:
             global_shortcuts = {
@@ -293,7 +294,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
     def unregister_global_shortcut_keys(self):
         """注销全局忷键"""
-        global_shortcut = get_global_shortcut()
+        global_shortcut = self.ini.get_global_shortcut()
         try:
             for shortcut_name, action in global_shortcut.items():
                 # 将ctrl替换为control
@@ -304,8 +305,8 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
     def add_recent_to_fileMenu(self):
         """将最近文件添加到菜单中"""
-        recently_opened_list = get_recently_opened_file("文件列表")
-        current_file_path = get_setting_data_from_ini('Config', "当前文件路径")
+        recently_opened_list = self.db.get_recently_opened_file("文件列表")
+        current_file_path = self.ini.get_setting_data_from_ini('Config', "当前文件路径")
         # 将最近打开文件添加到菜单中
         if len(recently_opened_list) != 0:
             for file in recently_opened_list:
@@ -325,13 +326,13 @@ class Main_window(QMainWindow, Ui_MainWindow):
     def open_recent_file(self, file_path):
         """打开最近打开的文件
         :param file_path: 文件路径"""
-        recent_file = get_setting_data_from_ini('Config', "当前文件路径")
+        recent_file = self.ini.get_setting_data_from_ini('Config', "当前文件路径")
         if file_path != recent_file:
             if os.path.exists(file_path):
                 self.data_import(file_path)
             elif not os.path.exists(file_path):
                 # 如果文件不存在，则删除最近打开文件列表中的文件
-                remove_recently_opened_file(file_path)
+                self.db.remove_recently_opened_file(file_path)
                 # 从菜单中删除文件
                 for action in self.menuzv.actions():
                     if action.text() == file_path:
@@ -351,17 +352,17 @@ class Main_window(QMainWindow, Ui_MainWindow):
             row = self.tableWidget.currentRow()
             xx = int(self.tableWidget.item(row, 6).text())
             # 删除数据库中指定id的数据
-            cursor, con = sqlitedb()
-            branch_name = self.comboBox.currentText()
-            cursor.execute(
-                "delete from 命令 where ID=? and 隶属分支=?",
-                (
-                    xx,
-                    branch_name,
-                ),
-            )
-            con.commit()
-            close_database(cursor, con)
+            with sqlite3.connect(self.db.db_path) as con:
+                cursor = con.cursor()
+                branch_name = self.comboBox.currentText()
+                cursor.execute(
+                    "delete from 命令 where ID=? and 隶属分支=?",
+                    (
+                        xx,
+                        branch_name,
+                    ),
+                )
+                con.commit()
             self.get_data(row)  # 调用get_data()函数，刷新表格
             # 状态栏显示信息
             self.statusBar.showMessage(f"删除指令。", 1000)
@@ -388,26 +389,26 @@ class Main_window(QMainWindow, Ui_MainWindow):
         try:
             row = self.tableWidget.currentRow()
             id_ = int(self.tableWidget.item(row, 6).text())  # 指令ID
-            cursor, con = sqlitedb()
-            new_list_order = get_new_order()  # 获取新的指令数据
-            try:
-                cursor.execute(
-                    "INSERT INTO 命令 VALUES (?,?,?,?,?,?,?,?,?,?,?)", new_list_order
-                )
-                con.commit()
-            except sqlite3.IntegrityError:
-                # 如果下一个id已经存在，则将后面的id全部加1
-                max_id_ = 1000000
-                cursor.execute("UPDATE 命令 SET ID=ID+? WHERE ID>?", (max_id_, id_))
-                cursor.execute(
-                    "UPDATE 命令 SET ID=ID-? WHERE ID>?",
-                    (max_id_ - 1, max_id_ + int(id_)),
-                )
-                cursor.execute(
-                    "INSERT INTO 命令 VALUES (?,?,?,?,?,?,?,?,?,?,?)", new_list_order
-                )
-                con.commit()
-            close_database(cursor, con)
+            with sqlite3.connect(self.db.db_path) as con:
+                cursor = con.cursor()
+                new_list_order = get_new_order()  # 获取新的指令数据
+                try:
+                    cursor.execute(
+                        "INSERT INTO 命令 VALUES (?,?,?,?,?,?,?,?,?,?,?)", new_list_order
+                    )
+                    con.commit()
+                except sqlite3.IntegrityError:
+                    # 如果下一个id已经存在，则将后面的id全部加1
+                    max_id_ = 1000000
+                    cursor.execute("UPDATE 命令 SET ID=ID+? WHERE ID>?", (max_id_, id_))
+                    cursor.execute(
+                        "UPDATE 命令 SET ID=ID-? WHERE ID>?",
+                        (max_id_ - 1, max_id_ + int(id_)),
+                    )
+                    cursor.execute(
+                        "INSERT INTO 命令 VALUES (?,?,?,?,?,?,?,?,?,?,?)", new_list_order
+                    )
+                    con.commit()
             self.get_data(row)
             self.statusBar.showMessage(f"复制指令。", 1000)
         except AttributeError:
@@ -456,32 +457,32 @@ class Main_window(QMainWindow, Ui_MainWindow):
         try:
             row = self.tableWidget.currentRow()
             id_ = int(self.tableWidget.item(row, 6).text())  # 指令ID
-            cursor, con = sqlitedb()
-            # 获取数据库中id的最大值
-            cursor.execute("SELECT MAX(ID) FROM 命令")
-            max_id = cursor.fetchone()[0]
-            # 将指令移动到目标分支
-            if max_id != id_:
-                cursor.execute(
-                    "UPDATE 命令 SET 隶属分支=?, ID=? WHERE ID=? AND 隶属分支=?",
-                    (
-                        target_branch_name,
-                        max_id + 1,
-                        id_,
-                        branch_name,
-                    ),
-                )
-            else:
-                cursor.execute(
-                    "UPDATE 命令 SET 隶属分支=? WHERE ID=? AND 隶属分支=?",
-                    (
-                        target_branch_name,
-                        id_,
-                        branch_name,
-                    ),
-                )
-            con.commit()
-            close_database(cursor, con)
+            with sqlite3.connect(self.db.db_path) as con:
+                cursor = con.cursor()
+                # 获取数据库中id的最大值
+                cursor.execute("SELECT MAX(ID) FROM 命令")
+                max_id = cursor.fetchone()[0]
+                # 将指令移动到目标分支
+                if max_id != id_:
+                    cursor.execute(
+                        "UPDATE 命令 SET 隶属分支=?, ID=? WHERE ID=? AND 隶属分支=?",
+                        (
+                            target_branch_name,
+                            max_id + 1,
+                            id_,
+                            branch_name,
+                        ),
+                    )
+                else:
+                    cursor.execute(
+                        "UPDATE 命令 SET 隶属分支=? WHERE ID=? AND 隶属分支=?",
+                        (
+                            target_branch_name,
+                            id_,
+                            branch_name,
+                        ),
+                    )
+                con.commit()
             self.get_data()
             # 切换到目标分支
             self.comboBox.setCurrentText(target_branch_name)
@@ -521,11 +522,11 @@ class Main_window(QMainWindow, Ui_MainWindow):
             choice = QMessageBox.question(self, "提示", "确认清除所有指令吗？",
                                           QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No)
             if choice == QMessageBox.StandardButton.Yes:
-                clear_all_ins()
+                self.db.clear_all_ins()
                 # 在ini中删除分支信息，保留主分支
                 for i in range(self.comboBox.count()):
                     if self.comboBox.itemText(i) != MAIN_FLOW:
-                        del_branch_info(self.comboBox.itemText(i))
+                        self.ini.del_branch_info(self.comboBox.itemText(i))
                 self.get_data()
                 self.load_branch_to_combobox()  # 重新加载分支
             else:
@@ -655,7 +656,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
             clear_table()
             self.statusBar.showMessage(f"清空指令表格。", 1000)
         elif action == del_branch:
-            clear_all_ins(branch_name=self.comboBox.currentText())
+            self.db.clear_all_ins(branch_name=self.comboBox.currentText())
             self.get_data()
             self.statusBar.showMessage(f"清空当前分支全部指令。", 1000)
         elif action == go_branch:
@@ -724,14 +725,14 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.tableWidget.clearContents()
             self.tableWidget.setRowCount(0)
             # 获取数据库数据
-            cursor, con = sqlitedb()
-            branch_name = self.comboBox.currentText()
-            cursor.execute(
-                "select 图像名称,指令类型,异常处理,备注,参数1,重复次数,ID from 命令 where 隶属分支=?",
-                (branch_name,),
-            )
-            list_order = cursor.fetchall()
-            close_database(cursor, con)
+            with sqlite3.connect(self.db.db_path) as con:
+                cursor = con.cursor()
+                branch_name = self.comboBox.currentText()
+                cursor.execute(
+                    "select 图像名称,指令类型,异常处理,备注,参数1,重复次数,ID from 命令 where 隶属分支=?",
+                    (branch_name,),
+                )
+                list_order = cursor.fetchall()
             # 在表格中写入数据
             for i_ in range(len(list_order)):
                 self.tableWidget.insertRow(i_)
@@ -748,7 +749,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
             if row is not None:
                 self.tableWidget.setCurrentCell(int(row), 0)
             # 设置重复次数
-            self.spinBox.setValue(int(get_branch_repeat_times(branch_name)))
+            self.spinBox.setValue(int(self.ini.get_branch_repeat_times(branch_name)))
 
         except sqlite3.OperationalError:
             pass
@@ -760,32 +761,32 @@ class Main_window(QMainWindow, Ui_MainWindow):
             """交换数据库中的两行数据
             :param id_1: 要交换的第一行的id
             :param id_2: 要交换的第二行的id"""
-            cursor, con = sqlitedb()
-            # 交换两行的id
-            cursor.execute(
-                "update 命令 set ID=? where ID=?",
-                (
-                    999999,
-                    id_1,
-                ),
-            )
-            cursor.execute(
-                "update 命令 set ID=? where ID=?",
-                (
-                    id_1,
-                    id_2,
-                ),
-            )
-            cursor.execute(
-                "update 命令 set ID=? where ID=?",
-                (
-                    id_2,
-                    999999,
-                ),
-            )
-            con.commit()
-            # 刷新数据库
-            close_database(cursor, con)
+            # cursor, con = sqlitedb()
+            with sqlite3.connect(self.db.db_path) as con:
+                cursor = con.cursor()
+                # 交换两行的id
+                cursor.execute(
+                    "update 命令 set ID=? where ID=?",
+                    (
+                        999999,
+                        id_1,
+                    ),
+                )
+                cursor.execute(
+                    "update 命令 set ID=? where ID=?",
+                    (
+                        id_1,
+                        id_2,
+                    ),
+                )
+                cursor.execute(
+                    "update 命令 set ID=? where ID=?",
+                    (
+                        id_2,
+                        999999,
+                    ),
+                )
+                con.commit()
 
         try:
             # 获取选中值的行号和id
@@ -817,8 +818,8 @@ class Main_window(QMainWindow, Ui_MainWindow):
         def get_save_file_and_folder() -> tuple:
             """获取保存文件名和文件夹路径"""
             # 获取资源文件夹路径作为默认路径，如果存在则使用用户的主目录
-            directory_folder_path = extract_resource_folder_path()[0] \
-                if extract_resource_folder_path() else os.path.expanduser("~")
+            directory_folder_path = self.ini.extract_resource_folder_path()[0] \
+                if self.ini.extract_resource_folder_path() else os.path.expanduser("~")
             directory_path = os.path.normpath(os.path.join(directory_folder_path, "指令数据.xlsx"))
             # 获取保存文件名和文件夹路径
             file_path, _ = QFileDialog.getSaveFileName(
@@ -833,7 +834,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
         def get_file_and_folder_from_setting():
             """从设置中获取最近打开的文件路径作为保存路径，用于自动保存"""
-            recently_opened = get_setting_data_from_ini('Config', "当前文件路径")
+            recently_opened = self.ini.get_setting_data_from_ini('Config', "当前文件路径")
             if recently_opened != "None" and os.path.exists(recently_opened):
                 return os.path.split(recently_opened)
             self.statusBar.showMessage("未找到最近导入的文件路径。已自动切换为另存为...", 3000)
@@ -887,7 +888,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
                 # 使用openpyxl模块创建Excel文件
                 wb = openpyxl.Workbook()
                 # 获取全局参数表中的分支表名
-                branch_table_list = get_branch_info(keys_only=True)
+                branch_table_list = self.ini.get_branch_info(keys_only=True)
                 # 将sheet名设置为分支表名
                 headers = [
                     "ID",
@@ -907,12 +908,12 @@ class Main_window(QMainWindow, Ui_MainWindow):
                     sheet.append(headers)
                     set_title_style(sheet)  # 设置标题样式
                     # 写入数据
-                    for ins in extracted_ins_from_database(branch_name):
+                    for ins in self.db.extracted_ins_from_database(branch_name):
                         sheet.append(ins)
                     adaptive_column_width(sheet)
 
                 wb.remove(wb["Sheet"])  # 删除默认的sheet
-                ini_to_excel(wb)  # 将ini文件中的数据写入到Excel文件中
+                self.ini.ini_to_excel(wb)  # 将ini文件中的数据写入到Excel文件中
                 adaptive_column_width(wb['设置'])
                 # 保存Excel文件
                 save_path = os.path.normpath(os.path.join(folder_path, file_name))
@@ -925,12 +926,12 @@ class Main_window(QMainWindow, Ui_MainWindow):
     def closeEvent(self, event):
         """关闭窗口事件"""
         # 是否隐藏工具栏
-        update_settings_in_ini('Config', 显示工具栏=str(self.actiong.isChecked()))
+        self.ini.update_settings_in_ini('Config', 显示工具栏=str(self.actiong.isChecked()))
         # 终止线程
         if self.command_thread.isRunning():
             self.command_thread.terminate()
         # 是否退出清空数据库
-        if eval(get_setting_data_from_ini("Config", "退出提醒清空指令")):
+        if eval(self.ini.get_setting_data_from_ini("Config", "退出提醒清空指令")):
             choice = QMessageBox.question(
                 self, "提示", "确定退出并清空所有指令？\n将自动保存当前指令数据。"
                 , QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No)
@@ -938,14 +939,14 @@ class Main_window(QMainWindow, Ui_MainWindow):
                 # 退出终止后台进程并清空数据库
                 self.save_data("自动保存")
                 event.accept()
-                clear_all_ins()
+                self.db.clear_all_ins()
             else:
                 event.ignore()
         self.branch_win.close()  # 关闭选择窗口
         # 保存当前分支
-        set_current_branch(self.comboBox.currentText())
+        self.ini.set_current_branch(self.comboBox.currentText())
         # 窗口大小
-        save_window_size(self.width(), self.height(), self.windowTitle())
+        self.ini.save_window_size(self.width(), self.height(), self.windowTitle())
 
     def data_import(self, file_path):
         """导入数据功能"""
@@ -954,34 +955,35 @@ class Main_window(QMainWindow, Ui_MainWindow):
             # 读取数据
             wb = openpyxl.load_workbook(target_path_)
             sheets = wb.worksheets  # 获取所有的sheet
-            excel_to_ini(wb)  # 写入ini设置
-            cursor_, con_ = sqlitedb()
-            for sheet in sheets:  # 遍历所有的sheet，写入分支指令
-                if sheet.title != "设置":
-                    # writes_to_branch_info(sheet.title, '')  # 添加分支表名
-                    max_row = sheet.max_row
-                    max_column = sheet.max_column
-                    # 向数据库中写入数据
-                    try:
-                        for row in range(2, max_row + 1):
-                            # 获取第一列数据
-                            instructions = []
-                            for column in range(1, max_column + 1):
-                                # 获取单元格数据
-                                data = sheet.cell(row, column).value
-                                instructions.append(data)
-                            cursor_.execute(
-                                "INSERT INTO 命令(ID,图像名称,指令类型,参数1,参数2,参数3,参数4,"
-                                "重复次数,异常处理,备注,隶属分支) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-                                instructions[0:11],
-                            )
-                            con_.commit()
-                    except Exception as e:
-                        # 捕获并处理异常
-                        QMessageBox.warning(self, f"导入失败", f"ID重复或格式错误！{e}", QMessageBox.StandardButton.Ok,
-                                            QMessageBox.StandardButton.NoButton)
+            self.ini.excel_to_ini(wb)  # 写入ini设置
+            with sqlite3.connect(self.db.db_path) as con:
+                cursor = con.cursor()
+                for sheet in sheets:  # 遍历所有的sheet，写入分支指令
+                    if sheet.title != "设置":
+                        # writes_to_branch_info(sheet.title, '')  # 添加分支表名
+                        max_row = sheet.max_row
+                        max_column = sheet.max_column
+                        # 向数据库中写入数据
+                        try:
+                            for row in range(2, max_row + 1):
+                                # 获取第一列数据
+                                instructions = []
+                                for column in range(1, max_column + 1):
+                                    # 获取单元格数据
+                                    data = sheet.cell(row, column).value
+                                    instructions.append(data)
+                                cursor.execute(
+                                    "INSERT INTO 命令(ID,图像名称,指令类型,参数1,参数2,参数3,参数4,"
+                                    "重复次数,异常处理,备注,隶属分支) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                                    instructions[0:11],
+                                )
+                                con.commit()
+                        except Exception as e:
+                            # 捕获并处理异常
+                            QMessageBox.warning(self, f"导入失败", f"ID重复或格式错误！{e}",
+                                                QMessageBox.StandardButton.Ok,
+                                                QMessageBox.StandardButton.NoButton)
             wb.close()
-            close_database(cursor_, con_)
             self.load_branch_to_combobox()  # 重新加载分支列表
             if file_path == "资源文件夹路径":
                 QMessageBox.information(self, "提示", "指令数据导入成功！")
@@ -989,12 +991,12 @@ class Main_window(QMainWindow, Ui_MainWindow):
         # 获取资源文件夹路径，如果不存在则使用用户的主目录
         if file_path == "资源文件夹路径":
             directory_path = next(
-                (item for item in extract_resource_folder_path()), os.path.expanduser("~")
+                (item for item in self.ini.extract_resource_folder_path()), os.path.expanduser("~")
             )
             target_path, _ = QFileDialog.getOpenFileName(
                 parent=self,
                 caption="请选择指令备份文件",
-                directory=directory_path,
+                dir=directory_path,
                 filter="(*.xlsx)"
             )
             if target_path:
@@ -1007,14 +1009,14 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
         # 如果为.xlsx文件
         if suffix == ".xlsx":
-            clear_all_ins(True)  # 清空原有数据，包括分支表
+            self.db.clear_all_ins(True)  # 清空原有数据，包括分支表
             data_import_from_excel(target_path)
         # 将最近导入的文件路径写入数据库,用于保存时自动设置路径
-        update_settings_in_ini(
+        self.ini.update_settings_in_ini(
             "Config",
             当前文件路径=os.path.normpath(target_path)
         )  # 写入当前文件路径
-        writes_to_recently_opened_files(
+        self.db.writes_to_recently_opened_files(
             os.path.normpath(target_path)
         )  # 写入最近打开的文件
         self.statusBar.showMessage(f"指令数据导入成功！已自动设置保存路径。", 1000)
@@ -1048,7 +1050,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         # 设置重复次数
         repeat_number = self.spinBox.value() if self.radioButton_2.isChecked() else -1
         self.command_thread.set_repeat_number(repeat_number)  # 设置重复次数
-        set_branch_repeat_times(self.comboBox.currentText(), repeat_number)  # 设置分支重复次数
+        self.ini.set_branch_repeat_times(self.comboBox.currentText(), repeat_number)  # 设置分支重复次数
         # 开始运行
         self.command_thread.start()
         # 记录开始时间的时间戳
@@ -1067,7 +1069,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.command_thread.set_run_mode('全部指令', 0)  # 设置运行模式
         self.command_thread.set_branch_name_index(branch_index)
         self.command_thread.set_repeat_number(repeat_number)  # 设置重复次数
-        set_branch_repeat_times(branch_name, repeat_number)  # 记录分支重复次数
+        self.ini.set_branch_repeat_times(branch_name, repeat_number)  # 记录分支重复次数
         # 设置主窗口显示的重复次数
         if self.comboBox.currentText() == branch_name:
             self.spinBox.setValue(repeat_number)
@@ -1103,7 +1105,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         flag = Qt.WindowType.WindowCloseButtonHint
         branch_name, ok = QInputDialog.getText(self, "创建分支", "请输入分支名称：", flags=flag)
         if ok:
-            message = writes_to_branch_info(branch_name, '')
+            message = self.ini.writes_to_branch_info(branch_name, '')
             self.load_branch_to_combobox(branch_name)
             QMessageBox.information(
                 self, "提示",
@@ -1119,9 +1121,9 @@ class Main_window(QMainWindow, Ui_MainWindow):
             # 将combox显示的名称切换为主流程
             self.comboBox.setCurrentIndex(0)
             # 删除分支表
-            mes = del_branch_info(text)
+            mes = self.ini.del_branch_info(text)
             if mes:
-                del_branch_in_database(text)  # 删除数据库中的分支
+                self.db.del_branch_in_database(text)  # 删除数据库中的分支
                 self.load_branch_to_combobox()  # 重新加载分支列表
                 QMessageBox.information(self, "提示", "分支已删除！")
             else:
@@ -1132,11 +1134,11 @@ class Main_window(QMainWindow, Ui_MainWindow):
         """加载分支
         :param text: 设置combox的文本"""
         self.comboBox.clear()
-        self.comboBox.addItems(get_branch_info(True))
+        self.comboBox.addItems(self.ini.get_branch_info(True))
         if text is not None:
             self.comboBox.setCurrentText(text)
         # 设置重复次数
-        self.spinBox.setValue(int(get_branch_repeat_times(self.comboBox.currentText())))
+        self.spinBox.setValue(int(self.ini.get_branch_repeat_times(self.comboBox.currentText())))
 
     def eventFilter(self, obj, event):
         # 重写self.tableWidget的快捷键事件
@@ -1195,7 +1197,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
     def global_shortcut_key(self, i_str):
         """全局热键处理函数"""
-        system_prompt_tone("全局快捷键")  # 发出提示音
+        self.ini.system_prompt_tone("全局快捷键")  # 发出提示音
 
         if i_str == "终止线程":
             if self.command_thread.isRunning():
@@ -1205,7 +1207,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
                 if self.checkBox_2.isChecked():
                     self.show()
                 QApplication.processEvents()
-                show_normal_window_with_specified_title(self.windowTitle())  # 显示窗口
+                self.ini.show_normal_window_with_specified_title(self.windowTitle())  # 显示窗口
 
         elif i_str == "开始线程":
             self.start('全部指令', 0)  # 开始线程
@@ -1254,8 +1256,8 @@ class Main_window(QMainWindow, Ui_MainWindow):
         if self.checkBox_2.isChecked():  # 显示窗口
             self.show()
             QApplication.processEvents()
-        system_prompt_tone("线程结束")  # 发出提示音
-        show_normal_window_with_specified_title(self.windowTitle())  # 显示窗口
+        self.ini.system_prompt_tone("线程结束")  # 发出提示音
+        self.ini.show_normal_window_with_specified_title(self.windowTitle())  # 显示窗口
         close_browser()  # 关闭浏览器驱动
 
     def check_update_software(self, show_MessageBox=True):
@@ -1286,7 +1288,8 @@ class About(QDialog, Ui_About):
         # 初始化窗体
         self._parent = parent
         self.setupUi(self)
-        set_window_size(self)  # 获取上次退出时的窗口大小
+        self.ini = IniControl()
+        self.ini.set_window_size(self)  # 获取上次退出时的窗口大小
         self.label_2.setText(f"版本：{CURRENT_VERSION}")  # 设置版本号
         self.label_7.setText('<a href="{}"><font color="red">{}</font></a>'.format(QQ_GROUP, QQ))
         # 绑定事件
@@ -1306,7 +1309,7 @@ class About(QDialog, Ui_About):
 
     def closeEvent(self, event):
         # 保存窗体大小
-        save_window_size(self.width(), self.height(), self.windowTitle())
+        self.ini.save_window_size(self.width(), self.height(), self.windowTitle())
 
 
 class Param(QDialog, Ui_Param):
@@ -1316,12 +1319,13 @@ class Param(QDialog, Ui_Param):
         super().__init__(parent)
         # 初始化窗体
         self.setupUi(self)
-        set_window_size(self)  # 获取上次退出时的窗口大小
+        self.ini = IniControl()
+        self.ini.set_window_size(self)  # 获取上次退出时的窗口大小
         self.pushButton.clicked.connect(self.modify_parameters)  # 保存参数
 
     def closeEvent(self, event):
         # 保存窗体大小
-        save_window_size(self.width(), self.height(), self.windowTitle())
+        self.ini.save_window_size(self.width(), self.height(), self.windowTitle())
 
     def modify_parameters(self):
         self.parent().modify_parameters()
@@ -1344,7 +1348,8 @@ class QSSLoader:
 if __name__ == "__main__":
     # 自适应高分辨率
     # 强制启用高 DPI 感知模式
-    is_AA_EnableHighDpiScaling = eval(get_setting_data_from_ini("Config", "高DPI自适应"))
+    ini = IniControl()
+    is_AA_EnableHighDpiScaling = eval(ini.get_setting_data_from_ini("Config", "高DPI自适应"))
     if is_AA_EnableHighDpiScaling:
         QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     app = QtWidgets.QApplication(sys.argv)

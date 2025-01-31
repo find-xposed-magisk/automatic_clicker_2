@@ -31,12 +31,8 @@ from aip import AipOcr
 from dateutil.parser import parse
 
 from functions import get_str_now_time, line_number_increment
-from ini控制 import get_ocr_info, get_setting_data_from_ini, extract_resource_folder_path, \
-    matched_complete_path_from_resource_folders
-from 数据库操作 import (
-    get_variable_info,
-    set_variable_value,
-)
+from ini控制 import IniControl
+from 数据库操作 import DatabaseOperation
 from 网页操作 import WebOption
 
 sys.coinit_flags = 2  # STA
@@ -71,6 +67,24 @@ def close_browser():
     web_option.close_browser()
 
 
+def get_variable_info(return_type: str = "dict"):
+    """获取变量信息"""
+    db = DatabaseOperation()
+    return db.get_variable_info(return_type)
+
+
+def set_variable_value(variable_name: str, variable_value: str):
+    """设置变量值"""
+    db = DatabaseOperation()
+    db.set_variable_value(variable_name, variable_value)
+
+
+def get_setting_data_from_ini(section: str, *options: str):
+    """从配置文件中获取设置数据"""
+    ini = IniControl()
+    return ini.get_setting_data_from_ini(section, *options)
+
+
 def sub_variable(text: str):
     """将text中的变量替换为变量值"""
     new_text = text
@@ -95,17 +109,18 @@ def get_available_path(image_name_: str, out_mes, is_test=False):
                 return image_path
         return None
 
+    ini = IniControl()
     if os.path.isabs(image_name_):
         if os.path.exists(image_name_):
             return image_name_
         else:
             out_mes.out_mes("原资源文件路径不存在，已重新匹配。", is_test)
             image_name_only = os.path.basename(image_name_)
-            res_folder_path = extract_resource_folder_path()
+            res_folder_path = ini.extract_resource_folder_path()
             return search_image_in_folders(image_name_only, res_folder_path)
 
     else:
-        res_folder_path = extract_resource_folder_path()
+        res_folder_path = ini.extract_resource_folder_path()
         return search_image_in_folders(image_name_, res_folder_path)
 
 
@@ -360,6 +375,7 @@ class MultipleImagesClick:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
+        self.ini = IniControl()
         setting_data_dic = get_setting_data_from_ini(
             'Config',
             "持续时间", "时间间隔", "暂停时间"
@@ -377,7 +393,7 @@ class MultipleImagesClick:
         """从指令字典中解析出指令参数"""
         re_try = self.ins_dic.get('重复次数')
         img_name_list = str(self.ins_dic.get('图像路径')).split('、')
-        img_path_list = [matched_complete_path_from_resource_folders(img_name) for img_name in img_name_list]
+        img_path_list = [self.ini.matched_complete_path_from_resource_folders(img_name) for img_name in img_name_list]
         parameter_dic_ = eval(self.ins_dic.get('参数1（键鼠指令）'))
         area_identification = None if eval(parameter_dic_.get("区域")) == (0, 0, 0, 0) \
             else eval(parameter_dic_.get("区域"))
@@ -1306,8 +1322,8 @@ class MouseDrag:
 
     def mouse_drag(self, start_position, end_position, duration_=300):
         """鼠标拖拽事件"""
-        pyautogui.moveTo(start_position[0], start_position[1], duration=duration_//1000)
-        pyautogui.dragTo(end_position[0], end_position[1], duration=duration_//1000)
+        pyautogui.moveTo(start_position[0], start_position[1], duration=duration_ // 1000)
+        pyautogui.dragTo(end_position[0], end_position[1], duration=duration_ // 1000)
         self.out_mes.out_mes(
             "鼠标拖拽%s到%s" % (str(start_position), str(end_position)), self.is_test
         )
@@ -2573,6 +2589,7 @@ class TextRecognition:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
+        self.ini = IniControl()
         self.time_sleep: float = 0.5  # 等待时间
         self.out_mes = outputmessage  # 用于输出信息到不同的窗口
         self.ins_dic: dict = ins_dic  # 指令字典
@@ -2610,8 +2627,7 @@ class TextRecognition:
         else:
             raise ValueError("参数错误！")
 
-    @staticmethod
-    def ocr_pic(reigon):
+    def ocr_pic(self, reigon):
         """文字识别
         :param reigon: 识别区域"""
 
@@ -2626,7 +2642,7 @@ class TextRecognition:
         im_b = im_bytes.getvalue()
         # 返回百度api识别文字信息
         try:
-            client_info = get_ocr_info()  # 获取百度api信息
+            client_info = self.ini.get_ocr_info()  # 获取百度api信息
             client = AipOcr(
                 client_info["appId"], client_info["apiKey"], client_info["secretKey"]
             )

@@ -4,7 +4,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QAction
 from PySide6.QtWidgets import QDialog, QMenu, QStyle, QApplication
 
-from 数据库操作 import get_value_from_variable_table, set_value_to_variable_table
+from 数据库操作 import DatabaseOperation
 from 窗体.variablepool_ui import Ui_VariablePool
 
 
@@ -16,6 +16,7 @@ class VariablePool_Win(QDialog, Ui_VariablePool):
         # 初始化变量池窗口
         self.setupUi(self)
         self.set_style()  # 设置窗体样式
+        self.db = DatabaseOperation()  # 创建数据库对象
         # 添加右键菜单
         self.tableView.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.tableView.customContextMenuRequested.connect(self.open_menu)
@@ -44,7 +45,7 @@ class VariablePool_Win(QDialog, Ui_VariablePool):
         model = QStandardItemModel(self)  # 创建一个 QStandardItemModel 作为数据模型
         # 设置模型的表头
         model.setHorizontalHeaderLabels(["变量名称", "备注", "值"])
-        variable_list = get_value_from_variable_table()  # 从数据库中获取数据
+        variable_list = self.db.get_value_from_variable_table()  # 从数据库中获取数据
         # 添加数据到模型中
         for variable_tuple in variable_list:
             items = [
@@ -106,7 +107,7 @@ class VariablePool_Win(QDialog, Ui_VariablePool):
             variable_list.append((variable_name, variable_remark, variable_value))
         # 保存数据到数据库
         # print(variable_list)
-        set_value_to_variable_table(variable_list)
+        self.db.set_value_to_variable_table(variable_list)
 
         # 父窗口加载数据
         if self.parent:
