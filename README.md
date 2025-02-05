@@ -13,7 +13,7 @@ Clicker-0.26-Bate（尚未发布）
 6. 详情请参考代码：添加指令模板.py
 ## 必须安装的python库
 ```txt
-PyQt5
+PySide6
 pyttsx4
 pymsgbox
 pyautogui
@@ -40,7 +40,7 @@ xlrd
 ```
 ## 一键安装方法
 ```txt
-pip install PyQt5 pyttsx4 pymsgbox pyautogui mouse keyboard pywinauto pandas selenium webdriver_manager pillow openpyxl requests system_hotkey pygments opencv-python baidu-aip chardet nuitka pyinstaller python-dateutil psutil xlrd
+pip install PySide6 pyttsx4 pymsgbox pyautogui mouse keyboard pywinauto pandas selenium webdriver_manager pillow openpyxl requests system_hotkey pygments opencv-python baidu-aip chardet nuitka pyinstaller python-dateutil psutil xlrd
 ```
 # 贡献者
 FasterThanLight
