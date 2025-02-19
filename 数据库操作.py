@@ -24,9 +24,11 @@ class DatabaseOperation:
                 for root, dirs, files in os.walk(folder_path):
                     for file in files:
                         if (
-                                file.endswith(".xlsx") or file.endswith(".xls")
+                            file.endswith(".xlsx") or file.endswith(".xls")
                         ) and not file.startswith("~$"):
-                            excel_files.append(os.path.normpath(os.path.join(root, file)))
+                            excel_files.append(
+                                os.path.normpath(os.path.join(root, file))
+                            )
         return excel_files
 
     def get_branch_count(self, branch_name: str) -> int:
@@ -42,7 +44,7 @@ class DatabaseOperation:
     def clear_all_ins(self, judge: bool = False, branch_name: str = None):
         """清空数据库中所有指令
         :param judge: 是否清除分支表名
-        :param branch_name: 分支表名，如果不传入，则清空所有分支表名的数据"""
+        :param branch_name: 目标分支表名，如果不传入，则清空所有指令"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             if branch_name:
@@ -51,7 +53,8 @@ class DatabaseOperation:
                 cursor.execute("delete from 命令 where ID<>-1")
             if judge:
                 cursor.execute(
-                    "delete from 全局参数 " "where (分支表名 != ?  and 分支表名 is not null)",
+                    "delete from 全局参数 "
+                    "where (分支表名 != ?  and 分支表名 is not null)",
                     (MAIN_FLOW,),
                 )
             conn.commit()
@@ -87,7 +90,9 @@ class DatabaseOperation:
             all_list_instructions = []
             if len(branch_table_name_list) != 0:
                 for branch_table_name in branch_table_name_list:
-                    all_list_instructions.append(get_branch_table_ins(branch_table_name))
+                    all_list_instructions.append(
+                        get_branch_table_ins(branch_table_name)
+                    )
                 return all_list_instructions
 
     def extracted_ins_target_id_from_database(self, id_: int) -> list:
@@ -193,7 +198,9 @@ class DatabaseOperation:
                 cursor.execute("SELECT * FROM 变量池")
                 existing_values = cursor.fetchall()
                 # 将现有值存储为字典，便于比较
-                existing_values_dict = {row[0]: (row[1], row[2]) for row in existing_values}
+                existing_values_dict = {
+                    row[0]: (row[1], row[2]) for row in existing_values
+                }
                 # 遍历传入的变量列表
                 for variable_name, remark, value in variable_list:
                     # 如果变量名称在数据库中已存在且对应的备注值不等于传入值，则更新备注值
@@ -236,7 +243,9 @@ class DatabaseOperation:
                     }  # 获取变量名称和值的字典
                 elif return_type == "list":
                     cursor.execute(f"SELECT 变量名称 FROM 变量池")
-                    result = [item[0] for item in cursor.fetchall()]  # 获取变量名称的列表
+                    result = [
+                        item[0] for item in cursor.fetchall()
+                    ]  # 获取变量名称的列表
                 else:
                     raise ValueError("Invalid return_type. Use 'dict' or 'list'.")
             except Exception as e:
@@ -252,7 +261,8 @@ class DatabaseOperation:
             cursor = conn.cursor()
             try:
                 cursor.execute(
-                    "UPDATE 变量池 SET 值 = ? WHERE 变量名称 = ?", (new_value, variable_name)
+                    "UPDATE 变量池 SET 值 = ? WHERE 变量名称 = ?",
+                    (new_value, variable_name),
                 )
                 conn.commit()
             except Exception as e:

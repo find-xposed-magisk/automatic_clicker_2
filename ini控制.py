@@ -1,7 +1,6 @@
 import configparser
 import ctypes
 import os
-import sqlite3
 import time
 
 import win32con
@@ -19,11 +18,10 @@ class IniControl:
         self.config.read(self.ini_path, encoding='utf-8')
         self.db_path = os.path.join(get_current_folder(), "命令集.db")
 
-    @staticmethod
-    def get_config() -> configparser.ConfigParser:
+    def get_config(self) -> configparser.ConfigParser:
         """获取配置文件"""
         config = configparser.ConfigParser()
-        config.read("config.ini", encoding="utf-8")
+        config.read(self.ini_path, encoding='utf-8')
         return config
 
     def get_setting_data_from_ini(self, selection: str, *args):
@@ -62,7 +60,7 @@ class IniControl:
             return {
                 "appId": config["三方接口"]["appid"],
                 "apiKey": config["三方接口"]["apikey"],
-                "secretKey": config["三方接口"]["secretkey"]
+                "secretKey": config["三方接口"]["secretkey"],
             }
         except Exception as e:
             print("获取OCR信息失败！", e)
@@ -101,7 +99,9 @@ class IniControl:
             :return: 窗口大小"""
             window_info = f"{window_name}-{self.get_screen_resolution()}"
             try:
-                width_, height_ = eval(self.get_setting_data_from_ini("窗口大小", window_info))
+                width_, height_ = eval(
+                    self.get_setting_data_from_ini("窗口大小", window_info)
+                )
                 return int(width_), int(height_)
             except TypeError:
                 return 0, 0
@@ -148,9 +148,12 @@ class IniControl:
             paths = {key: config.get(section, key) for key in config.options(section)}
             if path not in paths.values():
                 keys = sorted(
-                    [int(
-                        k.replace("路径", "")
-                    ) for k in paths.keys() if k.replace("路径", "").isdigit()], reverse=True
+                    [
+                        int(k.replace("路径", ""))
+                        for k in paths.keys()
+                        if k.replace("路径", "").isdigit()
+                    ],
+                    reverse=True,
                 )
                 new_key = f"路径{keys[0] + 1 if keys else 1}"
                 config.set(section, new_key, path)
@@ -177,7 +180,10 @@ class IniControl:
                 print("路径不存在于配置文件中！")
                 return
             # 删除指定路径并重新编号
-            new_paths = {f"路径{i + 1}": value for i, value in enumerate(v for k, v in paths.items() if v != path)}
+            new_paths = {
+                f"路径{i + 1}": value
+                for i, value in enumerate(v for k, v in paths.items() if v != path)
+            }
             # 清除原有部分并重新添加整理后的路径键值对
             config.remove_section(section)
             config.add_section(section)
@@ -205,16 +211,20 @@ class IniControl:
             if path not in paths.values():
                 print("路径不存在于配置文件中！")
                 return
-            path_key = next((key for key, value in paths.items() if value == path), None)
+            path_key = next(
+                (key for key, value in paths.items() if value == path), None
+            )
             path_index = list(paths.keys()).index(path_key)
             if direction == 'up' and path_index > 0:
-                paths[path_key], paths[
-                    list(paths.keys())[path_index - 1]] = paths[list(paths.keys())[path_index - 1]], paths[path_key
-                ]
+                paths[path_key], paths[list(paths.keys())[path_index - 1]] = (
+                    paths[list(paths.keys())[path_index - 1]],
+                    paths[path_key],
+                )
             elif direction == 'down' and path_index < len(paths) - 1:
-                paths[path_key], paths[
-                    list(paths.keys())[path_index + 1]] = paths[list(paths.keys())[path_index + 1]], paths[path_key
-                ]
+                paths[path_key], paths[list(paths.keys())[path_index + 1]] = (
+                    paths[list(paths.keys())[path_index + 1]],
+                    paths[path_key],
+                )
             config.remove_section(section)
             config.add_section(section)
             for key, value in paths.items():
@@ -245,8 +255,17 @@ class IniControl:
             config = self.get_config()
             if '资源文件夹路径' not in config:
                 return []
-            paths = [config.get('资源文件夹路径', key) for key in config.options('资源文件夹路径')]
-            return [file for path in paths for _, _, files in os.walk(path) for file in files if file.endswith('.png')]
+            paths = [
+                config.get('资源文件夹路径', key)
+                for key in config.options('资源文件夹路径')
+            ]
+            return [
+                file
+                for path in paths
+                for _, _, files in os.walk(path)
+                for file in files
+                if file.endswith('.png')
+            ]
         except Exception as e:
             print(f"Failed to retrieve PNG image names: {e}")
             return []
@@ -259,7 +278,10 @@ class IniControl:
             config = self.get_config()
             if '资源文件夹路径' not in config:
                 return ''
-            paths = [config.get('资源文件夹路径', key) for key in config.options('资源文件夹路径')]
+            paths = [
+                config.get('资源文件夹路径', key)
+                for key in config.options('资源文件夹路径')
+            ]
             for path in paths:
                 for root, _, files in os.walk(path):
                     for file in files:
@@ -270,7 +292,9 @@ class IniControl:
             print(f"匹配资源文件夹路径失败: {e}")
             return ''
 
-    def writes_to_branch_info(self, branch_name: str, shortcut_key: str, repeat_times: int = 1) -> bool:
+    def writes_to_branch_info(
+        self, branch_name: str, shortcut_key: str, repeat_times: int = 1
+    ) -> bool:
         """将分支信息写入到config.ini中
         :param branch_name: 分支名称
         :param shortcut_key: 快捷键
@@ -291,9 +315,13 @@ class IniControl:
                 existing_shortcut = existing_value[0]
                 existing_repeat_times = existing_value[1]
                 if existing_shortcut != shortcut_key:
-                    config.set(section, branch_name, f"('{shortcut_key}',{repeat_times})")
+                    config.set(
+                        section, branch_name, f"('{shortcut_key}',{repeat_times})"
+                    )
                 elif existing_repeat_times != repeat_times:
-                    config.set(section, branch_name, f"('{shortcut_key}',{repeat_times})")
+                    config.set(
+                        section, branch_name, f"('{shortcut_key}',{repeat_times})"
+                    )
                 else:
                     return False
             else:
@@ -315,7 +343,11 @@ class IniControl:
             config = self.get_config()
             section = '分支'
             if config.has_option(section, branch_name):
-                config.set(section, branch_name, f"('{eval(config.get(section, branch_name))[0]}',{repeat_times})")
+                config.set(
+                    section,
+                    branch_name,
+                    f"('{eval(config.get(section, branch_name))[0]}',{repeat_times})",
+                )
                 with open('config.ini', 'w', encoding='utf-8') as configfile:
                     config.write(configfile)
         except Exception as e:
@@ -335,43 +367,39 @@ class IniControl:
             print(f"获取分支重复次数失败: {e}")
             return 1
 
-    def del_branch_info(self, branch_name: str) -> bool:
+    def add_branch_info(self, branch_name: str) -> None:
+        """添加分支信息"""
+        config = self.get_config()
+        section = '分支'
+        # 如果“分支”部分不存在，则添加该部分
+        if not config.has_section(section):
+            config.add_section(section)
+        # 检查分支名称是否已经存在
+        if config.has_option(section, branch_name):
+            raise Exception("分支名称已经存在！")
+        # 将分支名称和快捷键写入到“分支”部分
+        config.set(section, branch_name, "('',1)")
+        # 将更新后的配置写回文件
+        with open('config.ini', 'w', encoding='utf-8') as configfile:
+            config.write(configfile)
+
+    def del_branch_info(self, branch_name: str) -> None:
         """删除分支信息
         :param branch_name: 分支名称
-        :return: 如果分支名称不存在则返回False，删除成功返回True
         """
-
-        def del_branch_in_database():
-            """删除数据库中的分支"""
-            with sqlite3.connect(self.db_path) as con:
-                cursor = con.cursor()
-                cursor.execute(
-                    "delete from 命令 where 隶属分支=?", (branch_name,)
-                )  # 从命令表中删除分支指令
-                con.commit()
-
-        try:
-            config = self.get_config()
-            section = '分支'
-            # 如果“分支”部分不存在，则返回False
-            if not config.has_section(section):
-                return False
-            # 检查分支名称是否存在，不存在则返回False
-            if not config.has_option(section, branch_name):
-                return False
-            # 如果为主流程则不允许删除
-            if branch_name == "主流程":
-                return False
-            # 删除指定分支名称
-            config.remove_option(section, branch_name)
-            del_branch_in_database()  # 删除数据库中的分支
-            # 将更新后的配置写回文件
-            with open('config.ini', 'w', encoding='utf-8') as configfile:
-                config.write(configfile)
-            return True
-        except Exception as e:
-            print(f"删除分支信息失败: {e}")
-            return False
+        config = self.get_config()
+        section = '分支'
+        # 如果“分支”部分不存在
+        if not config.has_section(section):
+            raise Exception("分支信息不存在！")
+        # 检查分支名称是否存在
+        if not config.has_option(section, branch_name):
+            raise Exception("分支名称不存在！")
+        # 删除指定分支名称
+        config.remove_option(section, branch_name)
+        # 将更新后的配置写回文件
+        with open('config.ini', 'w', encoding='utf-8') as configfile:
+            config.write(configfile)
 
     def get_branch_info(self, keys_only: bool = False) -> list:
         """获取分支信息
@@ -406,11 +434,20 @@ class IniControl:
         if '分支' not in config:
             return False
         branches = list(config['分支'].items())
-        index = next((i for i, (name, _) in enumerate(branches) if name == branch_name), None)
-        if index is None or branch_name == '主流程':
+        index = next(
+            (i for i, (name, _) in enumerate(branches) if name == branch_name), None
+        )
+        if index is None:
             return False
-        new_index = index - 1 if direction == 'up' and index > 1 else index + 1 if direction == 'down' and index < len(
-            branches) - 1 else index
+        new_index = (
+            index - 1
+            if direction == 'up' and index > 0
+            else (
+                index + 1
+                if direction == 'down' and index < len(branches) - 1
+                else index
+            )
+        )
         if new_index != index:
             branches.insert(new_index, branches.pop(index))
             config['分支'] = {name: value for name, value in branches}

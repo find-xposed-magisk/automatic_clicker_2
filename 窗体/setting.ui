@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>354</width>
-    <height>487</height>
+    <height>491</height>
    </rect>
   </property>
   <property name="font">
@@ -583,80 +583,6 @@
           </size>
          </property>
         </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_4">
-      <attribute name="title">
-       <string>分支管理</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout_7">
-       <item row="0" column="0" colspan="2">
-        <widget class="QTableWidget" name="tableWidget">
-         <property name="editTriggers">
-          <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
-         </property>
-         <attribute name="horizontalHeaderCascadingSectionResizes">
-          <bool>false</bool>
-         </attribute>
-         <attribute name="horizontalHeaderMinimumSectionSize">
-          <number>1</number>
-         </attribute>
-         <attribute name="horizontalHeaderStretchLastSection">
-          <bool>true</bool>
-         </attribute>
-         <column>
-          <property name="text">
-           <string>分支名称</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>快捷键</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>重复次数</string>
-          </property>
-         </column>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QPushButton" name="pushButton_5">
-         <property name="text">
-          <string>上移</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QPushButton" name="pushButton_7">
-         <property name="text">
-          <string>添加分支</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../images.qrc">
-           <normaloff>:/按钮图标/窗体/res/add.png</normaloff>:/按钮图标/窗体/res/add.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QPushButton" name="pushButton_6">
-         <property name="text">
-          <string>下移</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QPushButton" name="pushButton_8">
-         <property name="text">
-          <string>删除选中</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../images.qrc">
-           <normaloff>:/按钮图标/窗体/res/删除.png</normaloff>:/按钮图标/窗体/res/删除.png</iconset>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>
