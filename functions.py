@@ -1,11 +1,11 @@
 import datetime
 import os
 import re
+import sys
 import typing
 
 import win32con
 import win32gui
-from PySide6.QtWidgets import QMessageBox
 from system_hotkey import SystemHotkey, user32
 
 
@@ -30,6 +30,8 @@ def get_str_now_time():
 
 def get_current_folder() -> str:
     """获取当前文件夹"""
+    if getattr(sys, "frozen", False):
+        return getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
     return os.path.dirname(os.path.abspath(__file__))
 
 
@@ -78,25 +80,3 @@ def show_window(title):
                 break
     except Exception as e:
         print(f"显示窗口出现错误: {e}")
-
-
-def critical_window(QWidget, title, message):
-    """弹出错误窗口"""
-    QMessageBox.critical(
-        QWidget,
-        title,
-        message,
-        QMessageBox.StandardButton.Ok,
-        QMessageBox.StandardButton.NoButton,
-    )
-
-
-def warning_window(QWidget, title, message):
-    """弹出警告窗口"""
-    QMessageBox.warning(
-        QWidget,
-        title,
-        message,
-        QMessageBox.StandardButton.Ok,
-        QMessageBox.StandardButton.NoButton,
-    )

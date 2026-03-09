@@ -13,6 +13,69 @@ class DatabaseOperation:
         self.db_path = os.path.join(get_current_folder(), "命令集.db")
         self.ini = IniControl()
 
+    def get_setting_value(self, setting_type: str):
+        """从设置表获取指定设置值。"""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT 值 FROM 设置 WHERE 设置类型 = ?",
+                (setting_type,),
+            )
+            result = cursor.fetchone()
+        return result[0] if result else None
+
+    def get_setting_values(self, setting_types: list[str]) -> dict:
+        """批量从设置表获取设置值。"""
+        if not setting_types:
+            return {}
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT 设置类型, 值 FROM 设置 WHERE 设置类型 IN ({})".format(
+                    ",".join("?" * len(setting_types))
+                ),
+                setting_types,
+            )
+            result = dict(cursor.fetchall())
+        return {setting_type: result.get(setting_type) for setting_type in setting_types}
+
+    def set_setting_value(self, setting_type: str, value: str) -> None:
+        """向设置表写入单个设置值。"""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT OR REPLACE INTO 设置(设置类型, 值) VALUES (?, ?)",
+                (setting_type, value),
+            )
+            conn.commit()
+
+    def set_setting_values(self, settings: dict[str, str]) -> None:
+        """批量向设置表写入设置值。"""
+        if not settings:
+            return
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.executemany(
+                "INSERT OR REPLACE INTO 设置(设置类型, 值) VALUES (?, ?)",
+                list(settings.items()),
+            )
+            conn.commit()
+
+    def ensure_setting_values(self, settings: dict[str, str]) -> dict:
+        """确保设置表中存在指定键，不存在时写入默认值。"""
+        if not settings:
+            return {}
+        current_values = self.get_setting_values(list(settings.keys()))
+        missing_settings = {
+            key: value
+            for key, value in settings.items()
+            if current_values.get(key) is None
+        }
+        if missing_settings:
+            self.set_setting_values(missing_settings)
+            current_values.update(missing_settings)
+        return current_values
+
     def extract_excel_from_global_parameter(self) -> list:
         """从所有资源文件夹路径中提取所有的Excel文件
         :return: Excel文件列表"""
@@ -24,11 +87,9 @@ class DatabaseOperation:
                 for root, dirs, files in os.walk(folder_path):
                     for file in files:
                         if (
-                            file.endswith(".xlsx") or file.endswith(".xls")
+                                file.endswith(".xlsx") or file.endswith(".xls")
                         ) and not file.startswith("~$"):
-                            excel_files.append(
-                                os.path.normpath(os.path.join(root, file))
-                            )
+                            excel_files.append(os.path.normpath(os.path.join(root, file)))
         return excel_files
 
     def get_branch_count(self, branch_name: str) -> int:
@@ -44,7 +105,7 @@ class DatabaseOperation:
     def clear_all_ins(self, judge: bool = False, branch_name: str = None):
         """清空数据库中所有指令
         :param judge: 是否清除分支表名
-        :param branch_name: 目标分支表名，如果不传入，则清空所有指令"""
+        :param branch_name: 分支表名，如果不传入，则清空所有分支表名的数据"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             if branch_name:
@@ -53,8 +114,7 @@ class DatabaseOperation:
                 cursor.execute("delete from 命令 where ID<>-1")
             if judge:
                 cursor.execute(
-                    "delete from 全局参数 "
-                    "where (分支表名 != ?  and 分支表名 is not null)",
+                    "delete from 全局参数 " "where (分支表名 != ?  and 分支表名 is not null)",
                     (MAIN_FLOW,),
                 )
             conn.commit()
@@ -90,9 +150,7 @@ class DatabaseOperation:
             all_list_instructions = []
             if len(branch_table_name_list) != 0:
                 for branch_table_name in branch_table_name_list:
-                    all_list_instructions.append(
-                        get_branch_table_ins(branch_table_name)
-                    )
+                    all_list_instructions.append(get_branch_table_ins(branch_table_name))
                 return all_list_instructions
 
     def extracted_ins_target_id_from_database(self, id_: int) -> list:
@@ -198,9 +256,7 @@ class DatabaseOperation:
                 cursor.execute("SELECT * FROM 变量池")
                 existing_values = cursor.fetchall()
                 # 将现有值存储为字典，便于比较
-                existing_values_dict = {
-                    row[0]: (row[1], row[2]) for row in existing_values
-                }
+                existing_values_dict = {row[0]: (row[1], row[2]) for row in existing_values}
                 # 遍历传入的变量列表
                 for variable_name, remark, value in variable_list:
                     # 如果变量名称在数据库中已存在且对应的备注值不等于传入值，则更新备注值
@@ -243,9 +299,7 @@ class DatabaseOperation:
                     }  # 获取变量名称和值的字典
                 elif return_type == "list":
                     cursor.execute(f"SELECT 变量名称 FROM 变量池")
-                    result = [
-                        item[0] for item in cursor.fetchall()
-                    ]  # 获取变量名称的列表
+                    result = [item[0] for item in cursor.fetchall()]  # 获取变量名称的列表
                 else:
                     raise ValueError("Invalid return_type. Use 'dict' or 'list'.")
             except Exception as e:
@@ -261,8 +315,7 @@ class DatabaseOperation:
             cursor = conn.cursor()
             try:
                 cursor.execute(
-                    "UPDATE 变量池 SET 值 = ? WHERE 变量名称 = ?",
-                    (new_value, variable_name),
+                    "UPDATE 变量池 SET 值 = ? WHERE 变量名称 = ?", (new_value, variable_name)
                 )
                 conn.commit()
             except Exception as e:

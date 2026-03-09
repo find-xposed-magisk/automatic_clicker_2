@@ -256,9 +256,10 @@ QTabBar::tab
 
 QTabWidget::pane
 {
-	background-color: black;
+	background-color: red;
 	border: 1px solid #666;
 	top: 1px;
+
 }
 
 
@@ -916,6 +917,10 @@ QProgressBar::chunk
 }
 
 /*-----QTableWidget-----*/
+/*QTableWidget {*/
+/*    gridline-color: black; *//* 设置表格线颜色 */
+/*}*/
+
 QTableWidget::item:selected {
     background-color: #FFFF00; /* 选中的单元格为金色 */
     color: black; /* 字体颜色为黑色 */

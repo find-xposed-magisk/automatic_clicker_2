@@ -26,4 +26,5 @@ dependencies = [
     "pyinstaller",
     "python-dateutil",
     "psutil",
+    "ntplib",
 ]
