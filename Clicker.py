@@ -103,6 +103,7 @@ collections.Iterable = collections.abc.Iterable
 
 # pyinstaller -D -w -i clicker.ico Clicker.py --hidden-import=pyttsx4.drivers --uac-admin -y
 # pyinstaller -D -i clicker.ico Clicker.py --hidden-import=pyttsx4.drivers --uac-admin -y
+# cd /mnt/c/Users/23096/PycharmProjects/automatic_clicker_2
 
 class Main_window(QMainWindow, Ui_MainWindow):
     """主窗口"""
