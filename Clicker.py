@@ -27,7 +27,6 @@ from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 from system_hotkey import SystemHotkey
 
-from activation_service import check_activation_or_exit
 from functions import get_str_now_time, is_hotkey_valid, \
     show_window
 from icon import Icon
@@ -1388,6 +1387,5 @@ if __name__ == "__main__":
         splash.finish(main_win)  # 隐藏启动界面
         splash.deleteLater()
         app.processEvents()
-        check_activation_or_exit(main_win)
 
         sys.exit(app.exec())

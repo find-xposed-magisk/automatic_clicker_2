@@ -6,7 +6,6 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ('DNM', '.'),
         ('config.ini', '.'),
         ('命令集.db', '.'),
         ('flat/Combinear.qss', 'flat'),
