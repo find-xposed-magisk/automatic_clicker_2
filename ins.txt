@@ -1,0 +1,1 @@
+cd /mnt/c/Users/23096/PycharmProjects/automatic_clicker_2

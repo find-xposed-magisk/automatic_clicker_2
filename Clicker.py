@@ -29,7 +29,7 @@ from system_hotkey import SystemHotkey
 
 from activation_service import check_activation_or_exit
 from functions import get_str_now_time, is_hotkey_valid, \
-    show_window, get_current_folder
+    show_window
 from icon import Icon
 from main_work import CommandThread
 from 分支执行窗口 import BranchWindow

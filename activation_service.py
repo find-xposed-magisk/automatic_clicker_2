@@ -104,13 +104,13 @@ def is_activation_valid(web_date: datetime.date) -> bool:
     )
 
 
-def prompt_activation_code(parent=None) -> tuple[str, bool]:
+def prompt_activation_code(web_date: datetime.date, parent=None) -> tuple[str, bool]:
     """弹出激活码输入框。"""
     app = QApplication.instance()
     if app is None:
         raise RuntimeError("QApplication未初始化")
     dialog = QInputDialog(parent)
-    dialog.setWindowTitle("激活验证")
+    dialog.setWindowTitle(f"激活验证 - {web_date.strftime('%Y-%m-%d')}")
     dialog.setLabelText("请输入本月激活码：")
     dialog.setInputMode(QInputDialog.InputMode.TextInput)
     dialog.setTextEchoMode(QLineEdit.EchoMode.Normal)
@@ -146,7 +146,7 @@ def check_activation_or_exit(parent=None) -> None:
         print(f"读取激活密匙失败: {exc}")
         show_error_and_exit("激活配置文件丢失。", parent)
     while True:
-        activation_code, ok = prompt_activation_code(parent)
+        activation_code, ok = prompt_activation_code(web_date, parent)
         if not ok:
             show_error_and_exit("未完成激活验证，程序即将退出。", parent)
         if activation_code.strip().upper() == expected_code:
