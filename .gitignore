@@ -28,7 +28,8 @@ images/!/test.png
 !/Clicker.dist/
 
 __pycache__/
-窗体/__pycache__/
+.DS_Store
+Window/__pycache__/
 EXE_TEST/
 
 Clicker-test-file/

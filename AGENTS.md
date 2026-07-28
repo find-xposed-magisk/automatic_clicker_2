@@ -1,27 +1,35 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-`Clicker.py` is the desktop app entry point and wires together the main PySide6 window, hotkeys, settings, and update flow. Core execution logic lives in `main_work.py`, `功能类.py`, `数据库操作.py`, and `ini控制.py`. UI definitions are stored under `窗体/`; generated `*_ui.py` files should stay aligned with their matching `.ui` sources. Static assets live in `flat/`, `窗体/res/`, and `clicker.ico`. Packaging files include `Clicker.spec`, `pyproject.toml`, `requirements.txt`, and `uv.lock`.
+- Entry point: `main.py` (GUI app startup).
+- Core logic: `main_work.py`, `功能类.py`, `functions.py`, `数据库操作.py`.
+- Window controllers: `WindowControl/`; application metadata: `info.py`.
+- UI resources: `Window/` for `.ui` and generated `*_ui.py` files.
+- Assets & themes: `flat/`, `Window/flatwhite/`, `clicker.ico`, `images.qrc`, `images_rc.py`.
+- Data/config: `config.ini`, `命令集.db`.
+- Tests/experiments: `test_1.py`, `test_2.py`, `test_3.py`, `测试单元.py`.
+- Packaging: `Clicker.spec`, `打包指令.md`.
 
 ## Build, Test, and Development Commands
-Use Python 3.12 in a virtual environment.
-
-- `uv sync` installs dependencies from `pyproject.toml` and `uv.lock`.
-- `pip install -r requirements.txt` is the fallback setup path.
-- `python Clicker.py` launches the application locally.
-- `pyinstaller Clicker.spec` builds the packaged executable.
-- `python test_2.py` or `python test_3.py` runs the existing ad hoc verification scripts.
-
-`打包指令.md` also contains maintained Nuitka commands for Windows release builds.
+- Install deps: `pip install -r requirements.txt`.
+- Run locally: `python main.py`.
+- Packaging: follow `打包指令.md` (PyInstaller/Nuitka setup is referenced in `requirements.txt`).
 
 ## Coding Style & Naming Conventions
-Follow the existing code style: 4-space indentation, UTF-8 source files, and concise docstrings for non-obvious behavior. Keep module names consistent with the current mixed Chinese naming scheme, and use `snake_case` for functions, variables, and new helper modules. Use `PascalCase` for Qt window and worker classes such as `Main_window` and `CommandThread`. Prefer explicit imports over new wildcard imports, especially outside legacy files.
+- Python codebase; use 4-space indentation.
+- Filenames mix English and Chinese; keep new module names consistent with existing naming.
+- UI files: keep `.ui` in `Window/` and generated `*_ui.py` alongside them.
+- No formatter/linter is configured; keep changes minimal and consistent with surrounding code.
 
 ## Testing Guidelines
-This repository does not yet have a formal `pytest` suite. Treat `test_*.py` as manual or exploratory checks, not coverage gates. For changes to commands, verify at minimum that `python Clicker.py` starts cleanly, the edited window opens, and the affected automation flow runs against a disposable test case. Add focused script-based repro tests when fixing bugs in parsing, config, or database behavior.
+- No formal test framework detected; tests are script-style.
+- Add quick checks in `test_*.py` or `测试单元.py` and document how to run them.
+- Run a test script directly: `python test_1.py`.
 
 ## Commit & Pull Request Guidelines
-Recent history uses short, task-focused commit subjects, often in Chinese, for example `ini和数据库控制封装为class` and `UI`. Keep commits small and descriptive; one change set per commit. Pull requests should summarize the user-visible behavior change, list touched modules, note any config or database impact, and include screenshots for UI edits. Link the related issue when one exists.
+- Existing commits use short Chinese descriptions or timestamps (e.g., `2025年2月5日23:59:01`).
+- Use concise, descriptive messages in the same style.
+- PRs: check `.gitee/PULL_REQUEST_TEMPLATE.zh-CN.md` and include a clear summary, steps to verify, and screenshots if UI changes.
 
-## Configuration & Safety Tips
-Do not commit machine-specific secrets or local runtime data from `config.ini` and `命令集.db`. Test automation changes on non-critical apps first; this project can control the mouse, keyboard, browser, and windows globally.
+## Configuration Tips
+- Keep `config.ini` and `命令集.db` out of functional diffs unless you are intentionally changing defaults or seed data.

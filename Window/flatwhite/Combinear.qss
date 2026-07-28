@@ -1,7 +1,11 @@
+* {
+    font-family: "微软雅黑";
+/*    font-family: "Arial";*/
+}
 
 /* 标题栏设置 */
 QMainWindow::title {
-    color: #FFFFFF ; /* 黑色 */
+    color: #000000; /* 黑色 */
     background-color: #000000; /* 黑色 */
 }
 
@@ -14,56 +18,19 @@ QWidget
 	selection-color: #000;
 }
 
-/*-----QPushButton-----*/
-QPushButton {
-    background-color: #5a5a5a; /* 设置背景颜色为蓝色 */
-    color: white;
-    border-radius: 10px; /* 设置圆角半径 */
-    font-family: 'Microsoft YaHei'; /* 设置字体为微软雅黑 */
-    /*font-size: 14px;  设置字体大小，可以根据需要调整 */
-    padding: 3px 5px; /* 设置内边距，使按钮看起来更美观 */
-    border: 2px solid transparent; /* 设置边框为透明 */
-}
-
-QPushButton:hover {
-    background-color: #4a4a4a; /* 设置鼠标悬停时的背景颜色为更深的蓝色 */
-    color: #ffff00; /* 设置鼠标悬停时的文字颜色为白色 */
-}
-
-QPushButton:pressed {
-    background-color: rgb(85, 85, 127); /* 设置按钮按下时的背景颜色 */
-}
-
-QPushButton::disabled
-{
-	background-color: #404040;
-	color: #656565;
-	border-color: #051a39;
-	/* 设置按钮边框为1像素宽*/
-	border-width: 1px;
-}
-
-
 
 /*-----QLabel-----*/
 QLabel
 {
 	background-color: transparent;
-	font-family: 'Microsoft YaHei';
 	color: #fff;
 }
-
-QLabel:disabled {
-    color: #888; /* 设置失效状态下的文字颜色 */
-}
-
 
 
 /*-----QMenuBar-----*/
 QMenuBar
 {
 	background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(57, 57, 57, 255),stop:1 rgba(50, 50, 50, 255));
-	font-family: 'Microsoft YaHei';
 	border: 1px solid #000;
 	color: #fff;
 }
@@ -95,7 +62,6 @@ QMenuBar::item:pressed
 QMenu
 {
     background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(57, 57, 57, 255),stop:1 rgba(50, 50, 50, 255));
-    font-family: 'Microsoft YaHei';
     border: 1px solid #222;
     padding: 4px;
 	color: #fff;
@@ -136,7 +102,6 @@ QMenu::item:selected
 /*-----QToolBar-----*/
 QToolBar
 {
-    font-family: 'Microsoft YaHei';
 	background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(69, 69, 69, 255),stop:1 rgba(58, 58, 58, 255));
 	border-top: none;
 	border-bottom: 1px solid #4f4f4f;
@@ -157,7 +122,6 @@ QToolBar::separator
 /*-----QToolButton-----*/
 QToolButton
 {
-    font-family: 'Microsoft YaHei';
 	background-color: transparent;
 	color: #fff;
 	padding: 5px;
@@ -190,58 +154,93 @@ QToolButton:checked
 }
 
 
+/*-----QPushButton-----*/
+QPushButton
+{
+	background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(84, 84, 84, 255),stop:1 rgba(59, 59, 59, 255));
+	color: #ffffff;
+	min-width: 80px;
+	border-style: solid;
+	border-width: 1px;
+	border-radius: 3px;
+	border-radius: 8px;
+	border-color: #00aaff;
+	padding: 5px;
+
+}
+
+
+QPushButton::flat
+{
+	background-color: transparent;
+	border: none;
+	color: #fff;
+
+}
+
+
+QPushButton::disabled
+{
+	background-color: #404040;
+	color: #656565;
+	border-color: #051a39;
+
+}
+
+
+QPushButton::hover
+{
+	background-color: rgba(183, 134, 32, 20%);
+	border: 1px solid #ffff00;
+
+}
+
+
+QPushButton::pressed
+{
+	background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(74, 74, 74, 255),stop:1 rgba(49, 49, 49, 255));
+	border: 1px solid #ffff00;
+
+}
+
+
+QPushButton::checked
+{
+	background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(74, 74, 74, 255),stop:1 rgba(49, 49, 49, 255));
+	border: 1px solid #222;
+
+}
+
+
 /*-----QLineEdit-----*/
 QLineEdit
 {
-    font-family: 'Microsoft YaHei';
 	background-color: #131313;
 	color : #eee;
 	border: 1px solid #343434;
 	border-radius: 2px;
 	padding: 3px;
 	padding-left: 5px;
-}
-/* 激活状态 */
-QLineEdit:enabled {
-    background-color: #131313;
-    color: #eee;
-    border: 1px solid #343434;
-}
 
-/* 非激活状态 */
-QLineEdit:disabled {
-    background-color: #555;
-    color: #aaa;
-    border: 1px solid #888;
 }
 
 
-/*-----QTextEdit-----*/
-QTextEdit {
-    font-family: 'Microsoft YaHei';
-    background-color: #131313;
-    border: 1px solid #343434;
-    border-radius: 2px;
-    padding: 3px;
-    padding-left: 5px;
+/*-----QPlainTExtEdit-----*/
+QPlainTextEdit
+{
+	background-color: #131313;
+	color : #eee;
+	border: 1px solid #343434;
+	border-radius: 2px;
+	padding: 3px;
+	padding-left: 5px;
+
 }
-/* 激活状态 */
-QTextEdit:enabled {
-    background-color: #131313;
-    color: #eee;
-    border: 1px solid #343434;
-}
-/* 非激活状态 */
-QTextEdit:disabled {
-    background-color: #555;
-    color: #aaa;
-    border: 1px solid #888;
-}
+
 
 /*-----QTabBar-----*/
 QTabBar::tab
 {
-    font-family: 'Microsoft YaHei';
 	background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(84, 84, 84, 255),stop:1 rgba(59, 59, 59, 255));
 	color: #ffffff;
 	border-style: solid;
@@ -306,8 +305,7 @@ QTabBar::tab:!selected:hover
 QComboBox {
     background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(84, 84, 84, 255),stop:1 rgba(59, 59, 59, 255));
     border: 1px solid #000; /* 增大边框线宽度 */
-
-    font-family: 'Microsoft YaHei';
+    border-radius: 10px; /* 设置边框为圆角 */
     padding-left: 5px;
     padding-right: 5px; /* 增大左右内边距 */
 	padding-top: 5px;
@@ -366,39 +364,19 @@ QComboBox::down-arrow {
 
 /*-----QSpinBox & QDateTimeEdit-----*/
 QSpinBox,
-QDoubleSpinBox,
 QDateTimeEdit
 {
-    font-family: 'Microsoft YaHei';
     background-color: #131313;
 	color : #eee;
 	border: 1px solid #343434;
 	padding: 3px;
 	padding-left: 5px;
     border-radius : 2px;
-}
 
-/* 激活状态 */
-QSpinBox:enabled,
-QDoubleSpinBox:enabled,
-QDateTimeEdit:enabled {
-    background-color: #131313;
-    color: #eee;
-    border: 1px solid #343434;
-}
-
-/* 非激活状态 */
-QSpinBox:disabled,
-QDoubleSpinBox:disabled,
-QDateTimeEdit:disabled {
-    background-color: #555;
-    color: #aaa;
-    border: 1px solid #888;
 }
 
 
 QSpinBox::up-button,
-QDoubleSpinBox::up-button,
 QDateTimeEdit::up-button
 {
 	border-top-right-radius:2px;
@@ -410,7 +388,6 @@ QDateTimeEdit::up-button
 
 
 QSpinBox::up-button:hover,
-QDoubleSpinBox::up-button:hover,
 QDateTimeEdit::up-button:hover
 {
 	background-color: #585858;
@@ -419,7 +396,6 @@ QDateTimeEdit::up-button:hover
 
 
 QSpinBox::up-button:pressed,
-QDoubleSpinBox::up-button:pressed,
 QDateTimeEdit::up-button:pressed
 {
 	background-color: #252525;
@@ -430,7 +406,6 @@ QDateTimeEdit::up-button:pressed
 
 
 QSpinBox::up-arrow,
-QDoubleSpinBox::up-arrow,
 QDateTimeEdit::up-arrow
 {
     image: url(:/按钮图标/Window/qss_icons/branch_open.png);
@@ -441,7 +416,6 @@ QDateTimeEdit::up-arrow
 
 
 QSpinBox::down-button,
-QDoubleSpinBox::down-button,
 QDateTimeEdit::down-button
 {
 	border-bottom-right-radius:2px;
@@ -453,7 +427,6 @@ QDateTimeEdit::down-button
 
 
 QSpinBox::down-button:hover,
-QDoubleSpinBox::down-button:hover,
 QDateTimeEdit::down-button:hover
 {
 	background-color: #585858;
@@ -462,7 +435,6 @@ QDateTimeEdit::down-button:hover
 
 
 QSpinBox::down-button:pressed,
-QDoubleSpinBox::down-button:pressed,
 QDateTimeEdit::down-button:pressed
 {
 	background-color: #252525;
@@ -473,7 +445,6 @@ QDateTimeEdit::down-button:pressed
 
 
 QSpinBox::down-arrow,
-QDoubleSpinBox::down-arrow,
 QDateTimeEdit::down-arrow
 {
     image: url(:/按钮图标/Window/qss_icons/branch_close.png);
@@ -486,7 +457,6 @@ QDateTimeEdit::down-arrow
 /*-----QGroupBox-----*/
 QGroupBox {
     border: 1px solid;
-    font-family: 'Microsoft YaHei';
     border-color: #FFFF00;
     border-radius: 5px;
     margin-top: 25px;
@@ -498,44 +468,17 @@ QGroupBox {
 QGroupBox::title {
     subcontrol-origin: margin;
     background-color: transparent;
-    font-family: 'Microsoft YaHei';
-    color: #FFC0CB;
+    color: #eee;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
 }
 
-QGroupBox::indicator {
-    background-color: #323232;
-    border: 1px solid pink; /* 修改边框颜色为红色 */
-    width: 12px;
-    height: 12px;
-}
-
-QGroupBox::indicator:checked {
-    image: url("./ressources/check.png");
-    background-color: pink; /* 修改选中状态的背景颜色为红色 */
-    border: 1px solid pink; /* 修改选中状态的边框颜色为红色 */
-}
-
-QGroupBox::indicator:unchecked:hover {
-    border: 1px solid pink; /* 修改鼠标悬停时未选中状态的边框颜色为红色 */
-}
-
-QGroupBox::indicator:disabled {
-    background-color: #656565;
-    color: #656565;
-    border: 1px solid #656565;
-}
-
-QGroupBox::unchecked {
-    border-color: black;
-}
+/* proceed with styling just like QCheckBox */
 
 
 /*-----QHeaderView-----*/
 QHeaderView::section
 {
-    font-family: 'Microsoft YaHei';
     background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(60, 60, 60, 255),stop:1 rgba(50, 50, 50, 255));
 	border: 1px solid #000;
     color: #fff;
@@ -604,11 +547,6 @@ QTreeView::item:selected {
     color: black; /* 字体颜色为黑色 */
 }
 
-QTreeView::item:hover {
-    background-color: #5A5E2F;
-    color: red; /* 字体颜色为黑色 */
-}
-
 QTreeView::branch:has-siblings:!adjoins-item {
     border-image: url(:/按钮图标/Window/qss_icons/vline.png) 0;
 }
@@ -638,7 +576,6 @@ QTreeView::branch:open:has-children:has-siblings  {
 /*-----QListView-----*/
 QListView
 {
-    font-family: 'Microsoft YaHei';
 	background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(83, 83, 83, 255),stop:0.293269 rgba(81, 81, 81, 255),stop:0.634615 rgba(79, 79, 79, 255),stop:1 rgba(83, 83, 83, 255));
     border : none;
     color: white;
@@ -673,7 +610,7 @@ QListView::item:selected
 {
 	background-color: #ffff00;
 	border: 1px solid #ffff00;
-	color: red;
+	color: #fff;
 }
 
 
@@ -681,7 +618,7 @@ QListView::item:selected:!active
 {
 	background-color: #ffff00;
 	border: 1px solid #ffff00;
-	color: red;
+	color: #fff;
 }
 
 
@@ -707,7 +644,6 @@ QListView:!has-children {
 /*-----QCheckBox-----*/
 QCheckBox
 {
-    font-family: 'Microsoft YaHei';
 	background-color: transparent;
     color: lightgray;
 	border: none;
@@ -760,7 +696,6 @@ QCheckBox::indicator:disabled
 /*-----QRadioButton-----*/
 QRadioButton
 {
-    font-family: 'Microsoft YaHei';
 	color: lightgray;
 	background-color: transparent;
 
@@ -977,11 +912,15 @@ QProgressBar
 QProgressBar::chunk
 {
     background-color: #ffff00;
-    width: 5px;
+    width: 30px;
     margin: 0.5px;
 }
 
 /*-----QTableWidget-----*/
+/*QTableWidget {*/
+/*    gridline-color: black; *//* 设置表格线颜色 */
+/*}*/
+
 QTableWidget::item:selected {
     background-color: #FFFF00; /* 选中的单元格为金色 */
     color: black; /* 字体颜色为黑色 */
@@ -989,18 +928,7 @@ QTableWidget::item:selected {
 
 QTableWidget::item:selected:!focus {
     background-color: #5A5E2F; /* 未聚焦的选中区为浅金色 */
-    color: white;
-}
-QTableWidget::item:hover {
-     background-color: #5A5E2F;
-}
-QTableWidget::item:selected:hover {
-    background-color: #FFFF00;
-    color: black;
-}
-QTableWidget::item:selected:hover!focus {
-    background-color: #5A5E2F;
-    color: white;
+    color: white; /* 字体颜色为白色 */
 }
 
 /*-----plainTextEdit*-----*/
@@ -1012,3 +940,5 @@ QPlainTextEdit {
     padding: 3px;
     padding-left: 5px;
 }
+
+

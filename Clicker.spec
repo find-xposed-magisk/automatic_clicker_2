@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['Clicker.py'],
+    ['main.py'],
     pathex=[],
     binaries=[],
     datas=[

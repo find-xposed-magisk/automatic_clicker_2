@@ -31,12 +31,15 @@ from aip import AipOcr
 from dateutil.parser import parse
 
 from functions import get_str_now_time, line_number_increment
+from image_utils import patch_pyautogui_unicode_cv2
 from ini控制 import IniControl
 from 数据库操作 import DatabaseOperation
 from 网页操作 import WebOption
 
 sys.coinit_flags = 2  # STA
 from pywinauto import Application
+
+patch_pyautogui_unicode_cv2()
 
 # from pywinauto.findwindows import ElementNotFoundError
 
