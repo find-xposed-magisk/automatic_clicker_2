@@ -51,7 +51,30 @@ class DataPathTests(unittest.TestCase):
                         "SELECT name FROM sqlite_master WHERE type='table'"
                     )
                 }
+                setting_columns = [
+                    (row[1], row[3], row[5])
+                    for row in connection.execute("PRAGMA table_info('设置')")
+                ]
+                setting_types = dict(
+                    connection.execute("SELECT 设置项, 类型 FROM 设置")
+                )
             self.assertTrue({"设置", "窗口大小", "分支", "资源文件夹"} <= tables)
+            self.assertEqual(
+                setting_columns,
+                [("类型", 1, 0), ("设置项", 1, 1), ("值", 1, 0)],
+            )
+            self.assertEqual(setting_types["测试值"], "基础设置")
+            self.assertEqual(setting_types["apiKey"], "三方接口")
+            self.assertEqual(setting_types["快捷键-开始运行"], "全局快捷键")
+
+            setting_sheet = workbook["设置"]
+            exported_settings = {
+                row[1]: row[3]
+                for row in setting_sheet.iter_rows(min_row=2, values_only=True)
+                if row[0] == "设置"
+            }
+            self.assertEqual(exported_settings["测试值"], "基础设置")
+            self.assertEqual(exported_settings["apiKey"], "三方接口")
 
     def test_legacy_excel_settings_are_not_imported(self):
         workbook = Workbook()
@@ -64,6 +87,40 @@ class DataPathTests(unittest.TestCase):
             self.assertFalse(database.import_settings_from_excel(workbook))
             self.assertIsNone(database.get_setting_value("测试值"))
 
+    def test_excel_settings_without_category_are_classified_on_import(self):
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "设置"
+        sheet.append(["类型", "名称", "值", "附加值", "排序"])
+        sheet.append(["设置", "apiKey", "旧格式接口值", None, None])
+        sheet.append(["设置", "快捷键-开始运行", "ctrl+f10", None, None])
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            database = DatabaseOperation(os.path.join(temporary_directory, "test.db"))
+            self.assertTrue(database.import_settings_from_excel(workbook))
+            with contextlib.closing(sqlite3.connect(database.db_path)) as connection:
+                setting_types = dict(
+                    connection.execute("SELECT 设置项, 类型 FROM 设置")
+                )
+            self.assertEqual(setting_types["apiKey"], "三方接口")
+            self.assertEqual(setting_types["快捷键-开始运行"], "全局快捷键")
+
+    def test_unknown_settings_schema_is_rejected_without_data_loss(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            database_path = os.path.join(temporary_directory, "unknown.db")
+            with contextlib.closing(sqlite3.connect(database_path)) as connection:
+                connection.execute("CREATE TABLE 设置(未知字段 TEXT)")
+                connection.execute("INSERT INTO 设置 VALUES ('保留数据')")
+                connection.commit()
+
+            with self.assertRaisesRegex(RuntimeError, "未知的设置表结构"):
+                DatabaseOperation(database_path)
+
+            with contextlib.closing(sqlite3.connect(database_path)) as connection:
+                self.assertEqual(
+                    connection.execute("SELECT 未知字段 FROM 设置").fetchall(),
+                    [("保留数据",)],
+                )
+
     def test_legacy_database_global_parameters_are_migrated(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             database_path = os.path.join(temporary_directory, "legacy.db")
@@ -74,8 +131,14 @@ class DataPathTests(unittest.TestCase):
                 connection.execute(
                     "CREATE TABLE 设置(设置类型 TEXT PRIMARY KEY, 值 TEXT NOT NULL)"
                 )
-                connection.execute(
-                    "INSERT INTO 设置 VALUES ('Clicker', '(640, 480)')"
+                connection.executemany(
+                    "INSERT INTO 设置 VALUES (?, ?)",
+                    [
+                        ("Clicker", "(640, 480)"),
+                        ("激活状态", "True"),
+                        ("apiKey", "旧接口值"),
+                        ("快捷键-开始运行", "ctrl+f10"),
+                    ],
                 )
                 connection.executemany(
                     "INSERT INTO 全局参数 VALUES (?, ?)",
@@ -95,6 +158,23 @@ class DataPathTests(unittest.TestCase):
                         "SELECT 1 FROM sqlite_master WHERE name='全局参数'"
                     ).fetchone()
                 )
+                setting_rows = {
+                    item: (setting_type, value)
+                    for setting_type, item, value in connection.execute(
+                        "SELECT 类型, 设置项, 值 FROM 设置"
+                    )
+                }
+                setting_columns = [
+                    row[1]
+                    for row in connection.execute("PRAGMA table_info('设置')")
+                ]
+            self.assertEqual(setting_columns, ["类型", "设置项", "值"])
+            self.assertEqual(setting_rows["激活状态"], ("激活信息", "True"))
+            self.assertEqual(setting_rows["apiKey"], ("三方接口", "旧接口值"))
+            self.assertEqual(
+                setting_rows["快捷键-开始运行"],
+                ("全局快捷键", "ctrl+f10"),
+            )
 
 
 if __name__ == "__main__":

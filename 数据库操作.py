@@ -14,6 +14,25 @@ from functions import DATA_FOLDER, DATABASE_PATH, IMAGES_FOLDER
 
 MAIN_FLOW = "主流程"
 
+SETTING_TYPE_BASIC = "基础设置"
+SETTING_TYPE_THIRD_PARTY = "三方接口"
+SETTING_TYPE_SHORTCUT = "全局快捷键"
+SETTING_TYPE_ACTIVATION = "激活信息"
+
+ACTIVATION_SETTING_ITEMS = frozenset({"激活月份", "激活状态", "激活校验日期"})
+THIRD_PARTY_SETTING_ITEMS = frozenset({"appId", "apiKey", "secretKey", "云码Token"})
+
+
+def get_setting_type(setting_item: str) -> str:
+    """根据设置项名称返回统一的中文分类。"""
+    if setting_item in ACTIVATION_SETTING_ITEMS:
+        return SETTING_TYPE_ACTIVATION
+    if setting_item in THIRD_PARTY_SETTING_ITEMS:
+        return SETTING_TYPE_THIRD_PARTY
+    if setting_item.startswith("快捷键-"):
+        return SETTING_TYPE_SHORTCUT
+    return SETTING_TYPE_BASIC
+
 DEFAULT_SETTINGS = {
     "图像匹配精度": "0.8",
     "时间间隔": "0.0",
@@ -65,10 +84,7 @@ class DatabaseOperation:
         """创建配置相关表，并迁移旧版数据库中的全局参数。"""
         with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                "CREATE TABLE IF NOT EXISTS 设置 ("
-                "设置类型 TEXT NOT NULL PRIMARY KEY, 值 TEXT NOT NULL)"
-            )
+            self._migrate_settings_table(cursor)
             cursor.execute(
                 "CREATE TABLE IF NOT EXISTS 窗口大小 ("
                 "窗口 TEXT NOT NULL PRIMARY KEY, 大小 TEXT NOT NULL)"
@@ -107,11 +123,73 @@ class DatabaseOperation:
                 )
             conn.commit()
 
+    @staticmethod
+    def _create_settings_table(cursor, table_name: str = "设置") -> None:
+        cursor.execute(
+            f'CREATE TABLE "{table_name}" ('
+            "类型 TEXT NOT NULL, "
+            "设置项 TEXT NOT NULL PRIMARY KEY, "
+            "值 TEXT NOT NULL)"
+        )
+
+    @classmethod
+    def _migrate_settings_table(cls, cursor) -> None:
+        """将旧设置表无损迁移为“类型、设置项、值”三字段结构。"""
+        table_exists = cursor.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='设置'"
+        ).fetchone()
+        if not table_exists:
+            cls._create_settings_table(cursor)
+            return
+
+        table_info = cursor.execute("PRAGMA table_info('设置')").fetchall()
+        column_names = [column[1] for column in table_info]
+        desired_constraints = [
+            ("类型", 1, 0),
+            ("设置项", 1, 1),
+            ("值", 1, 0),
+        ]
+        current_constraints = [
+            (column[1], column[3], column[5]) for column in table_info
+        ]
+
+        if column_names == ["类型", "设置项", "值"]:
+            rows = cursor.execute(
+                "SELECT 设置项, 值 FROM 设置 ORDER BY rowid"
+            ).fetchall()
+            if current_constraints == desired_constraints:
+                cursor.executemany(
+                    "UPDATE 设置 SET 类型=? WHERE 设置项=?",
+                    [(get_setting_type(item), item) for item, _ in rows],
+                )
+                return
+        elif column_names in (["设置类型", "值"], ["设置项", "值"]):
+            item_column = column_names[0]
+            rows = cursor.execute(
+                f'SELECT "{item_column}", 值 FROM 设置 ORDER BY rowid'
+            ).fetchall()
+        else:
+            raise RuntimeError(
+                f"无法迁移未知的设置表结构：{', '.join(column_names)}"
+            )
+
+        cursor.execute('DROP TABLE IF EXISTS "设置_迁移"')
+        cls._create_settings_table(cursor, "设置_迁移")
+        cursor.executemany(
+            "INSERT INTO 设置_迁移(类型, 设置项, 值) VALUES (?, ?, ?)",
+            [
+                (get_setting_type(str(item)), str(item), str(value))
+                for item, value in rows
+            ],
+        )
+        cursor.execute("DROP TABLE 设置")
+        cursor.execute('ALTER TABLE "设置_迁移" RENAME TO "设置"')
+
     def _migrate_legacy_window_settings(self, cursor) -> None:
         resolution = self.get_screen_resolution()
         for setting_key in LEGACY_WINDOW_SETTING_KEYS:
             row = cursor.execute(
-                "SELECT 值 FROM 设置 WHERE 设置类型=?", (setting_key,)
+                "SELECT 值 FROM 设置 WHERE 设置项=?", (setting_key,)
             ).fetchone()
             if not row:
                 continue
@@ -124,7 +202,7 @@ class DatabaseOperation:
                         str({"size": state["size"], "maximized": state["maximized"]}),
                     ),
                 )
-            cursor.execute("DELETE FROM 设置 WHERE 设置类型=?", (setting_key,))
+            cursor.execute("DELETE FROM 设置 WHERE 设置项=?", (setting_key,))
 
     def _migrate_legacy_global_parameters(self, cursor) -> None:
         row = cursor.execute(
@@ -170,39 +248,41 @@ class DatabaseOperation:
             pass
         return normalized_path
 
-    def get_setting_value(self, setting_type: str):
+    def get_setting_value(self, setting_item: str):
         """从设置表获取指定设置值。"""
         with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT 值 FROM 设置 WHERE 设置类型 = ?",
-                (setting_type,),
+                "SELECT 值 FROM 设置 WHERE 设置项 = ?",
+                (setting_item,),
             )
             result = cursor.fetchone()
         return result[0] if result else None
 
-    def get_setting_values(self, setting_types: list[str]) -> dict:
+    def get_setting_values(self, setting_items: list[str]) -> dict:
         """批量从设置表获取设置值。"""
-        if not setting_types:
+        if not setting_items:
             return {}
         with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT 设置类型, 值 FROM 设置 WHERE 设置类型 IN ({})".format(
-                    ",".join("?" * len(setting_types))
+                "SELECT 设置项, 值 FROM 设置 WHERE 设置项 IN ({})".format(
+                    ",".join("?" * len(setting_items))
                 ),
-                setting_types,
+                setting_items,
             )
             result = dict(cursor.fetchall())
-        return {setting_type: result.get(setting_type) for setting_type in setting_types}
+        return {setting_item: result.get(setting_item) for setting_item in setting_items}
 
-    def set_setting_value(self, setting_type: str, value: str) -> None:
+    def set_setting_value(self, setting_item: str, value: str) -> None:
         """向设置表写入单个设置值。"""
         with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT OR REPLACE INTO 设置(设置类型, 值) VALUES (?, ?)",
-                (setting_type, value),
+                "INSERT INTO 设置(类型, 设置项, 值) VALUES (?, ?, ?) "
+                "ON CONFLICT(设置项) DO UPDATE SET "
+                "类型=excluded.类型, 值=excluded.值",
+                (get_setting_type(setting_item), setting_item, str(value)),
             )
             conn.commit()
 
@@ -213,8 +293,13 @@ class DatabaseOperation:
         with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.executemany(
-                "INSERT OR REPLACE INTO 设置(设置类型, 值) VALUES (?, ?)",
-                list(settings.items()),
+                "INSERT INTO 设置(类型, 设置项, 值) VALUES (?, ?, ?) "
+                "ON CONFLICT(设置项) DO UPDATE SET "
+                "类型=excluded.类型, 值=excluded.值",
+                [
+                    (get_setting_type(item), item, str(value))
+                    for item, value in settings.items()
+                ],
             )
             conn.commit()
 
@@ -233,16 +318,16 @@ class DatabaseOperation:
             current_values.update(missing_settings)
         return current_values
 
-    def get_bool_setting(self, setting_type: str, default: bool = False) -> bool:
-        value = self.get_setting_value(setting_type)
+    def get_bool_setting(self, setting_item: str, default: bool = False) -> bool:
+        value = self.get_setting_value(setting_item)
         if value is None:
             return default
         return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
-    def get_setting_data(self, *setting_types: str):
-        if len(setting_types) == 1:
-            return self.get_setting_value(setting_types[0])
-        return self.get_setting_values(list(setting_types))
+    def get_setting_data(self, *setting_items: str):
+        if len(setting_items) == 1:
+            return self.get_setting_value(setting_items[0])
+        return self.get_setting_values(list(setting_items))
 
     def update_settings(self, **settings) -> None:
         self.set_setting_values({key: str(value) for key, value in settings.items()})
@@ -482,8 +567,10 @@ class DatabaseOperation:
         sheet = workbook.create_sheet("设置")
         sheet.append(["类型", "名称", "值", "附加值", "排序"])
         with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
-            for name, value in conn.execute("SELECT 设置类型, 值 FROM 设置 ORDER BY 设置类型"):
-                sheet.append(["设置", name, value, None, None])
+            for setting_type, name, value in conn.execute(
+                "SELECT 类型, 设置项, 值 FROM 设置 ORDER BY 类型, 设置项"
+            ):
+                sheet.append(["设置", name, value, setting_type, None])
             for name, value in conn.execute("SELECT 窗口, 大小 FROM 窗口大小 ORDER BY 窗口"):
                 sheet.append(["窗口大小", name, value, None, None])
             for name, shortcut, repeats, order_ in conn.execute(
@@ -511,9 +598,10 @@ class DatabaseOperation:
         with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             for name, value, _, _ in grouped["设置"]:
                 conn.execute(
-                    "INSERT INTO 设置(设置类型, 值) VALUES (?, ?) "
-                    "ON CONFLICT(设置类型) DO UPDATE SET 值=excluded.值",
-                    (name, str(value)),
+                    "INSERT INTO 设置(类型, 设置项, 值) VALUES (?, ?, ?) "
+                    "ON CONFLICT(设置项) DO UPDATE SET "
+                    "类型=excluded.类型, 值=excluded.值",
+                    (get_setting_type(name), name, str(value)),
                 )
             if grouped["窗口大小"]:
                 conn.execute("DELETE FROM 窗口大小")
@@ -723,8 +811,7 @@ class DatabaseOperation:
             conn.commit()
 
     def get_value_from_variable_table(self):
-        """从设置表中获取指定设置类型的值
-        :return: 设置类型的值"""
+        """从变量池表中获取全部变量。"""
         with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM 变量池")
@@ -732,7 +819,7 @@ class DatabaseOperation:
         return result
 
     def set_value_to_variable_table(self, variable_list: list):
-        """将指定设置类型的值写入变量池窗口的表格
+        """将指定变量写入变量池窗口的表格
         :param variable_list: 将要写入的变量列表（变量名称、备注、变量值）"""
         # 查询数据库中的现有值
         with contextlib.closing(sqlite3.connect(self.db_path)) as con:
