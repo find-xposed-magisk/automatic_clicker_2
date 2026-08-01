@@ -32,7 +32,6 @@ from aip import AipOcr
 from dateutil.parser import parse
 
 from functions import TEMP_FOLDER, get_str_now_time, line_number_increment, patch_pyautogui_unicode_cv2
-from ini控制 import IniControl
 from 数据库操作 import DatabaseOperation
 from 网页操作 import WebOption
 
@@ -82,10 +81,10 @@ def set_variable_value(variable_name: str, variable_value: str):
     db.set_variable_value(variable_name, variable_value)
 
 
-def get_setting_data_from_ini(section: str, *options: str):
-    """从配置文件中获取设置数据"""
-    ini = IniControl()
-    return ini.get_setting_data_from_ini(section, *options)
+def get_setting_data(*options: str):
+    """从数据库获取设置数据。"""
+    db = DatabaseOperation()
+    return db.get_setting_data(*options)
 
 
 def sub_variable(text: str):
@@ -112,18 +111,18 @@ def get_available_path(image_name_: str, out_mes, is_test=False):
                 return image_path
         return None
 
-    ini = IniControl()
+    db = DatabaseOperation()
     if os.path.isabs(image_name_):
         if os.path.exists(image_name_):
             return image_name_
         else:
             out_mes.out_mes("原资源文件路径不存在，已重新匹配。", is_test)
             image_name_only = os.path.basename(image_name_)
-            res_folder_path = ini.extract_resource_folder_path()
+            res_folder_path = db.extract_resource_folder_path()
             return search_image_in_folders(image_name_only, res_folder_path)
 
     else:
-        res_folder_path = ini.extract_resource_folder_path()
+        res_folder_path = db.extract_resource_folder_path()
         return search_image_in_folders(image_name_, res_folder_path)
 
 
@@ -184,8 +183,7 @@ class ImageClick:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        setting_data_dic = get_setting_data_from_ini(
-            'Config',
+        setting_data_dic = get_setting_data(
             "持续时间", "时间间隔", "暂停时间"
         )
         self.duration = float(setting_data_dic.get("持续时间"))
@@ -378,9 +376,8 @@ class MultipleImagesClick:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.ini = IniControl()
-        setting_data_dic = get_setting_data_from_ini(
-            'Config',
+        self.db = DatabaseOperation()
+        setting_data_dic = get_setting_data(
             "持续时间", "时间间隔", "暂停时间"
         )
         self.duration = float(setting_data_dic.get("持续时间"))
@@ -396,7 +393,7 @@ class MultipleImagesClick:
         """从指令字典中解析出指令参数"""
         re_try = self.ins_dic.get('重复次数')
         img_name_list = str(self.ins_dic.get('图像路径')).split('、')
-        img_path_list = [self.ini.matched_complete_path_from_resource_folders(img_name) for img_name in img_name_list]
+        img_path_list = [self.db.matched_complete_path_from_resource_folders(img_name) for img_name in img_name_list]
         parameter_dic_ = eval(self.ins_dic.get('参数1（键鼠指令）'))
         area_identification = None if eval(parameter_dic_.get("区域")) == (0, 0, 0, 0) \
             else eval(parameter_dic_.get("区域"))
@@ -509,8 +506,7 @@ class CoordinateClick:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        setting_data_dic = get_setting_data_from_ini(
-            'Config',
+        setting_data_dic = get_setting_data(
             "持续时间", "时间间隔", "暂停时间"
         )
         self.duration = float(setting_data_dic.get("持续时间"))
@@ -720,7 +716,7 @@ class RollerSlide:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.time_sleep = float(get_setting_data_from_ini("Config", "暂停时间"))
+        self.time_sleep = float(get_setting_data("暂停时间"))
         self.out_mes = outputmessage  # 用于输出信息
         self.ins_dic = ins_dic  # 指令字典
         self.is_test = False  # 是否测试
@@ -776,8 +772,7 @@ class TextInput:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        setting_data_dic = get_setting_data_from_ini(
-            'Config',
+        setting_data_dic = get_setting_data(
             "时间间隔", "暂停时间")
         self.interval = float(setting_data_dic.get("时间间隔"))
         self.time_sleep = float(setting_data_dic.get("暂停时间"))
@@ -817,8 +812,7 @@ class MoveMouse:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        setting_data_dic = get_setting_data_from_ini(
-            'Config',
+        setting_data_dic = get_setting_data(
             "持续时间", "暂停时间")
         self.duration = float(setting_data_dic.get("持续时间"))
         self.time_sleep = float(setting_data_dic.get("暂停时间"))
@@ -924,8 +918,7 @@ class PressKeyboard:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.time_sleep = float(get_setting_data_from_ini(
-            'Config',
+        self.time_sleep = float(get_setting_data(
             "暂停时间"))
         self.out_mes = outputmessage
         # 指令字典
@@ -970,7 +963,7 @@ class MiddleActivation:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.time_sleep = float(get_setting_data_from_ini('Config', "暂停时间"))
+        self.time_sleep = float(get_setting_data("暂停时间"))
         # 主窗口
         self.out_mes = outputmessage
         # 指令字典
@@ -1019,7 +1012,7 @@ class MouseClick:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.time_sleep = float(get_setting_data_from_ini("Config", "暂停时间"))
+        self.time_sleep = float(get_setting_data("暂停时间"))
         self.out_mes = outputmessage
         # 指令字典
         self.ins_dic = ins_dic
@@ -1073,7 +1066,7 @@ class InformationEntry:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.time_sleep = float(get_setting_data_from_ini("Config", "暂停时间"))
+        self.time_sleep = float(get_setting_data("暂停时间"))
         # 主窗口
         self.out_mes = outputmessage
         # 指令字典
@@ -1305,7 +1298,7 @@ class MouseDrag:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.time_sleep = float(get_setting_data_from_ini("Config", "暂停时间"))
+        self.time_sleep = float(get_setting_data("暂停时间"))
         # 主窗口
         self.out_mes = outputmessage
         # 指令字典
@@ -1520,7 +1513,7 @@ class FullScreenCapture:
     def parsing_ins_dic(self):
         """解析指令字典"""
         parameter_dic_ = eval(self.ins_dic.get("参数1（键鼠指令）"))
-        save_path = IniControl.resolve_resource_path(self.ins_dic.get("图像路径"))
+        save_path = DatabaseOperation.resolve_resource_path(self.ins_dic.get("图像路径"))
         return parameter_dic_, save_path
 
     @staticmethod
@@ -1551,7 +1544,7 @@ class FullScreenCapture:
 
     def start_execute(self):
         parameter_dic_ = eval(self.ins_dic.get("参数1（键鼠指令）"))
-        save_path = IniControl.resolve_resource_path(self.ins_dic.get("图像路径"))
+        save_path = DatabaseOperation.resolve_resource_path(self.ins_dic.get("图像路径"))
         screenshot_type = parameter_dic_.get("截图类型")
         screenshot = self.take_screenshot(screenshot_type, parameter_dic_.get("区域"))
         if parameter_dic_.get("截图后") == "保存到路径":
@@ -1566,7 +1559,7 @@ class SendWeChat:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.time_sleep = float(get_setting_data_from_ini("Config", "暂停时间"))
+        self.time_sleep = float(get_setting_data("暂停时间"))
         self.out_mes = outputmessage
         # 指令字典
         self.ins_dic = ins_dic
@@ -1684,7 +1677,7 @@ class VerificationCode:
         self.cycle_number = cycle_number
         # 云码平台
         self._custom_url = "http://api.jfbym.com/api/YmServer/customApi"
-        self._token = get_setting_data_from_ini("三方接口", "云码Token")
+        self._token = get_setting_data("云码Token")
         self._headers = {"Content-Type": "application/json"}
 
     def parsing_ins_dic(self):
@@ -1768,7 +1761,7 @@ class PlayVoice:
     """播放声音"""
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        self.time_sleep = float(get_setting_data_from_ini("Config", "暂停时间"))
+        self.time_sleep = float(get_setting_data("暂停时间"))
         self.out_mes = outputmessage  # 用于输出信息
         self.ins_dic = ins_dic  # 指令字典
         self.is_test = False  # 是否测试
@@ -2595,7 +2588,7 @@ class TextRecognition:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.ini = IniControl()
+        self.db = DatabaseOperation()
         self.time_sleep: float = 0.5  # 等待时间
         self.out_mes = outputmessage  # 用于输出信息到不同的窗口
         self.ins_dic: dict = ins_dic  # 指令字典
@@ -2648,7 +2641,7 @@ class TextRecognition:
         im_b = im_bytes.getvalue()
         # 返回百度api识别文字信息
         try:
-            client_info = self.ini.get_ocr_info()  # 获取百度api信息
+            client_info = self.db.get_ocr_info()  # 获取百度api信息
             client = AipOcr(
                 client_info["appId"], client_info["apiKey"], client_info["secretKey"]
             )

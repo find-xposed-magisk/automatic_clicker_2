@@ -1,21 +1,178 @@
+import ast
+import contextlib
+import ctypes
 import datetime
 import os
 import sqlite3
+import time
 
-from functions import DATABASE_PATH
-from ini控制 import IniControl
+import win32con
+import win32gui
+import winsound
+
+from functions import DATA_FOLDER, DATABASE_PATH, IMAGES_FOLDER
 
 MAIN_FLOW = "主流程"
 
+DEFAULT_SETTINGS = {
+    "图像匹配精度": "0.8",
+    "时间间隔": "0.0",
+    "持续时间": "0.1",
+    "暂停时间": "0.0",
+    "模式": "极速模式",
+    "启动检查更新": "True",
+    "退出提醒清空指令": "False",
+    "系统提示音": "False",
+    "显示工具栏": "False",
+    "任务完成后显示主窗口": "False",
+    "当前文件路径": "None",
+    "当前分支": MAIN_FLOW,
+    "高DPI自适应": "True",
+    "执行中隐藏主窗口": "False",
+    "appId": "",
+    "apiKey": "",
+    "secretKey": "",
+    "云码Token": "",
+    "快捷键-开始运行": "f10",
+    "快捷键-结束运行": "f11",
+    "快捷键-分支选择": "shift+1",
+    "快捷键-暂停和恢复": "alt+f11",
+}
+
+LEGACY_WINDOW_SETTING_KEYS = (
+    "Clicker",
+    "设置",
+    "导航页",
+    "全局参数",
+    "关于",
+    "分支执行",
+    "执行分支",
+    "选择变量",
+    "指令参数",
+)
+
 
 class DatabaseOperation:
-    def __init__(self):
-        self.db_path = DATABASE_PATH
-        self.ini = IniControl()
+    MIN_WINDOW_WIDTH = 120
+    MIN_WINDOW_HEIGHT = 80
+
+    def __init__(self, db_path: str = DATABASE_PATH):
+        self.db_path = db_path
+        self.create_all_tables()
+        self.ensure_setting_values(DEFAULT_SETTINGS)
+
+    def create_all_tables(self) -> None:
+        """创建配置相关表，并迁移旧版数据库中的全局参数。"""
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "CREATE TABLE IF NOT EXISTS 设置 ("
+                "设置类型 TEXT NOT NULL PRIMARY KEY, 值 TEXT NOT NULL)"
+            )
+            cursor.execute(
+                "CREATE TABLE IF NOT EXISTS 窗口大小 ("
+                "窗口 TEXT NOT NULL PRIMARY KEY, 大小 TEXT NOT NULL)"
+            )
+            cursor.execute(
+                "CREATE TABLE IF NOT EXISTS 分支 ("
+                "名称 TEXT NOT NULL PRIMARY KEY, 快捷键 TEXT NOT NULL DEFAULT '', "
+                "重复次数 INTEGER NOT NULL DEFAULT 1, 排序 INTEGER NOT NULL)"
+            )
+            cursor.execute(
+                "CREATE TABLE IF NOT EXISTS 资源文件夹 ("
+                "路径 TEXT NOT NULL PRIMARY KEY, 排序 INTEGER NOT NULL)"
+            )
+            self._migrate_legacy_window_settings(cursor)
+            self._migrate_legacy_global_parameters(cursor)
+            cursor.execute(
+                "INSERT OR IGNORE INTO 分支(名称, 快捷键, 重复次数, 排序) "
+                "VALUES (?, '', 1, 0)",
+                (MAIN_FLOW,),
+            )
+            cursor.execute(
+                "INSERT OR IGNORE INTO 资源文件夹(路径, 排序) VALUES (?, 0)",
+                (self.portable_resource_path(IMAGES_FOLDER),),
+            )
+            self._normalize_order(conn, "分支", "名称")
+            image_path = self.portable_resource_path(IMAGES_FOLDER)
+            resource_rows = cursor.execute(
+                "SELECT 路径 FROM 资源文件夹 "
+                "ORDER BY CASE WHEN 路径=? THEN 0 ELSE 1 END, 排序, rowid",
+                (image_path,),
+            ).fetchall()
+            for order_, (resource_path,) in enumerate(resource_rows):
+                cursor.execute(
+                    "UPDATE 资源文件夹 SET 排序=? WHERE 路径=?",
+                    (order_, resource_path),
+                )
+            conn.commit()
+
+    def _migrate_legacy_window_settings(self, cursor) -> None:
+        resolution = self.get_screen_resolution()
+        for setting_key in LEGACY_WINDOW_SETTING_KEYS:
+            row = cursor.execute(
+                "SELECT 值 FROM 设置 WHERE 设置类型=?", (setting_key,)
+            ).fetchone()
+            if not row:
+                continue
+            state = self._parse_window_state(row[0])
+            if state is not None:
+                cursor.execute(
+                    "INSERT OR IGNORE INTO 窗口大小(窗口, 大小) VALUES (?, ?)",
+                    (
+                        f"{setting_key}-{resolution}",
+                        str({"size": state["size"], "maximized": state["maximized"]}),
+                    ),
+                )
+            cursor.execute("DELETE FROM 设置 WHERE 设置类型=?", (setting_key,))
+
+    def _migrate_legacy_global_parameters(self, cursor) -> None:
+        row = cursor.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='全局参数'"
+        ).fetchone()
+        if not row:
+            return
+        branch_order = cursor.execute("SELECT COUNT(*) FROM 分支").fetchone()[0]
+        resource_order = cursor.execute("SELECT COUNT(*) FROM 资源文件夹").fetchone()[0]
+        for resource_path, branch_name in cursor.execute(
+            "SELECT 资源文件夹路径, 分支表名 FROM 全局参数 ORDER BY rowid"
+        ).fetchall():
+            if resource_path:
+                cursor.execute(
+                    "INSERT OR IGNORE INTO 资源文件夹(路径, 排序) VALUES (?, ?)",
+                    (self.portable_resource_path(resource_path), resource_order),
+                )
+                resource_order += 1
+            if branch_name:
+                cursor.execute(
+                    "INSERT OR IGNORE INTO 分支(名称, 快捷键, 重复次数, 排序) "
+                    "VALUES (?, '', 1, ?)",
+                    (branch_name, branch_order),
+                )
+                branch_order += 1
+        cursor.execute("DROP TABLE 全局参数")
+
+    @staticmethod
+    def resolve_resource_path(path: str) -> str:
+        if not path:
+            return path
+        return os.path.normpath(
+            path if os.path.isabs(path) else os.path.join(DATA_FOLDER, path)
+        )
+
+    @staticmethod
+    def portable_resource_path(path: str) -> str:
+        normalized_path = os.path.normpath(path)
+        try:
+            if os.path.commonpath((DATA_FOLDER, normalized_path)) == os.path.normpath(DATA_FOLDER):
+                return os.path.relpath(normalized_path, DATA_FOLDER)
+        except ValueError:
+            pass
+        return normalized_path
 
     def get_setting_value(self, setting_type: str):
         """从设置表获取指定设置值。"""
-        with sqlite3.connect(self.db_path) as conn:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT 值 FROM 设置 WHERE 设置类型 = ?",
@@ -28,7 +185,7 @@ class DatabaseOperation:
         """批量从设置表获取设置值。"""
         if not setting_types:
             return {}
-        with sqlite3.connect(self.db_path) as conn:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT 设置类型, 值 FROM 设置 WHERE 设置类型 IN ({})".format(
@@ -41,7 +198,7 @@ class DatabaseOperation:
 
     def set_setting_value(self, setting_type: str, value: str) -> None:
         """向设置表写入单个设置值。"""
-        with sqlite3.connect(self.db_path) as conn:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT OR REPLACE INTO 设置(设置类型, 值) VALUES (?, ?)",
@@ -53,7 +210,7 @@ class DatabaseOperation:
         """批量向设置表写入设置值。"""
         if not settings:
             return
-        with sqlite3.connect(self.db_path) as conn:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.executemany(
                 "INSERT OR REPLACE INTO 设置(设置类型, 值) VALUES (?, ?)",
@@ -76,11 +233,349 @@ class DatabaseOperation:
             current_values.update(missing_settings)
         return current_values
 
-    def extract_excel_from_global_parameter(self) -> list:
-        """从所有资源文件夹路径中提取所有的Excel文件
+    def get_bool_setting(self, setting_type: str, default: bool = False) -> bool:
+        value = self.get_setting_value(setting_type)
+        if value is None:
+            return default
+        return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+    def get_setting_data(self, *setting_types: str):
+        if len(setting_types) == 1:
+            return self.get_setting_value(setting_types[0])
+        return self.get_setting_values(list(setting_types))
+
+    def update_settings(self, **settings) -> None:
+        self.set_setting_values({key: str(value) for key, value in settings.items()})
+
+    def get_ocr_info(self) -> dict:
+        return self.get_setting_values(["appId", "apiKey", "secretKey", "云码Token"])
+
+    def get_global_shortcut(self) -> dict:
+        actions = ("开始运行", "结束运行", "分支选择", "暂停和恢复")
+        values = self.get_setting_values([f"快捷键-{action}" for action in actions])
+        return {
+            action: str(values.get(f"快捷键-{action}") or "").lower().split("+")
+            for action in actions
+        }
+
+    def set_global_shortcut(self, **shortcuts) -> None:
+        values = {}
+        for action, shortcut in shortcuts.items():
+            normalized = ["ctrl" if str(key).lower() == "control" else str(key) for key in shortcut]
+            values[f"快捷键-{action}"] = "+".join(normalized).lower()
+        self.set_setting_values(values)
+
+    @staticmethod
+    def get_screen_resolution() -> str:
+        user32 = ctypes.windll.user32
+        return f"{user32.GetSystemMetrics(0)}*{user32.GetSystemMetrics(1)}"
+
+    @classmethod
+    def _parse_size_value(cls, value):
+        if not isinstance(value, (tuple, list)) or len(value) != 2:
+            return None
+        try:
+            width, height = int(value[0]), int(value[1])
+        except (TypeError, ValueError):
+            return None
+        if width < cls.MIN_WINDOW_WIDTH or height < cls.MIN_WINDOW_HEIGHT:
+            return None
+        return width, height
+
+    @classmethod
+    def _parse_window_state(cls, value):
+        try:
+            parsed = ast.literal_eval(str(value))
+        except (SyntaxError, ValueError, TypeError):
+            return None
+        if isinstance(parsed, dict):
+            size = cls._parse_size_value(parsed.get("size"))
+            return None if size is None else {
+                "size": size,
+                "maximized": bool(parsed.get("maximized", False)),
+            }
+        size = cls._parse_size_value(parsed)
+        return None if size is None else {"size": size, "maximized": False}
+
+    def get_window_state(self, window_name: str):
+        if not window_name:
+            return None
+        window_info = f"{window_name}-{self.get_screen_resolution()}"
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            row = conn.execute(
+                "SELECT 大小 FROM 窗口大小 WHERE 窗口 = ?", (window_info,)
+            ).fetchone()
+        return self._parse_window_state(row[0]) if row else None
+
+    def save_window_size(
+        self,
+        win_width: int,
+        win_height: int,
+        window_name: str,
+        maximized: bool = False,
+    ) -> None:
+        if not window_name:
+            return
+        save_size = self._parse_size_value((win_width, win_height))
+        if save_size is None:
+            existing = self.get_window_state(window_name)
+            if existing is None:
+                return
+            save_size = existing["size"]
+        payload = str({"size": save_size, "maximized": bool(maximized)})
+        window_info = f"{window_name}-{self.get_screen_resolution()}"
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            conn.execute(
+                "INSERT INTO 窗口大小(窗口, 大小) VALUES (?, ?) "
+                "ON CONFLICT(窗口) DO UPDATE SET 大小=excluded.大小",
+                (window_info, payload),
+            )
+            conn.commit()
+
+    def writes_to_resource_folder_path(self, path: str) -> bool:
+        path = self.portable_resource_path(path)
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            if conn.execute("SELECT 1 FROM 资源文件夹 WHERE 路径=?", (path,)).fetchone():
+                return False
+            order_ = conn.execute("SELECT COALESCE(MAX(排序), -1) + 1 FROM 资源文件夹").fetchone()[0]
+            conn.execute("INSERT INTO 资源文件夹(路径, 排序) VALUES (?, ?)", (path, order_))
+            conn.commit()
+        return True
+
+    def del_resource_folder_path(self, path: str) -> bool:
+        path = self.portable_resource_path(path)
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            cursor = conn.execute("DELETE FROM 资源文件夹 WHERE 路径=?", (path,))
+            self._normalize_order(conn, "资源文件夹", "路径")
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def move_resource_folder_up_and_down(self, path: str, direction: str) -> bool:
+        path = self.portable_resource_path(path)
+        return self._move_ordered_row("资源文件夹", "路径", path, direction, fixed_first=False)
+
+    def extract_resource_folder_path(self) -> list:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            rows = conn.execute("SELECT 路径 FROM 资源文件夹 ORDER BY 排序, rowid").fetchall()
+        paths = [self.resolve_resource_path(row[0]) for row in rows]
+        if IMAGES_FOLDER not in paths:
+            paths.insert(0, IMAGES_FOLDER)
+        return paths
+
+    def get_all_png_images_from_resource_folders(self) -> list:
+        return [
+            file
+            for path in self.extract_resource_folder_path()
+            for _, _, files in os.walk(path)
+            for file in files
+            if file.lower().endswith(".png")
+        ]
+
+    def matched_complete_path_from_resource_folders(self, file_name: str) -> str:
+        for path in self.extract_resource_folder_path():
+            for root, _, files in os.walk(path):
+                if file_name in files:
+                    return os.path.normpath(os.path.join(root, file_name))
+        return ""
+
+    def writes_to_branch_info(self, branch_name: str, shortcut_key: str, repeat_times: int = 1) -> bool:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            row = conn.execute(
+                "SELECT 快捷键, 重复次数 FROM 分支 WHERE 名称=?", (branch_name,)
+            ).fetchone()
+            if row and branch_name != MAIN_FLOW and row == (shortcut_key, repeat_times):
+                return False
+            if row:
+                conn.execute(
+                    "UPDATE 分支 SET 快捷键=?, 重复次数=? WHERE 名称=?",
+                    (shortcut_key, repeat_times, branch_name),
+                )
+            else:
+                order_ = conn.execute("SELECT COALESCE(MAX(排序), -1) + 1 FROM 分支").fetchone()[0]
+                conn.execute(
+                    "INSERT INTO 分支(名称, 快捷键, 重复次数, 排序) VALUES (?, ?, ?, ?)",
+                    (branch_name, shortcut_key, repeat_times, order_),
+                )
+            conn.commit()
+        return True
+
+    def set_branch_repeat_times(self, branch_name: str, repeat_times: int) -> None:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            conn.execute("UPDATE 分支 SET 重复次数=? WHERE 名称=?", (repeat_times, branch_name))
+            conn.commit()
+
+    def get_branch_repeat_times(self, branch_name: str) -> int:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            row = conn.execute("SELECT 重复次数 FROM 分支 WHERE 名称=?", (branch_name,)).fetchone()
+        return int(row[0]) if row else 1
+
+    def del_branch_info(self, branch_name: str) -> bool:
+        if branch_name == MAIN_FLOW:
+            return False
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            cursor = conn.execute("DELETE FROM 分支 WHERE 名称=?", (branch_name,))
+            if cursor.rowcount:
+                conn.execute("DELETE FROM 命令 WHERE 隶属分支=?", (branch_name,))
+                self._normalize_order(conn, "分支", "名称")
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def get_branch_info(self, keys_only: bool = False) -> list:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            rows = conn.execute(
+                "SELECT 名称, 快捷键, 重复次数 FROM 分支 "
+                "ORDER BY CASE WHEN 名称 = ? THEN 0 ELSE 1 END, 排序, rowid",
+                (MAIN_FLOW,),
+            ).fetchall()
+        return [row[0] for row in rows] if keys_only else rows
+
+    def move_branch_info(self, branch_name: str, direction: str) -> bool:
+        return self._move_ordered_row("分支", "名称", branch_name, direction, fixed_first=True)
+
+    @staticmethod
+    def _normalize_order(conn, table: str, key_column: str) -> None:
+        order_clause = (
+            f'CASE WHEN "{key_column}" = \'{MAIN_FLOW}\' THEN 0 ELSE 1 END, 排序, rowid'
+            if table == "分支"
+            else "排序, rowid"
+        )
+        rows = conn.execute(
+            f'SELECT "{key_column}" FROM "{table}" ORDER BY {order_clause}'
+        ).fetchall()
+        for order_, (key,) in enumerate(rows):
+            conn.execute(
+                f'UPDATE "{table}" SET 排序=? WHERE "{key_column}"=?', (order_, key)
+            )
+
+    def _move_ordered_row(
+        self, table: str, key_column: str, key: str, direction: str, *, fixed_first: bool
+    ) -> bool:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            order_clause = (
+                f'CASE WHEN "{key_column}" = \'{MAIN_FLOW}\' THEN 0 ELSE 1 END, 排序, rowid'
+                if table == "分支"
+                else "排序, rowid"
+            )
+            rows = conn.execute(
+                f'SELECT "{key_column}" FROM "{table}" ORDER BY {order_clause}'
+            ).fetchall()
+            keys = [row[0] for row in rows]
+            if key not in keys or (fixed_first and key == MAIN_FLOW):
+                return False
+            index = keys.index(key)
+            lower_bound = 1 if fixed_first else 0
+            target = index - 1 if direction == "up" else index + 1
+            if target < lower_bound or target >= len(keys):
+                return False
+            keys[index], keys[target] = keys[target], keys[index]
+            for order_, item in enumerate(keys):
+                conn.execute(
+                    f'UPDATE "{table}" SET 排序=? WHERE "{key_column}"=?',
+                    (order_, item),
+                )
+            conn.commit()
+        return True
+
+    def export_settings_to_excel(self, workbook) -> None:
+        if "设置" in workbook.sheetnames:
+            del workbook["设置"]
+        sheet = workbook.create_sheet("设置")
+        sheet.append(["类型", "名称", "值", "附加值", "排序"])
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            for name, value in conn.execute("SELECT 设置类型, 值 FROM 设置 ORDER BY 设置类型"):
+                sheet.append(["设置", name, value, None, None])
+            for name, value in conn.execute("SELECT 窗口, 大小 FROM 窗口大小 ORDER BY 窗口"):
+                sheet.append(["窗口大小", name, value, None, None])
+            for name, shortcut, repeats, order_ in conn.execute(
+                "SELECT 名称, 快捷键, 重复次数, 排序 FROM 分支 "
+                "ORDER BY CASE WHEN 名称 = ? THEN 0 ELSE 1 END, 排序",
+                (MAIN_FLOW,),
+            ):
+                sheet.append(["分支", name, shortcut, repeats, order_])
+            for path, order_ in conn.execute("SELECT 路径, 排序 FROM 资源文件夹 ORDER BY 排序"):
+                sheet.append(["资源文件夹", path, None, None, order_])
+
+    def import_settings_from_excel(self, workbook) -> bool:
+        if "设置" not in workbook.sheetnames:
+            return False
+        sheet = workbook["设置"]
+        headers = [sheet.cell(1, column).value for column in range(1, 6)]
+        if headers != ["类型", "名称", "值", "附加值", "排序"]:
+            return False
+        grouped = {"设置": [], "窗口大小": [], "分支": [], "资源文件夹": []}
+        for row in sheet.iter_rows(min_row=2, max_col=5, values_only=True):
+            category, name, value, extra, order_ = row
+            if category not in grouped or not name:
+                continue
+            grouped[category].append((str(name), value, extra, order_))
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            for name, value, _, _ in grouped["设置"]:
+                conn.execute(
+                    "INSERT INTO 设置(设置类型, 值) VALUES (?, ?) "
+                    "ON CONFLICT(设置类型) DO UPDATE SET 值=excluded.值",
+                    (name, str(value)),
+                )
+            if grouped["窗口大小"]:
+                conn.execute("DELETE FROM 窗口大小")
+                for name, value, _, _ in grouped["窗口大小"]:
+                    if self._parse_window_state(value) is not None:
+                        conn.execute("INSERT INTO 窗口大小(窗口, 大小) VALUES (?, ?)", (name, str(value)))
+            if grouped["分支"]:
+                conn.execute("DELETE FROM 分支")
+                for index, (name, shortcut, repeats, order_) in enumerate(grouped["分支"]):
+                    conn.execute(
+                        "INSERT INTO 分支(名称, 快捷键, 重复次数, 排序) VALUES (?, ?, ?, ?)",
+                        (name, str(shortcut or ""), int(repeats or 1), int(order_ if order_ is not None else index)),
+                    )
+                conn.execute(
+                    "INSERT OR IGNORE INTO 分支(名称, 快捷键, 重复次数, 排序) VALUES (?, '', 1, 0)",
+                    (MAIN_FLOW,),
+                )
+                self._normalize_order(conn, "分支", "名称")
+            if grouped["资源文件夹"]:
+                conn.execute("DELETE FROM 资源文件夹")
+                for index, (path, _, _, order_) in enumerate(grouped["资源文件夹"]):
+                    conn.execute(
+                        "INSERT INTO 资源文件夹(路径, 排序) VALUES (?, ?)",
+                        (self.portable_resource_path(path), int(order_ if order_ is not None else index)),
+                    )
+                self._normalize_order(conn, "资源文件夹", "路径")
+            conn.commit()
+        self.ensure_setting_values(DEFAULT_SETTINGS)
+        return True
+
+    def set_current_branch(self, branch_name: str) -> None:
+        self.set_setting_value("当前分支", branch_name)
+
+    def get_current_branch(self) -> str:
+        return self.get_setting_value("当前分支") or MAIN_FLOW
+
+    def system_prompt_tone(self, judge: str) -> None:
+        if not self.get_bool_setting("系统提示音"):
+            return
+        if judge == "线程结束":
+            for _ in range(3):
+                winsound.Beep(500, 300)
+        elif judge == "全局快捷键":
+            winsound.Beep(500, 300)
+        elif judge == "执行异常":
+            winsound.Beep(1000, 1000)
+
+    def show_normal_window_with_specified_title(self, title: str) -> None:
+        if not self.get_bool_setting("任务完成后显示主窗口"):
+            return
+        titles = {}
+        win32gui.EnumWindows(lambda hwnd, result: result.update({hwnd: win32gui.GetWindowText(hwnd)}), titles)
+        for hwnd, window_title in titles.items():
+            if window_title == title:
+                time.sleep(0.5)
+                win32gui.ShowWindow(hwnd, win32con.SW_SHOWNORMAL)
+                break
+
+    def extract_excel_from_resource_folders(self) -> list:
+        """从所有资源文件夹路径中提取全部 Excel 文件
         :return: Excel文件列表"""
-        # 从全局参数表中提取所有的资源文件夹路径
-        resource_folder_path_list = self.ini.extract_resource_folder_path()
+        resource_folder_path_list = self.extract_resource_folder_path()
         excel_files = []
         for folder_path in resource_folder_path_list:
             if os.path.exists(folder_path) and os.path.isdir(folder_path):
@@ -96,7 +591,7 @@ class DatabaseOperation:
         """获取分支表的数量
         :param branch_name: 分支表名
         :return: 目标分支表名中的指令数量"""
-        with sqlite3.connect(self.db_path) as conn:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT count(*) FROM 命令 where 隶属分支=?", (branch_name,))
             count_record = cursor.fetchone()[0]
@@ -106,24 +601,14 @@ class DatabaseOperation:
         """清空数据库中所有指令
         :param judge: 是否清除分支表名
         :param branch_name: 分支表名，如果不传入，则清空所有分支表名的数据"""
-        with sqlite3.connect(self.db_path) as conn:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             if branch_name:
                 cursor.execute("delete from 命令 where 隶属分支=?", (branch_name,))
             else:
                 cursor.execute("delete from 命令 where ID<>-1")
             if judge:
-                cursor.execute(
-                    "delete from 全局参数 " "where (分支表名 != ?  and 分支表名 is not null)",
-                    (MAIN_FLOW,),
-                )
-            conn.commit()
-
-    def del_branch_in_database(self, branch_name):
-        """删除数据库中的分支"""
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("delete from 命令 where 隶属分支=?", (branch_name,))
+                cursor.execute("DELETE FROM 分支 WHERE 名称 != ?", (MAIN_FLOW,))
             conn.commit()
 
     def extracted_ins_from_database(self, branch_name=None) -> list or None:
@@ -135,7 +620,7 @@ class DatabaseOperation:
             """获取某分支表名中的所有指令
             :param branch_name_ 目标分支表名
             :return 目标分支表名中的指令内容"""
-            with sqlite3.connect(self.db_path) as conn:
+            with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
                 cursor = conn.cursor()
                 cursor.execute("SELECT * FROM 命令 where 隶属分支=?", (branch_name_,))
                 count_record = cursor.fetchall()
@@ -146,7 +631,7 @@ class DatabaseOperation:
             return get_branch_table_ins(branch_name)  # 返回分支指令列表
         else:
             # 提取所有分支表中的指令
-            branch_table_name_list = self.ini.get_branch_info(keys_only=True)
+            branch_table_name_list = self.get_branch_info(keys_only=True)
             all_list_instructions = []
             if len(branch_table_name_list) != 0:
                 for branch_table_name in branch_table_name_list:
@@ -156,7 +641,7 @@ class DatabaseOperation:
     def extracted_ins_target_id_from_database(self, id_: int) -> list:
         """获取目标id的指令，并返回一个和extracted_ins_from_database相似的列表
         :param id_: 目标id"""
-        with sqlite3.connect(self.db_path) as conn:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM 命令 where ID=?", (id_,))
             count_record = cursor.fetchall()
@@ -209,7 +694,7 @@ class DatabaseOperation:
         # 将时间转化为13位时间戳
         time_stamp = int(datetime.datetime.now().timestamp() * 1000)
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
                 cursor = conn.cursor()
                 write_to_new_file(cursor, file_path, time_stamp)
                 delete_the_oldest_file(cursor, conn)  # 删除最早打开的文件
@@ -220,7 +705,7 @@ class DatabaseOperation:
         """获取最近打开的文件
         :param judge: 返回类型（单文件、文件列表）
         :return: 最近打开的文件"""
-        with sqlite3.connect(self.db_path) as conn:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT 文件路径 FROM 最近打开 ORDER BY 打开时间 DESC")
             result = cursor.fetchall()
@@ -232,7 +717,7 @@ class DatabaseOperation:
     def remove_recently_opened_file(self, file_path: str):
         """从最近打开的文件中删除指定的文件
         :param file_path: 文件路径"""
-        with sqlite3.connect(self.db_path) as conn:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM 最近打开 WHERE 文件路径 = ?", (file_path,))
             conn.commit()
@@ -240,7 +725,7 @@ class DatabaseOperation:
     def get_value_from_variable_table(self):
         """从设置表中获取指定设置类型的值
         :return: 设置类型的值"""
-        with sqlite3.connect(self.db_path) as conn:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM 变量池")
             result = cursor.fetchall()
@@ -250,7 +735,7 @@ class DatabaseOperation:
         """将指定设置类型的值写入变量池窗口的表格
         :param variable_list: 将要写入的变量列表（变量名称、备注、变量值）"""
         # 查询数据库中的现有值
-        with sqlite3.connect(self.db_path) as con:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as con:
             cursor = con.cursor()
             try:
                 cursor.execute("SELECT * FROM 变量池")
@@ -289,7 +774,7 @@ class DatabaseOperation:
         """从变量名中获取变量信息，可以选择返回类型为字典或列表
         :param return_type: 指定返回类型，'dict'表示返回字典，'list'表示返回列表"""
         # cursor, conn = sqlitedb()
-        with sqlite3.connect(self.db_path) as conn:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             try:
                 if return_type == "dict":
@@ -311,7 +796,7 @@ class DatabaseOperation:
         """设置变量池中的变量的值
         :param variable_name: 变量名称
         :param new_value: 新的值"""
-        with sqlite3.connect(self.db_path) as conn:
+        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             try:
                 cursor.execute(

@@ -25,7 +25,6 @@ class CommandThread(QThread):
         self.main_window = main_window
         self.navigation = navigation
         self.out_mes = OutputMessage(self, self.navigation)
-        self.ini = IniControl()
         self.db = DatabaseOperation()
         # 循环控制
         self.number: int = 1  # 在窗体中显示循环次数
@@ -36,8 +35,8 @@ class CommandThread(QThread):
         # 运行时的参数
         self.branch_name_index: int = 0  # 分支表名索引
         self.run_mode: tuple = ('全部指令', 0)  # 运行模式
-        # 读取配置文件
-        self.time_sleep = float(get_setting_data_from_ini('Config', '暂停时间'))
+        # 读取数据库设置
+        self.time_sleep = float(get_setting_data('暂停时间'))
         self.branch_table_name: list = []
         # 互斥锁,用于暂停线程
         self.mutex = QMutex()
@@ -236,7 +235,7 @@ class CommandThread(QThread):
 
                     # 提示异常并暂停
                     elif exception_handling == '提示异常并暂停':
-                        self.ini.system_prompt_tone('执行异常')
+                        self.db.system_prompt_tone('执行异常')
                         self.show_message(f'ID为{str_id}的指令执行异常，已提示异常并暂停。')
                         # 弹出带有OK按钮的提示框
                         choice = pymsgbox.confirm(
@@ -254,7 +253,7 @@ class CommandThread(QThread):
 
                     # 抛出异常并停止
                     elif exception_handling == '提示异常并停止':
-                        self.ini.system_prompt_tone('执行异常')
+                        self.db.system_prompt_tone('执行异常')
                         self.show_message(f'ID为{str_id}的指令执行异常，已提示异常并停止。')
                         # 弹出提示框
                         pymsgbox.alert(
@@ -268,7 +267,7 @@ class CommandThread(QThread):
 
                     # 终止所有任务
                     elif exception_handling == '终止所有任务':
-                        self.ini.system_prompt_tone('执行异常')
+                        self.db.system_prompt_tone('执行异常')
                         self.show_message(f'ID为{str_id}的指令触发‘终止流程’指令。')
                         current_index += 1
                         self.start_state = False
@@ -279,7 +278,7 @@ class CommandThread(QThread):
                         self.show_message(f'转到分支：{exception_handling}')
                         target_branch_name = exception_handling.split('-')[0]  # 分支表名
                         # 目标分支表名在分支表名中的索引
-                        self.branch_table_name = self.ini.get_branch_info(True)
+                        self.branch_table_name = self.db.get_branch_info(True)
                         branch_table_name_index = self.branch_table_name.index(target_branch_name)
                         # 分支表中要跳转的指令索引
                         branch_ins_index = exception_handling.split('-')[1]

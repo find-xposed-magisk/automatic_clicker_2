@@ -9,15 +9,15 @@ from PySide6 import QtGui
 from PySide6.QtWidgets import QDialog, QMessageBox
 
 from functions import normalize_png_filename
-from ini控制 import IniControl
 from Window.image_preview_ui import Ui_Image
+from 数据库操作 import DatabaseOperation
 
 
 class ImagePreview(QDialog, Ui_Image):
     def __init__(self, im_bytes, im_b, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-        self.ini = IniControl()  # 创建ini对象
+        self.db = DatabaseOperation()
         self.im_bytes = im_bytes  # 图片的二进制数据
         self.im_b = im_b  # 图片的二进制数据
         self.load_setting_data()  # 加载设置数据
@@ -26,7 +26,7 @@ class ImagePreview(QDialog, Ui_Image):
         self.lineEdit.setText(f'{self.generate_random_alphanumeric(10)}')
 
     def load_setting_data(self):
-        folder_path_list = self.ini.extract_resource_folder_path()
+        folder_path_list = self.db.extract_resource_folder_path()
         self.comboBox.clear()
         self.comboBox.addItems(folder_path_list)
 

@@ -3,8 +3,9 @@ import os
 from PySide6.QtGui import QStandardItemModel, QStandardItem
 from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
-from ini控制 import IniControl
 from Window.global_s_ui import Ui_Global
+from WindowControl.窗口状态 import install_window_state
+from 数据库操作 import DatabaseOperation
 
 
 class Global_s(QDialog, Ui_Global):
@@ -14,8 +15,8 @@ class Global_s(QDialog, Ui_Global):
         super().__init__(parent)
 
         self.setupUi(self)
-        self.ini = IniControl()  # 创建ini对象
-        self.ini.set_window_size(self)  # 获取上次退出时的窗口大小
+        self.db = getattr(parent, "db", None) or DatabaseOperation()
+        install_window_state(self, self.db, self.windowTitle())
         # 绑定事件
         self.refresh_listview()  # 刷新listview
         self.pushButton.clicked.connect(self.select_file)  # 添加图像文件夹路径
@@ -33,7 +34,7 @@ class Global_s(QDialog, Ui_Global):
             dir=os.path.expanduser("~")
         )
         if fil_path != '':
-            self.ini.writes_to_resource_folder_path(os.path.normpath(fil_path))
+            self.db.writes_to_resource_folder_path(os.path.normpath(fil_path))
         self.refresh_listview()
 
     def open_select_listview(self):
@@ -54,7 +55,7 @@ class Global_s(QDialog, Ui_Global):
         try:
             indexes = self.listView.selectedIndexes()
             value = self.listView.model().itemFromIndex(indexes[0]).text()
-            self.ini.del_resource_folder_path(value)  # 删除数据库中的数据
+            self.db.del_resource_folder_path(value)  # 删除数据库中的数据
             self.refresh_listview()  # 刷新listview
         except Exception as e:
             print(e)
@@ -69,7 +70,7 @@ class Global_s(QDialog, Ui_Global):
             for item in list_:
                 model.appendRow(QStandardItem(item))
 
-        res_folder_path = self.ini.extract_resource_folder_path()  # 获取数据库中的数据
+        res_folder_path = self.db.extract_resource_folder_path()  # 获取数据库中的数据
         add_listview(res_folder_path, self.listView)
 
     def move_up_down(self, direction):
@@ -78,15 +79,10 @@ class Global_s(QDialog, Ui_Global):
         if not indexes:
             return
         path = indexes[0].data()
-        self.ini.move_resource_folder_up_and_down(path, direction)
+        self.db.move_resource_folder_up_and_down(path, direction)
         self.refresh_listview()
         # 选中移动后的项
         for i in range(self.listView.model().rowCount()):
             if self.listView.model().item(i).text() == path:
                 self.listView.setCurrentIndex(self.listView.model().index(i, 0))
                 break
-
-    def closeEvent(self, event):
-        """关闭窗口时触发"""
-        # 窗口大小
-        self.ini.save_window_size(self.width(), self.height(), self.windowTitle())

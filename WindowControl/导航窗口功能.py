@@ -17,7 +17,6 @@ from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonLexer
 
-from ini控制 import IniControl
 from 功能类 import (
     InformationEntry,
     InputCellExcel,
@@ -48,6 +47,7 @@ from WindowControl.变量池窗口 import VariablePool_Win
 from WindowControl.图像点击位置 import ClickPosition
 from WindowControl.截图模块 import ScreenCapture
 from 数据库操作 import DatabaseOperation
+from WindowControl.窗口状态 import install_window_state
 from Window.图像选择_ui import Ui_ImageSelect
 from Window.导航窗口_ui import Ui_navigation
 from 网页操作 import WebOption
@@ -61,7 +61,7 @@ class ImageSelection(QDialog, Ui_ImageSelect):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-        self.ini = IniControl()  # 创建ini对象
+        self.db = DatabaseOperation()
         self.load_images_name_to_listView()  # 加载图片名称到listView
         self.listView.clicked.connect(self.preview_image)  # 预览图片
         self.pushButton.clicked.connect(self.get_image_name)  # 获取图片名称
@@ -69,7 +69,7 @@ class ImageSelection(QDialog, Ui_ImageSelect):
 
     def load_images_name_to_listView(self):
         """加载图片名称到listView"""
-        images_name_list = self.ini.get_all_png_images_from_resource_folders()
+        images_name_list = self.db.get_all_png_images_from_resource_folders()
         # 创建模型并绑定到listView
         model = QtCore.QStringListModel()
         model.setStringList(images_name_list)
@@ -80,7 +80,7 @@ class ImageSelection(QDialog, Ui_ImageSelect):
         # 获取图片名称
         image_name = self.listView.currentIndex().data()
         # 获取图片路径
-        image_path = self.ini.matched_complete_path_from_resource_folders(image_name)
+        image_path = self.db.matched_complete_path_from_resource_folders(image_name)
         # 加载图片
         if image_path != '':
             # 将图像转换为QImage对象
@@ -128,12 +128,13 @@ class Na(QWidget, Ui_navigation):
         self.main_window = main_window_
         self.out_mes = OutputMessage(None, self)  # 输出信息
         self.setupUi(self)
-        self.ini = IniControl()  # 创建ini对象
-        self.db = DatabaseOperation()  # 数据库操作
+        self.db = getattr(main_window_, "db", None) or DatabaseOperation()
         # 去除最大化最小化按钮
         self.setWindowFlags(Qt.WindowType.WindowCloseButtonHint)
         self.setWindowModality(Qt.WindowModality.ApplicationModal)
-        self.ini.set_window_size(self)  # 获取上次退出时的窗口大小
+        install_window_state(
+            self, self.db, self.windowTitle(), enable_maximize_button=False
+        )
         self.tabWidget.setCurrentIndex(0)  # 设置默认页
         self.treeWidget.expandAll()  # treeWidget全部展开
         self.variable_sel_win = Variable_selection_win(self, "变量选择")  # 变量选择窗口
@@ -260,8 +261,7 @@ class Na(QWidget, Ui_navigation):
         if self.transparent_window.isVisible():  # 关闭框选窗口
             self.transparent_window.close()
         self.main_window.get_data(self.modify_row)
-        # 窗口大小
-        self.ini.save_window_size(self.width(), self.height(), self.windowTitle())
+        super().closeEvent(a0)
 
     def on_find_item(self, filter_txt):
         """指令搜索功能"""
@@ -304,7 +304,7 @@ class Na(QWidget, Ui_navigation):
                 )
                 self.comboBox_9.setCurrentText("跳转分支")
                 # 解除异常处理方式的禁用，加载分支表名
-                self.comboBox_10.addItems(self.ini.get_branch_info(True))
+                self.comboBox_10.addItems(self.db.get_branch_info(True))
                 self.find_controls("分支", "功能区参数")
                 # self.comboBox_10.setEnabled(True)
                 # self.comboBox_11.setEnabled(True)
@@ -553,7 +553,7 @@ class Na(QWidget, Ui_navigation):
                     self.disable_exception_handling_control(False)
                 elif self.comboBox_9.currentText() == "跳转分支":
                     self.disable_exception_handling_control(True)
-                    self.comboBox_10.addItems(self.ini.get_branch_info(True))
+                    self.comboBox_10.addItems(self.db.get_branch_info(True))
                     self.comboBox_10.setCurrentIndex(0)
                     self.find_controls("分支", "功能区参数")
             elif type_ == "分支名称":  # 分支表名下拉列表变化触发
@@ -952,7 +952,7 @@ class Na(QWidget, Ui_navigation):
         elif type_ == "加载信息":
             # 加载图像文件夹路径
             self.comboBox_8.clear()
-            self.comboBox_8.addItems(self.ini.extract_resource_folder_path())
+            self.comboBox_8.addItems(self.db.extract_resource_folder_path())
             self.find_controls("图像", "图像点击")
             self.show_image_to_label("图像点击")
             # 设置初始识别精度
@@ -976,7 +976,7 @@ class Na(QWidget, Ui_navigation):
                 """获取最新保存的图像"""
                 latest_image_path_ = None
                 latest_mod_time = 0
-                for folder_path in self.ini.extract_resource_folder_path():
+                for folder_path in self.db.extract_resource_folder_path():
                     for png_file in glob.glob(os.path.join(folder_path, '*.png')):
                         mod_time = os.path.getmtime(png_file)
                         if mod_time > latest_mod_time:
@@ -1032,7 +1032,7 @@ class Na(QWidget, Ui_navigation):
                 )
                 if reply == QMessageBox.StandardButton.Yes:
                     # 获取图像完整路径
-                    image_path = self.ini.matched_complete_path_from_resource_folders(selected_image)
+                    image_path = self.db.matched_complete_path_from_resource_folders(selected_image)
                     # 刷新listView
                     model = self.listView.model()
                     current_list = model.stringList()
@@ -1071,7 +1071,7 @@ class Na(QWidget, Ui_navigation):
             selected_image = self.listView.currentIndex().data()
             if selected_image:
                 # 获取图像完整路径
-                image_path = self.ini.matched_complete_path_from_resource_folders(selected_image)
+                image_path = self.db.matched_complete_path_from_resource_folders(selected_image)
                 # 显示图像
                 image_ = QImage(image_path)
                 image_ = image_.scaled(
@@ -1604,7 +1604,7 @@ class Na(QWidget, Ui_navigation):
             # 加载图像文件夹路径
             self.comboBox_17.clear()
             self.comboBox_18.clear()
-            self.comboBox_17.addItems(self.ini.extract_resource_folder_path())
+            self.comboBox_17.addItems(self.db.extract_resource_folder_path())
             self.find_controls("图像", "图像等待")
             self.label_182.setText(f'{str(self.horizontalSlider_6.value())}%')
             self.show_image_to_label("图像等待")
@@ -2063,11 +2063,11 @@ class Na(QWidget, Ui_navigation):
             # 加载文件路径
             self.comboBox_12.clear()
             self.comboBox_12.addItems(
-                self.db.extract_excel_from_global_parameter()
+                self.db.extract_excel_from_resource_folders()
             )  # 加载全局参数中的excel文件路径
             self.comboBox_13.clear()
             self.comboBox_14.clear()
-            self.comboBox_14.addItems(self.ini.extract_resource_folder_path())
+            self.comboBox_14.addItems(self.db.extract_resource_folder_path())
             self.find_controls("图像", "信息录入")
             self.show_image_to_label("信息录入")
             self.find_controls("excel", "信息录入")
@@ -2280,7 +2280,7 @@ class Na(QWidget, Ui_navigation):
         elif type_ == "加载信息":
             # 加载文件路径
             self.comboBox_20.clear()
-            self.comboBox_20.addItems(self.db.extract_excel_from_global_parameter())
+            self.comboBox_20.addItems(self.db.extract_excel_from_resource_folders())
             self.comboBox_23.clear()
             self.find_controls("excel", "网页录入")
 
@@ -2523,7 +2523,7 @@ class Na(QWidget, Ui_navigation):
             )
         elif type_ == "加载信息":
             self.comboBox_29.clear()
-            self.comboBox_29.addItems(self.db.extract_excel_from_global_parameter())
+            self.comboBox_29.addItems(self.db.extract_excel_from_resource_folders())
         elif type_ == "还原参数":
             put_parameters(self.image_path, self.parameter_1)
 
@@ -2617,7 +2617,7 @@ class Na(QWidget, Ui_navigation):
             # 获取参数字典
             if not self.lineEdit_16.text().endswith(".png"):  # 如果没有.png后缀则添加
                 self.lineEdit_16.setText(self.lineEdit_16.text() + ".png")
-            image_path_ = self.ini.portable_resource_path(
+            image_path_ = self.db.portable_resource_path(
                 os.path.join(self.comboBox_31.currentText(), self.lineEdit_16.text())
             )
             parameter_dic_ = {
@@ -2629,7 +2629,7 @@ class Na(QWidget, Ui_navigation):
 
         def put_parameters(image_path_, parameter_dic_):
             """将参数还原到控件中"""
-            image_path_ = self.ini.resolve_resource_path(image_path_)
+            image_path_ = self.db.resolve_resource_path(image_path_)
             # 还原截图类型
             self.comboBox_67.setCurrentText(parameter_dic_["截图类型"])
             show_region()
@@ -2693,7 +2693,7 @@ class Na(QWidget, Ui_navigation):
             )
         elif type_ == "加载信息":
             self.comboBox_31.clear()
-            self.comboBox_31.addItems(self.ini.extract_resource_folder_path())
+            self.comboBox_31.addItems(self.db.extract_resource_folder_path())
             show_region()
             show_save_path()
         elif type_ == "还原参数":
@@ -3190,7 +3190,7 @@ class Na(QWidget, Ui_navigation):
                 remarks_=func_info_dic.get("备注"),
             )
         elif type_ == "加载信息":
-            self.comboBox_37.addItems(self.ini.get_branch_info(True))
+            self.comboBox_37.addItems(self.db.get_branch_info(True))
             self.comboBox_37.setCurrentIndex(0)
             # 获取分支表名中的指令数量
             self.find_controls("分支", "跳转分支")
@@ -3354,7 +3354,7 @@ class Na(QWidget, Ui_navigation):
         def set_branch_name():
             """当选择跳转分支功能时，加载分支表名"""
             disable_control(True)
-            self.comboBox_41.addItems(self.ini.get_branch_info(True))
+            self.comboBox_41.addItems(self.db.get_branch_info(True))
             self.find_controls("分支", "按键等待")
 
         def disable_control(judge_: bool):
@@ -3563,7 +3563,7 @@ class Na(QWidget, Ui_navigation):
             # 当t导航业显示时，加载信息到控件
             self.comboBox_45.clear()
             self.comboBox_45.addItems(
-                self.db.extract_excel_from_global_parameter()
+                self.db.extract_excel_from_resource_folders()
             )  # 加载全局参数中的excel文件路径
             self.find_controls("excel", "获取Excel")
 
@@ -3774,7 +3774,7 @@ class Na(QWidget, Ui_navigation):
             self.comboBox_51.clear()
             self.comboBox_51.addItems(self.db.get_variable_info("list"))
             self.comboBox_52.clear()
-            self.comboBox_52.addItems(self.ini.get_branch_info(True))
+            self.comboBox_52.addItems(self.db.get_branch_info(True))
             self.comboBox_52.setCurrentIndex(0)
             # 获取分支表名中的指令数量
             self.find_controls("分支", "变量判断")
@@ -4138,7 +4138,7 @@ class Na(QWidget, Ui_navigation):
         elif type_ == "加载信息":
             # 当t导航业显示时，加载信息到控件
             self.comboBox_57.clear()
-            self.comboBox_57.addItems(self.db.extract_excel_from_global_parameter())
+            self.comboBox_57.addItems(self.db.extract_excel_from_resource_folders())
             self.find_controls("excel", "写入单元格")
         elif type_ == "还原参数":
             put_parameters(self.image_path, self.parameter_1)
@@ -4194,7 +4194,7 @@ class Na(QWidget, Ui_navigation):
                 )
 
                 # 测试用例
-                client_info = self.ini.get_ocr_info()
+                client_info = self.db.get_ocr_info()
                 if client_info["appId"] != "":
                     test_class = TextRecognition(self.out_mes, dic_)
                     test_class.is_test = True
@@ -4428,7 +4428,7 @@ class Na(QWidget, Ui_navigation):
             # 当t导航业显示时，加载信息到控件
             set_label_color()
             self.comboBox_74.clear()
-            self.comboBox_74.addItems(self.ini.get_branch_info(True))
+            self.comboBox_74.addItems(self.db.get_branch_info(True))
             self.comboBox_74.setCurrentIndex(0)
             # 获取分支表名中的指令数量
             self.find_controls("分支", "颜色判断")

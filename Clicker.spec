@@ -6,7 +6,6 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ('data/config.ini', 'data'),
         ('data/命令集.db', 'data'),
         ('flat/Combinear.qss', 'flat'),
         ('flat/开屏.png', 'flat'),

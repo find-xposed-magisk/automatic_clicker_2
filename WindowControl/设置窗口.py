@@ -5,8 +5,9 @@ from PySide6.QtWidgets import QDialog, QHeaderView, QMessageBox
 from system_hotkey import SystemHotkey
 
 from functions import is_hotkey_valid
-from ini控制 import IniControl
+from 数据库操作 import DatabaseOperation
 from Window.setting_ui import Ui_Setting
+from WindowControl.窗口状态 import install_window_state
 
 BAIDU_OCR = 'https://ai.baidu.com/tech/ocr'
 YUN_CODE = 'https://www.jfbym.com'
@@ -19,8 +20,8 @@ class Setting(QDialog, Ui_Setting):
         super().__init__(parent)
         # 初始化设置窗口
         self.setupUi(self)
-        self.ini = IniControl()
-        self.ini.set_window_size(self)  # 获取上次退出时的窗口大小
+        self.db = getattr(parent, "db", None) or DatabaseOperation()
+        install_window_state(self, self.db, self.windowTitle())
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         # 绑定快捷键事件
         self.main_window_open = True  # 设置窗口是否是主窗口打开，如果不是则不注册全局快捷键，并隐藏快捷键设置
@@ -61,7 +62,7 @@ class Setting(QDialog, Ui_Setting):
                 key_sequence = key_sequence_edit_.keySequence().toString().lower().split('+')
                 key_sequence = [key.replace('ctrl', 'control') for key in key_sequence]
                 if is_hotkey_valid(hotkey, key_sequence):
-                    self.ini.set_global_shortcut(**{action_: key_sequence})
+                    self.db.set_global_shortcut(**{action_: key_sequence})
                 else:
                     QMessageBox.information(
                         self, '提醒',
@@ -75,9 +76,7 @@ class Setting(QDialog, Ui_Setting):
         # 模式选择
         model = self.radioButton.text() if self.radioButton.isChecked() else \
             self.radioButton_2.text() if self.radioButton_2.isChecked() else None
-        # 更新ini文件
-        self.ini.update_settings_in_ini(
-            'Config',
+        self.db.update_settings(
             时间间隔=str(self.horizontalSlider_2.value() / 1000),
             持续时间=str(self.horizontalSlider_3.value() / 1000),
             暂停时间=str(self.spinBox.value() / 1000),
@@ -88,8 +87,7 @@ class Setting(QDialog, Ui_Setting):
             任务完成后显示主窗口=str(True if self.checkBox_4.isChecked() else False),
             高DPI自适应=str(True if self.checkBox_5.isChecked() else False)
         )
-        self.ini.update_settings_in_ini(
-            '三方接口',
+        self.db.update_settings(
             appId=str(self.lineEdit.text()),
             apiKey=str(self.lineEdit_2.text()),
             secretKey=str(self.lineEdit_3.text()),
@@ -130,8 +128,7 @@ class Setting(QDialog, Ui_Setting):
         """加载设置数据库中的数据"""
         self.checkBox_5.toggled.disconnect()  # 断开信号槽连接，避免触发高DPI自适应
         # 加载设置数据
-        setting_data_dic = self.ini.get_setting_data_from_ini(
-            'Config',
+        setting_data_dic = self.db.get_setting_data(
             '时间间隔',
             '持续时间',
             '暂停时间',
@@ -151,8 +148,7 @@ class Setting(QDialog, Ui_Setting):
             self.radioButton.setChecked(True)
             self.change_mode('普通模式')
 
-        app_data_dic = self.ini.get_setting_data_from_ini(
-            '三方接口',
+        app_data_dic = self.db.get_setting_data(
             'appId',
             'apiKey',
             'secretKey',
@@ -162,11 +158,11 @@ class Setting(QDialog, Ui_Setting):
         self.horizontalSlider_3.setValue(int(float(setting_data_dic['持续时间']) * 1000))
         self.spinBox.setValue(int(float(setting_data_dic['暂停时间']) * 1000))
 
-        self.checkBox.setChecked(eval(setting_data_dic['启动检查更新']))
-        self.checkBox_2.setChecked(eval(setting_data_dic['退出提醒清空指令']))
-        self.checkBox_3.setChecked(eval(setting_data_dic['系统提示音']))
-        self.checkBox_4.setChecked(eval(setting_data_dic['任务完成后显示主窗口']))
-        self.checkBox_5.setChecked(eval(setting_data_dic['高DPI自适应']))
+        self.checkBox.setChecked(self.db.get_bool_setting('启动检查更新'))
+        self.checkBox_2.setChecked(self.db.get_bool_setting('退出提醒清空指令'))
+        self.checkBox_3.setChecked(self.db.get_bool_setting('系统提示音'))
+        self.checkBox_4.setChecked(self.db.get_bool_setting('任务完成后显示主窗口'))
+        self.checkBox_5.setChecked(self.db.get_bool_setting('高DPI自适应'))
 
         # 填入OCR API信息
         self.lineEdit.setText(app_data_dic.get('appId', ''))
@@ -176,7 +172,7 @@ class Setting(QDialog, Ui_Setting):
         self.lineEdit_6.setText(app_data_dic.get('云码Token', ''))
 
         # 加载快捷键设置
-        global_shortcut_dic = self.ini.get_global_shortcut()
+        global_shortcut_dic = self.db.get_global_shortcut()
         self.keySequenceEdit.setKeySequence('+'.join(global_shortcut_dic['开始运行']))
         self.keySequenceEdit_2.setKeySequence('+'.join(global_shortcut_dic['结束运行']))
         self.keySequenceEdit_3.setKeySequence('+'.join(global_shortcut_dic['分支选择']))
@@ -204,7 +200,7 @@ class Setting(QDialog, Ui_Setting):
 
     def load_branch_info(self):
         """向表格中加载分支信息"""
-        branch_info = self.ini.get_branch_info()
+        branch_info = self.db.get_branch_info()
         if branch_info:
             # 在表格中写入数据，branch_info为列表，每个元素为元组
             self.tableWidget.setRowCount(len(branch_info))
@@ -248,9 +244,9 @@ class Setting(QDialog, Ui_Setting):
                                              QMessageBox.StandardButton.NoButton)
                         raise Exception('分支快捷键已存在！')
             branch_info.append((branch_name, key_sequence, repeat_times))
-        # 写入分支信息到ini文件
+        # 写入分支信息到数据库
         for branch_name, key_sequence, repeat_times in branch_info:
-            self.ini.writes_to_branch_info(branch_name, key_sequence, repeat_times)
+            self.db.writes_to_branch_info(branch_name, key_sequence, repeat_times)
 
     def add_branch(self):
         """添加分支"""
@@ -267,8 +263,8 @@ class Setting(QDialog, Ui_Setting):
                 QMessageBox.critical(self, '错误', '分支名称已存在！', QMessageBox.StandardButton.Ok,
                                      QMessageBox.StandardButton.NoButton)
                 return
-            # 在ini文件中添加分支信息
-            self.ini.writes_to_branch_info(branch_name, '', 1)
+            # 在数据库中添加分支信息
+            self.db.writes_to_branch_info(branch_name, '', 1)
             self.load_branch_info()  # 刷新表格
             # 选中新添加的分支，最后一行
             self.tableWidget.selectRow(self.tableWidget.rowCount() - 1)
@@ -282,7 +278,7 @@ class Setting(QDialog, Ui_Setting):
                 QMessageBox.critical(self, '错误', '主流程不能删除，也不能移动！', QMessageBox.StandardButton.Ok,
                                      QMessageBox.StandardButton.NoButton)
                 return
-            if self.ini.del_branch_info(branch_name):
+            if self.db.del_branch_info(branch_name):
                 self.load_branch_info()
             else:
                 QMessageBox.critical(self, '错误', '删除分支失败！请重试！', QMessageBox.StandardButton.Ok,
@@ -294,7 +290,7 @@ class Setting(QDialog, Ui_Setting):
         selected_row = self.tableWidget.currentRow()
         if selected_row != -1:
             branch_name = self.tableWidget.item(selected_row, 0).text()
-            if self.ini.move_branch_info(branch_name, direction):
+            if self.db.move_branch_info(branch_name, direction):
                 self.load_branch_info()
                 self.tableWidget.selectRow(
                     selected_row - 1 if direction == 'up' else selected_row + 1
@@ -310,8 +306,6 @@ class Setting(QDialog, Ui_Setting):
         QMessageBox.information(self, '提醒', '该功能重启后才能生效！')
 
     def closeEvent(self, event):
-        # 窗口大小
-        self.ini.save_window_size(self.width(), self.height(), self.windowTitle())
         if self.main_window_open:  # 如果是主窗口打开
             # 注册全局快捷键
             self.parent().register_global_shortcut_keys()

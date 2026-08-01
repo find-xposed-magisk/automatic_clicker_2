@@ -33,10 +33,8 @@ Window/__pycache__/
 EXE_TEST/
 
 Clicker-test-file/
-/ins.txt
-/.codex
 
-# Clicker runtime data. Keep the portable configuration and database templates.
+# Clicker runtime data. Keep the portable database template.
 /data/images/*
 !/data/images/.gitkeep
 /data/exports/*

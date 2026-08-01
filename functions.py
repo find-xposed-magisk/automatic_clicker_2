@@ -111,7 +111,6 @@ def get_current_folder() -> str:
 INSTALL_FOLDER = get_install_folder()
 RESOURCE_FOLDER = get_resource_folder()
 DATA_FOLDER = os.path.join(INSTALL_FOLDER, "data")
-CONFIG_PATH = os.path.join(DATA_FOLDER, "config.ini")
 DATABASE_PATH = os.path.join(DATA_FOLDER, "命令集.db")
 IMAGES_FOLDER = os.path.join(DATA_FOLDER, "images")
 EXPORTS_FOLDER = os.path.join(DATA_FOLDER, "exports")
