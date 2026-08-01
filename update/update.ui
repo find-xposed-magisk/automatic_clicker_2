@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 软件更新窗口界面。 -->
 <ui version="4.0">
  <class>Update_UI</class>
  <widget class="QWidget" name="Update_UI">

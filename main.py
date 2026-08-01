@@ -15,19 +15,20 @@ import json
 import os.path
 import re
 import sys
-import time
+from time import time as current_time
+from typing import Optional, Tuple
 
 import openpyxl
 from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtCore import Signal, Qt, QUrl, QSharedMemory
-from PySide6.QtGui import QAction, QDesktopServices, QPixmap, QFont
+from PySide6.QtCore import QEvent, Signal, Qt, QUrl, QSharedMemory
+from PySide6.QtGui import QAction, QDesktopServices, QKeyEvent, QPixmap, QFont
 from PySide6.QtWidgets import QMainWindow, QStatusBar, QMessageBox, QMenu, QStyle, QTableWidgetItem, QHeaderView, \
     QFileDialog, QInputDialog, QDialog, QApplication, QSplashScreen
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 from system_hotkey import SystemHotkey
 
-from functions import DATABASE_PATH, EXPORTS_FOLDER, LOGS_FOLDER, RESOURCE_FOLDER, \
+from functions import EXPORTS_FOLDER, LOGS_FOLDER, RESOURCE_FOLDER, \
     ensure_data_directories, get_str_now_time, is_hotkey_valid, show_window
 from WindowControl.icon import Icon
 from main_work import CommandThread
@@ -38,7 +39,7 @@ from 数据库操作 import *
 from Window.about_ui import Ui_About
 from Window.mainwindow_ui import Ui_MainWindow
 from Window.参数窗口_ui import Ui_Param
-from WindowControl.自动更新 import Check_Update, UpdateWindow
+from update.自动更新 import Check_Update, UpdateWindow
 from WindowControl.设置窗口 import Setting
 from WindowControl.资源文件夹窗口 import Global_s
 from info import CURRENT_VERSION, MAIN_WEBSITE, ISSUE_WEBSITE, QQ_GROUP, QQ, APP_NAME, \
@@ -76,9 +77,7 @@ collections.Iterable = collections.abc.Iterable
 
 # activate clicker
 
-# pyinstaller -D -w -i clicker.ico main.py --hidden-import=pyttsx4.drivers --uac-admin -y
-# pyinstaller -D -i clicker.ico main.py --hidden-import=pyttsx4.drivers --uac-admin -y
-# pyinstaller --clean -y Clicker.spec
+# pyinstaller --clean -y packaging\main.spec
 
 # 添加指令的步骤：
 # 1. 在导航页的页面中添加指令的控件
@@ -89,11 +88,9 @@ collections.Iterable = collections.abc.Iterable
 
 def timer(func):
     def func_wrapper(*args, **kwargs):
-        from time import time
-
-        time_start = time()
+        time_start = current_time()
         result = func(*args, **kwargs)
-        time_end = time()
+        time_end = current_time()
         time_spend = time_end - time_start
         print("%s cost time: %.3f s" % (func.__name__, time_spend))
         return result
@@ -199,7 +196,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         def check_file_integrity():
             """检查文件完整性"""
             # 检查命令集.db文件是否存在
-            if not os.path.exists(DATABASE_PATH):
+            if not os.path.exists(self.db.db_path):
                 QMessageBox.critical(
                     self, "错误", "命令集.db文件不存在！\n请重新下载软件！", QMessageBox.StandardButton.Ok,
                     QMessageBox.StandardButton.NoButton
@@ -226,12 +223,14 @@ class Main_window(QMainWindow, Ui_MainWindow):
         # 注册全局快捷键
         self.register_global_shortcut_keys()
         # 设置状态栏信息
-        self.statusBar.showMessage(f"软件版本：{CURRENT_VERSION}准备就绪...", 3000)
+        self.statusBar.showMessage(
+            "软件版本：{}准备就绪...".format(CURRENT_VERSION), 3000
+        )
 
     def check_file_integrity(self):
         """检查文件完整性"""
         # 检查命令集.db文件是否存在
-        if not os.path.exists(DATABASE_PATH):
+        if not os.path.exists(self.db.db_path):
             QMessageBox.critical(self, '致命错误', '命令集.db文件不存在！请重新下载！', QMessageBox.StandardButton.Ok,
                                  QMessageBox.StandardButton.NoButton)
             sys.exit(1)
@@ -260,7 +259,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
                 "分支选择": "弹出分支选择窗口"
             }
 
-            for shortcut_name, action in global_shortcuts.items():
+            for shortcut_name, action_ in global_shortcuts.items():
                 # 将ctrl替换为control
                 global_shortcut[shortcut_name] = [
                     key.replace("ctrl", "control") for key in global_shortcut[shortcut_name]
@@ -268,7 +267,9 @@ class Main_window(QMainWindow, Ui_MainWindow):
                 if is_hotkey_valid(self.hk_stop, global_shortcut[shortcut_name]):
                     self.hk_stop.register(
                         global_shortcut[shortcut_name],
-                        callback=lambda x, action=action: self.global_shortcut_key(action),
+                        callback=lambda x_, action_name_=action_: self.global_shortcut_key(
+                            action_name_
+                        ),
                         overwrite=True
                     )
                 else:
@@ -278,6 +279,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
                         "提醒",
                         f"快捷键{str_shortcut}已被占用！“{shortcut_name}”的全局快捷键已失效！"
                         f"\n\n请在设置窗口中重新设置全局快捷键。",
+                        QMessageBox.StandardButton.Ok,
                     )
                 # 将主界面的按钮显示为快捷键
                 self.pushButton_5.setText(f"开始运行\t{'+'.join(global_shortcut['开始运行'])}".upper())
@@ -293,10 +295,10 @@ class Main_window(QMainWindow, Ui_MainWindow):
         """注销全局忷键"""
         global_shortcut = self.db.get_global_shortcut()
         try:
-            for shortcut_name, action in global_shortcut.items():
+            for shortcut_name, action_ in global_shortcut.items():
                 # 将ctrl替换为control
-                action = [key.replace("ctrl", "control") for key in action]
-                self.hk_stop.unregister(tuple(action))
+                action_ = [key.replace("ctrl", "control") for key in action_]
+                self.hk_stop.unregister(tuple(action_))
         except Exception as e:
             print(e)
 
@@ -447,7 +449,12 @@ class Main_window(QMainWindow, Ui_MainWindow):
             )
             navigation.switch_navigation_page(ins_type, restore_parameters)
         except AttributeError:
-            QMessageBox.information(self, "提示", "请先选择一行待修改的数据！")
+            QMessageBox.information(
+                self,
+                "提示",
+                "请先选择一行待修改的数据！",
+                QMessageBox.StandardButton.Ok,
+            )
 
     def move_ins_to_branch(self, branch_name, target_branch_name):
         """移动指令到分支"""
@@ -534,16 +541,21 @@ class Main_window(QMainWindow, Ui_MainWindow):
             :param judge: （向前插入、向后插入）"""
             try:
                 # 获取当前行行号列号
-                row = self.tableWidget.currentRow()
-                target_id = int(self.tableWidget.item(row, 6).text())  # 指令ID
+                row_ = self.tableWidget.currentRow()
+                target_id = int(self.tableWidget.item(row_, 6).text())  # 指令ID
                 navigation = Na(self)  # 实例化导航页窗口
                 navigation.show()
                 # 修改数据中的参数
                 navigation.pushButton_2.setText(judge)
                 navigation.modify_id = target_id
-                navigation.modify_row = row
+                navigation.modify_row = row_
             except AttributeError:
-                QMessageBox.information(self, "提示", "请先选择一行待修改的数据！")
+                QMessageBox.information(
+                    self,
+                    "提示",
+                    "请先选择一行待修改的数据！",
+                    QMessageBox.StandardButton.Ok,
+                )
 
         # 表格右键菜单
         row_num = -1
@@ -600,8 +612,12 @@ class Main_window(QMainWindow, Ui_MainWindow):
             # 从self.comboBox中获取分支列表
             branch_list = [self.comboBox.itemText(i) for i in range(self.comboBox.count())]
             for branch in branch_list:
-                action = move_to_branch_menu.addAction(branch)  # 右键菜单添加分支
-                action.triggered.connect(lambda _, b=branch: self.move_ins_to_branch(self.comboBox.currentText(), b))
+                move_to_branch_menu.addAction(
+                    branch,
+                    lambda checked_=False, branch_=branch: self.move_ins_to_branch(
+                        self.comboBox.currentText(), branch_
+                    ),
+                )
 
             menu.addSeparator()
             go_branch = menu.addAction("转到分支")
@@ -812,7 +828,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         """保存指令与设置到 Excel
         :param judge: 保存的文件类型（excel、自动保存）"""
 
-        def get_save_file_and_folder() -> tuple:
+        def get_save_file_and_folder() -> Tuple[Optional[str], Optional[str]]:
             """获取保存文件名和文件夹路径"""
             directory_path = os.path.normpath(os.path.join(EXPORTS_FOLDER, "指令数据.xlsx"))
             # 获取保存文件名和文件夹路径
@@ -826,10 +842,14 @@ class Main_window(QMainWindow, Ui_MainWindow):
                     os.path.normpath(os.path.split(file_path)[1])) \
                 if file_path else (None, None)
 
-        def get_file_and_folder_from_setting():
+        def get_file_and_folder_from_setting() -> Tuple[Optional[str], Optional[str]]:
             """从设置中获取最近打开的文件路径作为保存路径，用于自动保存"""
             recently_opened = self.db.get_setting_value("当前文件路径")
-            if recently_opened != "None" and os.path.exists(recently_opened):
+            if (
+                recently_opened
+                and recently_opened != "None"
+                and os.path.exists(recently_opened)
+            ):
                 return os.path.split(recently_opened)
             self.statusBar.showMessage("未找到最近导入的文件路径。已自动切换为另存为...", 3000)
             return get_save_file_and_folder()
@@ -878,7 +898,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
             folder_path, file_name = get_save_file_and_folder() \
                 if judge != "自动保存" else get_file_and_folder_from_setting()
             # 开始保存数据
-            if all([file_name, folder_path]):
+            if file_name is not None and folder_path is not None:
                 # 使用openpyxl模块创建Excel文件
                 wb = openpyxl.Workbook()
                 # 获取全局参数表中的分支表名
@@ -910,7 +930,9 @@ class Main_window(QMainWindow, Ui_MainWindow):
                 self.db.export_settings_to_excel(wb)
                 adaptive_column_width(wb['设置'])
                 # 保存Excel文件
-                save_path = os.path.normpath(os.path.join(folder_path, file_name))
+                save_path = os.path.normpath(
+                    os.path.join(str(folder_path), str(file_name))
+                )
                 wb.save(save_path)
                 prompt_save_success(save_path)  # 提示保存成功
         except PermissionError:
@@ -943,10 +965,10 @@ class Main_window(QMainWindow, Ui_MainWindow):
         # 保存当前分支
         self.db.set_current_branch(self.comboBox.currentText())
 
-    def data_import(self, file_path):
+    def data_import(self, file_path: str) -> None:
         """导入数据功能"""
 
-        def data_import_from_excel(target_path_):
+        def data_import_from_excel(target_path_: str) -> None:
             # 读取数据
             wb = openpyxl.load_workbook(target_path_)
             sheets = wb.worksheets  # 获取所有的sheet
@@ -985,7 +1007,12 @@ class Main_window(QMainWindow, Ui_MainWindow):
             wb.close()
             self.load_branch_to_combobox()  # 重新加载分支列表
             if file_path == "资源文件夹路径":
-                QMessageBox.information(self, "提示", "指令数据导入成功！")
+                QMessageBox.information(
+                    self,
+                    "提示",
+                    "指令数据导入成功！",
+                    QMessageBox.StandardButton.Ok,
+                )
 
         # 获取资源文件夹路径，如果不存在则使用用户的主目录
         if file_path == "资源文件夹路径":
@@ -1001,7 +1028,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
             else:
                 return
         else:
-            target_path = (file_path, "")
+            target_path = file_path
             suffix = os.path.splitext(file_path)[1]
 
         # 如果为.xlsx文件
@@ -1048,7 +1075,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         # 开始运行
         self.command_thread.start()
         # 记录开始时间的时间戳
-        self.start_time = time.time()
+        self.start_time = current_time()
 
     def start_from_branch(self, branch_name, repeat_number=1):
         """从分支开始运行"""
@@ -1069,7 +1096,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.spinBox.setValue(repeat_number)
         self.command_thread.start()
         # 记录开始时间的时间戳
-        self.start_time = time.time()
+        self.start_time = current_time()
 
     def clear_textEdit(self):
         """清空日志，主要用于在全局快捷键线程中调用，避免线程阻塞引发的程序闪退"""
@@ -1081,7 +1108,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         target_path = QFileDialog.getSaveFileName(
             parent=self,
             caption="请选择保存路径",
-            directory=os.path.join(LOGS_FOLDER, "操作日志.txt"),
+            dir=os.path.join(LOGS_FOLDER, "操作日志.txt"),
             filter="(*.txt)",
         )
         # 判断是否选择了文件
@@ -1092,7 +1119,12 @@ class Main_window(QMainWindow, Ui_MainWindow):
             with open(target_path[0], "w") as f:
                 f.write(f"日志导出时间：{get_str_now_time()}\n")
                 f.write(logs)
-            QMessageBox.information(self, "提示", "操作日志导出成功！")
+            QMessageBox.information(
+                self,
+                "提示",
+                "操作日志导出成功！",
+                QMessageBox.StandardButton.Ok,
+            )
 
     def create_branch(self):
         """创建分支"""
@@ -1103,7 +1135,8 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.load_branch_to_combobox(branch_name)
             QMessageBox.information(
                 self, "提示",
-                "分支创建成功!" if message else "分支已存在!"
+                "分支创建成功!" if message else "分支已存在!",
+                QMessageBox.StandardButton.Ok,
             )
 
     def delete_branch(self):
@@ -1118,7 +1151,12 @@ class Main_window(QMainWindow, Ui_MainWindow):
             mes = self.db.del_branch_info(text)
             if mes:
                 self.load_branch_to_combobox()  # 重新加载分支列表
-                QMessageBox.information(self, "提示", "分支已删除！")
+                QMessageBox.information(
+                    self,
+                    "提示",
+                    "分支已删除！",
+                    QMessageBox.StandardButton.Ok,
+                )
             else:
                 QMessageBox.critical(self, "提示", "分支删除失败！", QMessageBox.StandardButton.Ok,
                                      QMessageBox.StandardButton.NoButton)
@@ -1133,32 +1171,46 @@ class Main_window(QMainWindow, Ui_MainWindow):
         # 设置重复次数
         self.spinBox.setValue(int(self.db.get_branch_repeat_times(self.comboBox.currentText())))
 
-    def eventFilter(self, obj, event):
+    def eventFilter(self, obj, event: QEvent):
         # 重写self.tableWidget的快捷键事件
-        if obj == self.tableWidget:
-            if event.type() == 6:  # 键盘按下事件
+        if obj == self.tableWidget and isinstance(event, QKeyEvent):
+            if event.type() == QEvent.Type.KeyPress:
+                key_ = event.key()
+                modifiers_ = event.modifiers()
                 # 如果按下delete键
-                if event.key() == Qt.Key_Delete:
+                if key_ == Qt.Key.Key_Delete:
                     self.delete_data()
                 # 如果按下ctrl+c键
-                if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_C:
+                if (
+                    modifiers_ == Qt.KeyboardModifier.ControlModifier
+                    and key_ == Qt.Key.Key_C
+                ):
                     self.copy_data()
                 # 如果按下shift+向上键
-                if event.modifiers() == Qt.ShiftModifier and event.key() == Qt.Key_Up:
+                if (
+                    modifiers_ == Qt.KeyboardModifier.ShiftModifier
+                    and key_ == Qt.Key.Key_Up
+                ):
                     self.go_up_down("up")
                     # 将焦点下移一行,抵消上移的误差
                     self.tableWidget.setCurrentCell(
                         self.tableWidget.currentRow() + 1, 0
                     )
                 # 如果按下shift+向下键
-                if event.modifiers() == Qt.ShiftModifier and event.key() == Qt.Key_Down:
+                if (
+                    modifiers_ == Qt.KeyboardModifier.ShiftModifier
+                    and key_ == Qt.Key.Key_Down
+                ):
                     self.go_up_down("down")
                     # 将焦点上移一行,抵消下移的误差
                     self.tableWidget.setCurrentCell(
                         self.tableWidget.currentRow() - 1, 0
                     )
                 # 如果按下ctrl+向上键
-                if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_Up:
+                if (
+                    modifiers_ == Qt.KeyboardModifier.ControlModifier
+                    and key_ == Qt.Key.Key_Up
+                ):
                     # 将焦点下移一行,抵消上移的误差
                     self.tableWidget.setCurrentCell(
                         self.tableWidget.currentRow() + 1, 0
@@ -1168,8 +1220,8 @@ class Main_window(QMainWindow, Ui_MainWindow):
                         self.comboBox.setCurrentIndex(self.comboBox.currentIndex() - 1)
                 # 如果按下ctrl+向下键
                 if (
-                        event.modifiers() == Qt.ControlModifier
-                        and event.key() == Qt.Key_Down
+                    modifiers_ == Qt.KeyboardModifier.ControlModifier
+                    and key_ == Qt.Key.Key_Down
                 ):
                     # 将焦点上移一行,抵消下移的误差
                     self.tableWidget.setCurrentCell(
@@ -1179,10 +1231,16 @@ class Main_window(QMainWindow, Ui_MainWindow):
                     if self.comboBox.currentIndex() != self.comboBox.count() - 1:
                         self.comboBox.setCurrentIndex(self.comboBox.currentIndex() + 1)
                 # 如果按下ctrl+g键
-                if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_G:
+                if (
+                    modifiers_ == Qt.KeyboardModifier.ControlModifier
+                    and key_ == Qt.Key.Key_G
+                ):
                     self.go_to_branch()  # 转到分支
                 # 如果按下ctrl+x键
-                if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_Y:
+                if (
+                    modifiers_ == Qt.KeyboardModifier.ControlModifier
+                    and key_ == Qt.Key.Key_Y
+                ):
                     self.modify_parameters()  # 修改指令
         return super().eventFilter(obj, event)
 
@@ -1236,7 +1294,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
         def send_elapsed_time():
             """发送耗时"""
-            elapsed_time = time.time() - self.start_time
+            elapsed_time = current_time() - self.start_time
             # 将秒转换为毫秒或者保留两位小数的秒数
             if elapsed_time < 1:
                 elapsed_time_ms = round(elapsed_time * 1000)  # 毫秒
@@ -1276,7 +1334,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
 class About(QDialog, Ui_About):
     """关于窗体"""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[Main_window] = None):
         super().__init__(parent)
         # 初始化窗体
         self._parent = parent
@@ -1292,7 +1350,13 @@ class About(QDialog, Ui_About):
         self.gitee_2.clicked.connect(
             lambda: QDesktopServices.openUrl(QUrl(Github_WEBSITE))
         )
-        self.pushButton.clicked.connect(lambda: self._parent.check_update_software(True))
+        parent_ = self._parent
+        if parent_ is not None:
+            self.pushButton.clicked.connect(
+                lambda: parent_.check_update_software(True)
+            )
+        else:
+            self.pushButton.setEnabled(False)
         self.pushButton_2.clicked.connect(
             lambda: QDesktopServices.openUrl(QUrl(ISSUE_WEBSITE))
         )

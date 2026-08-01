@@ -12,7 +12,7 @@ from PySide6.QtCore import QThread, Signal, Qt
 from PySide6.QtWidgets import QDialog
 from dateutil.parser import parse
 
-from Window.update_ui import Ui_Update_UI
+from .update_ui import Ui_Update_UI
 from info import INTERFACE, CURRENT_VERSION, DOWNLOAD_PAGE
 from functions import INSTALL_FOLDER, UPDATES_FOLDER
 
