@@ -2617,7 +2617,9 @@ class Na(QWidget, Ui_navigation):
             # 获取参数字典
             if not self.lineEdit_16.text().endswith(".png"):  # 如果没有.png后缀则添加
                 self.lineEdit_16.setText(self.lineEdit_16.text() + ".png")
-            image_path_ = os.path.join(self.comboBox_31.currentText(), self.lineEdit_16.text())
+            image_path_ = self.ini.portable_resource_path(
+                os.path.join(self.comboBox_31.currentText(), self.lineEdit_16.text())
+            )
             parameter_dic_ = {
                 "截图类型": self.comboBox_67.currentText(),
                 "区域": self.label_164.text(),
@@ -2627,6 +2629,7 @@ class Na(QWidget, Ui_navigation):
 
         def put_parameters(image_path_, parameter_dic_):
             """将参数还原到控件中"""
+            image_path_ = self.ini.resolve_resource_path(image_path_)
             # 还原截图类型
             self.comboBox_67.setCurrentText(parameter_dic_["截图类型"])
             show_region()

@@ -9,16 +9,34 @@ import win32gui
 import winsound
 from openpyxl.workbook import Workbook
 
-from functions import get_current_folder
+from functions import CONFIG_PATH, DATABASE_PATH, DATA_FOLDER, IMAGES_FOLDER
 
 
 class IniControl:
     def __init__(self):
-        self.ini_path = os.path.join(get_current_folder(), "config.ini")
+        self.ini_path = CONFIG_PATH
         print("self.ini_path", self.ini_path)
         self.config = configparser.ConfigParser()
         self.config.read(self.ini_path, encoding='utf-8')
-        self.db_path = os.path.join(get_current_folder(), "命令集.db")
+        self.db_path = DATABASE_PATH
+
+    @staticmethod
+    def resolve_resource_path(path: str) -> str:
+        """将 data 下的便携相对路径转换为可访问的绝对路径。"""
+        if not path:
+            return path
+        return os.path.normpath(path if os.path.isabs(path) else os.path.join(DATA_FOLDER, path))
+
+    @staticmethod
+    def portable_resource_path(path: str) -> str:
+        """data 下的资源使用相对路径存储，便于整体迁移。"""
+        normalized_path = os.path.normpath(path)
+        try:
+            if os.path.commonpath((DATA_FOLDER, normalized_path)) == os.path.normpath(DATA_FOLDER):
+                return os.path.relpath(normalized_path, DATA_FOLDER)
+        except ValueError:
+            pass
+        return normalized_path
 
     def get_config(self) -> configparser.ConfigParser:
         """获取配置文件"""
@@ -141,6 +159,7 @@ class IniControl:
     def writes_to_resource_folder_path(self, path: str):
         """将资源文件路径写入到config.ini中"""
         try:
+            path = self.portable_resource_path(path)
             config = self.get_config()
             section = '资源文件夹路径'
             if not config.has_section(section):
@@ -165,6 +184,7 @@ class IniControl:
     def del_resource_folder_path(self, path: str):
         """删除资源文件路径"""
         try:
+            path = self.portable_resource_path(path)
             config = self.get_config()
             section = '资源文件夹路径'
             # 检查 '资源文件夹路径' 部分是否存在
@@ -195,6 +215,7 @@ class IniControl:
         :param path: 选中的路径
         :param direction: 移动方向（up: 上移, down: 下移）"""
         try:
+            path = self.portable_resource_path(path)
             config = self.get_config()
             section = '资源文件夹路径'
             if not config.has_section(section):
@@ -232,9 +253,12 @@ class IniControl:
             config = self.get_config()
             section = '资源文件夹路径'
             if not config.has_section(section):
-                return []
+                return [IMAGES_FOLDER]
             paths = {key: config.get(section, key) for key in config.options(section)}
-            return list(paths.values())
+            resolved_paths = [self.resolve_resource_path(path) for path in paths.values()]
+            if IMAGES_FOLDER not in resolved_paths:
+                resolved_paths.insert(0, IMAGES_FOLDER)
+            return resolved_paths
         except Exception as e:
             print("提取资源文件夹路径失败！", e)
             return []
@@ -242,10 +266,7 @@ class IniControl:
     def get_all_png_images_from_resource_folders(self) -> list:
         """Retrieve all PNG image names from resource folder paths defined in the config."""
         try:
-            config = self.get_config()
-            if '资源文件夹路径' not in config:
-                return []
-            paths = [config.get('资源文件夹路径', key) for key in config.options('资源文件夹路径')]
+            paths = self.extract_resource_folder_path()
             return [file for path in paths for _, _, files in os.walk(path) for file in files if file.endswith('.png')]
         except Exception as e:
             print(f"Failed to retrieve PNG image names: {e}")
@@ -256,10 +277,7 @@ class IniControl:
         :param file_name: 文件名
         :return: 完整路径"""
         try:
-            config = self.get_config()
-            if '资源文件夹路径' not in config:
-                return ''
-            paths = [config.get('资源文件夹路径', key) for key in config.options('资源文件夹路径')]
+            paths = self.extract_resource_folder_path()
             for path in paths:
                 for root, _, files in os.walk(path):
                     for file in files:
@@ -435,9 +453,9 @@ class IniControl:
                 row += 1
             row += 1  # 在每个section后面加一个空行
 
-    @staticmethod
-    def excel_to_ini(wb: Workbook, ini_path: str = 'config.ini'):
+    def excel_to_ini(self, wb: Workbook, ini_path: str = None):
         try:
+            ini_path = ini_path or self.ini_path
             # 创建configparser对象
             config = configparser.ConfigParser()
             # 如果INI文件存在，则读取现有文件

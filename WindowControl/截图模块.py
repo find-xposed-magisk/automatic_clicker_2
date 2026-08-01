@@ -8,7 +8,7 @@ import pyautogui
 from PySide6 import QtGui
 from PySide6.QtWidgets import QDialog, QMessageBox
 
-from image_utils import normalize_png_filename
+from functions import normalize_png_filename
 from ini控制 import IniControl
 from Window.image_preview_ui import Ui_Image
 

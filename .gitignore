@@ -33,7 +33,17 @@ Window/__pycache__/
 EXE_TEST/
 
 Clicker-test-file/
-/update_info.json
-/v0.26.2%20Beta.7z
 /ins.txt
 /.codex
+
+# Clicker runtime data. Keep the portable configuration and database templates.
+/data/images/*
+!/data/images/.gitkeep
+/data/exports/*
+!/data/exports/.gitkeep
+/data/logs/*
+!/data/logs/.gitkeep
+/data/updates/*
+!/data/updates/.gitkeep
+/data/temp/*
+!/data/temp/.gitkeep

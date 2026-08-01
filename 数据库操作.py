@@ -2,7 +2,7 @@ import datetime
 import os
 import sqlite3
 
-from functions import get_current_folder
+from functions import DATABASE_PATH
 from ini控制 import IniControl
 
 MAIN_FLOW = "主流程"
@@ -10,7 +10,7 @@ MAIN_FLOW = "主流程"
 
 class DatabaseOperation:
     def __init__(self):
-        self.db_path = os.path.join(get_current_folder(), "命令集.db")
+        self.db_path = DATABASE_PATH
         self.ini = IniControl()
 
     def get_setting_value(self, setting_type: str):

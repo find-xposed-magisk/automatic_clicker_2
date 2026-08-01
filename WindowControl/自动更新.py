@@ -14,6 +14,7 @@ from dateutil.parser import parse
 
 from Window.update_ui import Ui_Update_UI
 from info import INTERFACE, CURRENT_VERSION, DOWNLOAD_PAGE
+from functions import INSTALL_FOLDER, UPDATES_FOLDER
 
 
 class Check_Update(QThread):
@@ -137,7 +138,7 @@ class Download_UpdatePack(QThread):
                 chunk_size = 1024  # 单次请求最大值
                 content_size = int(response.headers.get('content-length', 0))
                 data_count = 0
-                file_name = os.path.basename(self.download_url)  # 从链接中提取文件名
+                file_name = os.path.join(UPDATES_FOLDER, os.path.basename(self.download_url))
                 # 下载文件，并显示self.progress进度条
                 with open(file_name, "wb") as file:
                     for data in response.iter_content(chunk_size=chunk_size):
@@ -199,7 +200,7 @@ class UpdateWindow(QDialog, Ui_Update_UI):
                 if isinstance(value, datetime.date):
                     self.update_info_dic[key] = value.isoformat()
             # 导出 JSON 文件
-            with open('update_info.json', 'w', encoding='utf-8') as f:
+            with open(os.path.join(UPDATES_FOLDER, 'update_info.json'), 'w', encoding='utf-8') as f:
                 json.dump(self.update_info_dic, f, ensure_ascii=False, indent=4)
         except Exception as e:
             print(f"导出 JSON 文件时发生错误: {e}")
@@ -211,13 +212,13 @@ class UpdateWindow(QDialog, Ui_Update_UI):
         self.export_json()  # 导出json文件
         time.sleep(1)
         try:
-            os.startfile('sky.exe')
+            os.startfile(os.path.join(INSTALL_FOLDER, 'sky.exe'), cwd=UPDATES_FOLDER)
         except FileNotFoundError:
             self.label_2.setText('更新程序不存在！请手动解压更新文件！')
-            os.remove('update_info.json')  # 删除json文件
+            os.remove(os.path.join(UPDATES_FOLDER, 'update_info.json'))
         except OSError:
             self.label_2.setText(f'更新失败！请手动解压更新文件！')
-            os.remove('update_info.json')
+            os.remove(os.path.join(UPDATES_FOLDER, 'update_info.json'))
 
     def closeEvent(self, event):
         """关闭窗口时触发"""

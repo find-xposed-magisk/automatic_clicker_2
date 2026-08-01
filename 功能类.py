@@ -5,6 +5,7 @@ import os
 import random
 import re
 import sys
+import tempfile
 import time
 import tkinter as tk
 from datetime import datetime
@@ -30,8 +31,7 @@ from PySide6.QtWidgets import QWidget, QApplication
 from aip import AipOcr
 from dateutil.parser import parse
 
-from functions import get_str_now_time, line_number_increment
-from image_utils import patch_pyautogui_unicode_cv2
+from functions import TEMP_FOLDER, get_str_now_time, line_number_increment, patch_pyautogui_unicode_cv2
 from ini控制 import IniControl
 from 数据库操作 import DatabaseOperation
 from 网页操作 import WebOption
@@ -1520,7 +1520,7 @@ class FullScreenCapture:
     def parsing_ins_dic(self):
         """解析指令字典"""
         parameter_dic_ = eval(self.ins_dic.get("参数1（键鼠指令）"))
-        save_path = self.ins_dic.get("图像路径")
+        save_path = IniControl.resolve_resource_path(self.ins_dic.get("图像路径"))
         return parameter_dic_, save_path
 
     @staticmethod
@@ -1551,7 +1551,7 @@ class FullScreenCapture:
 
     def start_execute(self):
         parameter_dic_ = eval(self.ins_dic.get("参数1（键鼠指令）"))
-        save_path = self.ins_dic.get("图像路径")
+        save_path = IniControl.resolve_resource_path(self.ins_dic.get("图像路径"))
         screenshot_type = parameter_dic_.get("截图类型")
         screenshot = self.take_screenshot(screenshot_type, parameter_dic_.get("区域"))
         if parameter_dic_.get("截图后") == "保存到路径":
@@ -1734,19 +1734,22 @@ class VerificationCode:
     def ver_input(self, region, verify_type_, variable_name):
         """截图区域，识别验证码，输入验证码"""
         im = pyautogui.screenshot(region=region)
-        im_path = os.path.join(os.getcwd(), "ver.png")
-        im.save(os.path.join(os.getcwd(), "ver.png"))
-        # 使用base64编码
-        im_base64 = open(im_path, "rb").read()
-        code_, res = self.common_verify(image=im_base64, verify_type=verify_type_)
+        with tempfile.NamedTemporaryFile(suffix=".png", dir=TEMP_FOLDER, delete=False) as temp_file:
+            im_path = temp_file.name
+        try:
+            im.save(im_path)
+            with open(im_path, "rb") as image_file:
+                im_base64 = image_file.read()
+            code_, res = self.common_verify(image=im_base64, verify_type=verify_type_)
+        finally:
+            if os.path.exists(im_path):
+                os.remove(im_path)
         if code_ == 10000:
             self.out_mes.out_mes(f"识别出的验证码为：{res}", self.is_test)
         elif code_ == 10001:
             self.out_mes.out_mes(
                 "识别验证码失败，账户错误！请设置Token。", self.is_test
             )
-        # 释放资源
-        os.remove(im_path)
         if not self.is_test:  # 非测试模式下
             # 执行变量写入
             set_variable_value(variable_name, res)

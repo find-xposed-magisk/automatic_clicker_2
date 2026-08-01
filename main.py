@@ -27,8 +27,8 @@ from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 from system_hotkey import SystemHotkey
 
-from functions import get_str_now_time, is_hotkey_valid, \
-    show_window
+from functions import CONFIG_PATH, DATABASE_PATH, EXPORTS_FOLDER, LOGS_FOLDER, RESOURCE_FOLDER, \
+    ensure_data_directories, get_str_now_time, is_hotkey_valid, show_window
 from WindowControl.icon import Icon
 from main_work import CommandThread
 from WindowControl.分支执行窗口 import BranchWindow
@@ -198,16 +198,15 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
         def check_file_integrity():
             """检查文件完整性"""
-            app_path = get_current_folder()
             # 检查命令集.db文件是否存在
-            if not os.path.exists(os.path.join(app_path, "命令集.db")):
+            if not os.path.exists(DATABASE_PATH):
                 QMessageBox.critical(
                     self, "错误", "命令集.db文件不存在！\n请重新下载软件！", QMessageBox.StandardButton.Ok,
                     QMessageBox.StandardButton.NoButton
                 )
                 sys.exit(1)
             # 检查ini文件是否存在
-            if not os.path.exists(os.path.join(app_path, "config.ini")):
+            if not os.path.exists(CONFIG_PATH):
                 QMessageBox.critical(self, "错误", "config.ini文件不存在！\n请重新下载软件！",
                                      QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.NoButton)
                 sys.exit(1)
@@ -229,24 +228,23 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
     def check_file_integrity(self):
         """检查文件完整性"""
-        app_path = get_current_folder()
         # 检查ini文件是否存在
-        if not os.path.exists(os.path.join(app_path, "config.ini")):
+        if not os.path.exists(CONFIG_PATH):
             QMessageBox.critical(self, '致命错误', 'config.ini文件不存在！请重新下载！', QMessageBox.StandardButton.Ok,
                                  QMessageBox.StandardButton.NoButton)
             sys.exit(1)
         # 检查命令集.db文件是否存在
-        if not os.path.exists(os.path.join(app_path, "命令集.db")):
+        if not os.path.exists(DATABASE_PATH):
             QMessageBox.critical(self, '致命错误', '命令集.db文件不存在！请重新下载！', QMessageBox.StandardButton.Ok,
                                  QMessageBox.StandardButton.NoButton)
             sys.exit(1)
         # 检查开屏和qss文件夹是否存在
-        if not os.path.exists(os.path.join(app_path, 'flat')):
+        if not os.path.exists(os.path.join(RESOURCE_FOLDER, 'flat')):
             QMessageBox.critical(self, '致命错误', 'flat文件夹不存在！', QMessageBox.StandardButton.Ok,
                                  QMessageBox.StandardButton.NoButton)
             sys.exit(1)
         # 检查qss文件夹下是否有模型文件
-        model_files = os.listdir(os.path.join(app_path, 'flat'))
+        model_files = os.listdir(os.path.join(RESOURCE_FOLDER, 'flat'))
         if not any(x.endswith('.qss') for x in model_files) or not any(x.endswith('.png') for x in model_files):
             QMessageBox.critical(self, '致命错误', 'flat文件夹下没有文件！', QMessageBox.StandardButton.Ok,
                                  QMessageBox.StandardButton.NoButton)
@@ -819,10 +817,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
         def get_save_file_and_folder() -> tuple:
             """获取保存文件名和文件夹路径"""
-            # 获取资源文件夹路径作为默认路径，如果存在则使用用户的主目录
-            directory_folder_path = self.ini.extract_resource_folder_path()[0] \
-                if self.ini.extract_resource_folder_path() else os.path.expanduser("~")
-            directory_path = os.path.normpath(os.path.join(directory_folder_path, "指令数据.xlsx"))
+            directory_path = os.path.normpath(os.path.join(EXPORTS_FOLDER, "指令数据.xlsx"))
             # 获取保存文件名和文件夹路径
             file_path, _ = QFileDialog.getSaveFileName(
                 parent=self,
@@ -992,9 +987,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
         # 获取资源文件夹路径，如果不存在则使用用户的主目录
         if file_path == "资源文件夹路径":
-            directory_path = next(
-                (item for item in self.ini.extract_resource_folder_path()), os.path.expanduser("~")
-            )
+            directory_path = EXPORTS_FOLDER
             target_path, _ = QFileDialog.getOpenFileName(
                 parent=self,
                 caption="请选择指令备份文件",
@@ -1089,7 +1082,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         target_path = QFileDialog.getSaveFileName(
             parent=self,
             caption="请选择保存路径",
-            directory=os.path.join(os.path.expanduser("~"), "操作日志.txt"),
+            directory=os.path.join(LOGS_FOLDER, "操作日志.txt"),
             filter="(*.txt)",
         )
         # 判断是否选择了文件
@@ -1348,6 +1341,7 @@ class QSSLoader:
 
 
 if __name__ == "__main__":
+    ensure_data_directories()
     # 自适应高分辨率
     # 强制启用高 DPI 感知模式
     ini = IniControl()
@@ -1362,7 +1356,7 @@ if __name__ == "__main__":
     if share.attach():
         show_window(APP_NAME)  # 显示窗口
     if share.create(1):
-        flat_dir = os.path.join(get_current_folder(), "flat")
+        flat_dir = os.path.join(RESOURCE_FOLDER, "flat")
         splash = QSplashScreen(QPixmap(os.path.join(flat_dir, "开屏.png")))  # 创建启动界面
         splash.showMessage(
             "加载中......",

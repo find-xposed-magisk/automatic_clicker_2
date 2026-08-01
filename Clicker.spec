@@ -6,8 +6,8 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ('config.ini', '.'),
-        ('命令集.db', '.'),
+        ('data/config.ini', 'data'),
+        ('data/命令集.db', 'data'),
         ('flat/Combinear.qss', 'flat'),
         ('flat/开屏.png', 'flat'),
     ],
@@ -37,6 +37,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    contents_directory='.',
     uac_admin=True,
     icon=['clicker.ico'],
 )

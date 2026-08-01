@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from image_utils import normalize_png_filename, patch_pyautogui_unicode_cv2
+from functions import normalize_png_filename, patch_pyautogui_unicode_cv2
 
 
 class UnicodeFilenameTest(unittest.TestCase):
