@@ -97,7 +97,6 @@ def timer(func):
 
 class Main_window(QMainWindow, Ui_MainWindow):
     """主窗口"""
-    sigkeyhot = Signal(str, name="sigkeyhot")  # 自定义信号,用于快捷键
     clear_signal = Signal()  # 自定义信号，textEdit清空信息，防止在全局快捷键调用时程序崩溃
     show_branch_signal = Signal()  # 自定义信号，显示分支选择窗口，防止在全局快捷键调用时程序崩溃
 
@@ -179,7 +178,6 @@ class Main_window(QMainWindow, Ui_MainWindow):
         # 设置全局快捷键,用于执行指令的终止
         self.clear_signal.connect(self.clear_textEdit)
         self.show_branch_signal.connect(lambda: self.show_windows("分支选择"))
-        self.sigkeyhot.connect(self.global_shortcut_key)
         self.hk_stop = SystemHotkey()
         # 加载上次的指令表格
         self.get_data()
@@ -1274,10 +1272,6 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.show_branch_signal.emit()
             # 将焦点切换到分支选择窗口
             self.branch_win.activateWindow()
-
-    def sendkeyevent(self, i_str):
-        """发送热键信号,将外部信号，转化成qt信号,用于全局热键"""
-        self.sigkeyhot.emit(i_str)
 
     def send_message(self, message):
         """向日志窗口发送信息"""

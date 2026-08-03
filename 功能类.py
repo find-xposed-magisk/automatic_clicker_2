@@ -4,7 +4,6 @@ import json
 import os
 import random
 import re
-import sys
 import tempfile
 import time
 import tkinter as tk
@@ -49,33 +48,11 @@ patch_pyautogui_unicode_cv2()
 #                     '异常处理': elem_[8]
 #                 }
 
-def exit_main_work():
-    sys.exit()
-
-
-def get_variable_info(return_type: str = "dict"):
-    """获取变量信息"""
-    db = DatabaseOperation()
-    return db.get_variable_info(return_type)
-
-
-def set_variable_value(variable_name: str, variable_value: str):
-    """设置变量值"""
-    db = DatabaseOperation()
-    db.set_variable_value(variable_name, variable_value)
-
-
-def get_setting_data(*options: str):
-    """从数据库获取设置数据。"""
-    db = DatabaseOperation()
-    return db.get_setting_data(*options)
-
-
 def sub_variable(text: str):
     """将text中的变量替换为变量值"""
     new_text = text
     if ("☾" in text) and ("☽" in text):
-        variable_dic = get_variable_info("dict")
+        variable_dic = DatabaseOperation().get_variable_info("dict")
         for key, value in variable_dic.items():
             new_text = new_text.replace(f"☾{key}☽", str(value))
     return new_text
@@ -142,7 +119,7 @@ class OutputMessage:
     def out_mes(self, message: str, is_test: bool = False):
         """输出信息,测试时输出到文本框，非测试时输出到主窗口"""
         if not is_test:
-            self.command_thread.show_message(f"----{message}")
+            self.command_thread.send_message.emit(f"----{message}")
         elif is_test:
             self.navigation.textBrowser.append(f"{get_str_now_time()}\t{message}")
         QApplication.processEvents()
@@ -167,7 +144,7 @@ class ImageClick:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        setting_data_dic = get_setting_data(
+        setting_data_dic = DatabaseOperation().get_setting_data(
             "持续时间", "时间间隔", "暂停时间"
         )
         self.duration = float(setting_data_dic.get("持续时间"))
@@ -361,7 +338,7 @@ class MultipleImagesClick:
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
         self.db = DatabaseOperation()
-        setting_data_dic = get_setting_data(
+        setting_data_dic = self.db.get_setting_data(
             "持续时间", "时间间隔", "暂停时间"
         )
         self.duration = float(setting_data_dic.get("持续时间"))
@@ -490,7 +467,7 @@ class CoordinateClick:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        setting_data_dic = get_setting_data(
+        setting_data_dic = DatabaseOperation().get_setting_data(
             "持续时间", "时间间隔", "暂停时间"
         )
         self.duration = float(setting_data_dic.get("持续时间"))
@@ -700,7 +677,7 @@ class RollerSlide:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.time_sleep = float(get_setting_data("暂停时间"))
+        self.time_sleep = float(DatabaseOperation().get_setting_data("暂停时间"))
         self.out_mes = outputmessage  # 用于输出信息
         self.ins_dic = ins_dic  # 指令字典
         self.is_test = False  # 是否测试
@@ -756,7 +733,7 @@ class TextInput:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        setting_data_dic = get_setting_data(
+        setting_data_dic = DatabaseOperation().get_setting_data(
             "时间间隔", "暂停时间")
         self.interval = float(setting_data_dic.get("时间间隔"))
         self.time_sleep = float(setting_data_dic.get("暂停时间"))
@@ -796,7 +773,7 @@ class MoveMouse:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        setting_data_dic = get_setting_data(
+        setting_data_dic = DatabaseOperation().get_setting_data(
             "持续时间", "暂停时间")
         self.duration = float(setting_data_dic.get("持续时间"))
         self.time_sleep = float(setting_data_dic.get("暂停时间"))
@@ -885,7 +862,7 @@ class MoveMouse:
 
     def variable_coordinates(self, var_name):
         """变量坐标"""
-        var_value = get_variable_info("dict").get(var_name)
+        var_value = DatabaseOperation().get_variable_info("dict").get(var_name)
         try:
             x, y = var_value.split(",")
             pyautogui.moveTo(int(x), int(y), duration=0)
@@ -902,7 +879,7 @@ class PressKeyboard:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.time_sleep = float(get_setting_data(
+        self.time_sleep = float(DatabaseOperation().get_setting_data(
             "暂停时间"))
         self.out_mes = outputmessage
         # 指令字典
@@ -947,7 +924,7 @@ class MiddleActivation:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.time_sleep = float(get_setting_data("暂停时间"))
+        self.time_sleep = float(DatabaseOperation().get_setting_data("暂停时间"))
         # 主窗口
         self.out_mes = outputmessage
         # 指令字典
@@ -996,7 +973,7 @@ class MouseClick:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.time_sleep = float(get_setting_data("暂停时间"))
+        self.time_sleep = float(DatabaseOperation().get_setting_data("暂停时间"))
         self.out_mes = outputmessage
         # 指令字典
         self.ins_dic = ins_dic
@@ -1050,7 +1027,7 @@ class InformationEntry:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.time_sleep = float(get_setting_data("暂停时间"))
+        self.time_sleep = float(DatabaseOperation().get_setting_data("暂停时间"))
         # 主窗口
         self.out_mes = outputmessage
         # 指令字典
@@ -1168,7 +1145,7 @@ class MouseDrag:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
         # 设置参数
-        self.time_sleep = float(get_setting_data("暂停时间"))
+        self.time_sleep = float(DatabaseOperation().get_setting_data("暂停时间"))
         # 主窗口
         self.out_mes = outputmessage
         # 指令字典
@@ -1286,7 +1263,7 @@ class VerificationCode:
         self.cycle_number = cycle_number
         # 云码平台
         self._custom_url = "http://api.jfbym.com/api/YmServer/customApi"
-        self._token = get_setting_data("云码Token")
+        self._token = DatabaseOperation().get_setting_data("云码Token")
         self._headers = {"Content-Type": "application/json"}
 
     def parsing_ins_dic(self):
@@ -1354,7 +1331,7 @@ class VerificationCode:
             )
         if not self.is_test:  # 非测试模式下
             # 执行变量写入
-            set_variable_value(variable_name, res)
+            DatabaseOperation().set_variable_value(variable_name, res)
             self.out_mes.out_mes(f"已将识别结果写入变量：{variable_name}", self.is_test)
 
     def start_execute(self):
@@ -1370,7 +1347,7 @@ class PlayVoice:
     """播放声音"""
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        self.time_sleep = float(get_setting_data("暂停时间"))
+        self.time_sleep = float(DatabaseOperation().get_setting_data("暂停时间"))
         self.out_mes = outputmessage  # 用于输出信息
         self.ins_dic = ins_dic  # 指令字典
         self.is_test = False  # 是否测试
@@ -1745,7 +1722,7 @@ class GetTimeValue:
         list_dic = self.parsing_ins_dic()  # 参数字典
         now_time_str = str(self.get_now_time(list_dic.get("时间格式")))
         if not self.is_test:
-            set_variable_value(list_dic.get("变量名称"), now_time_str)
+            DatabaseOperation().set_variable_value(list_dic.get("变量名称"), now_time_str)
             self.out_mes.out_mes(f'获取到的值为：{now_time_str}', self.is_test)
             self.out_mes.out_mes(
                 f'已获取当前时间并赋值给变量：{list_dic.get("变量名称")}', self.is_test
@@ -1824,7 +1801,7 @@ class GetExcelCellValue:
 
     def send_out_message(self, cell_value, list_dic):
         if not self.is_test:
-            set_variable_value(list_dic.get("变量名称"), cell_value)
+            DatabaseOperation().set_variable_value(list_dic.get("变量名称"), cell_value)
             self.out_mes.out_mes(
                 f'已获取单元格的值并赋值给变量：{list_dic.get("变量名称")}',
                 self.is_test,
@@ -1870,7 +1847,7 @@ class GetDialogValue:
         """开始执行鼠标点击事件"""
         ins_dic = self.parsing_ins_dic()  # 解析指令字典
         text = self.gets_text_from_dialog(ins_dic)
-        set_variable_value(ins_dic.get("变量名称"), text)  # 执行变量写入
+        DatabaseOperation().set_variable_value(ins_dic.get("变量名称"), text)  # 执行变量写入
         self.out_mes.out_mes(
             f'已获取对话框的值并赋值给变量：{ins_dic.get("变量名称")}', self.is_test
         )
@@ -1904,7 +1881,7 @@ class GetClipboard:
         if text != "":
             self.out_mes.out_mes(f'已获取剪贴板的值：{text}', self.is_test)
             if not self.is_test:
-                set_variable_value(variable_name, text)
+                DatabaseOperation().set_variable_value(variable_name, text)
                 self.out_mes.out_mes(
                     f'已将值赋予变量：{variable_name}', self.is_test
                 )
@@ -1949,7 +1926,7 @@ class ContrastVariables:
     def start_execute(self):
         """开始执行鼠标点击事件"""
         ins_dic = self.parsing_ins_dic()
-        variable_dic = get_variable_info("dict")  # 获取变量字典
+        variable_dic = DatabaseOperation().get_variable_info("dict")  # 获取变量字典
         # 获取变量名称
         variable1_name = ins_dic.get("变量1")
         variable2_name = ins_dic.get("变量2")
@@ -2031,7 +2008,7 @@ class RunPython:
         """将text中的变量替换为变量值"""
         new_text = text
         if ("☾" in text) and ("☽" in text):
-            variable_dic = get_variable_info("dict")
+            variable_dic = DatabaseOperation().get_variable_info("dict")
             for key, value in variable_dic.items():
                 new_text = new_text.replace(f"☾{key}☽", str(f'"{value}"'))
         return new_text
@@ -2054,7 +2031,7 @@ class RunPython:
             result = globals_dict.get(ins_dic.get("返回名称"), None)
             if result is not None:
                 if not self.is_test:  # 不是测试时,将结果赋值给变量
-                    set_variable_value(ins_dic.get("变量名称"), result)
+                    DatabaseOperation().set_variable_value(ins_dic.get("变量名称"), result)
             self.out_mes.out_mes(f"已执行Python，返回：{result}", self.is_test)
         except Exception as e:
             print(e)
@@ -2224,7 +2201,7 @@ class TextRecognition:
             if ocr_text is not None:  # 如果识别成功
                 self.out_mes.out_mes(f"OCR识别结果：{ocr_text}", self.is_test)
                 if not self.is_test:  # 如果不是测试
-                    set_variable_value(list_dic["变量名称"], ocr_text)
+                    self.db.set_variable_value(list_dic["变量名称"], ocr_text)
                     self.out_mes.out_mes(
                         f'已将OCR识别结果赋值给变量：{list_dic["变量名称"]}', self.is_test
                     )
@@ -2289,7 +2266,7 @@ class GetMousePositon:
         self.out_mes.out_mes(f"已将当前鼠标位置赋值给变量：{var}", self.is_test)
         str_mouse_position = f"{mouse_position[0]}, {mouse_position[1]}"
         # 设置变量池中的值
-        set_variable_value(var, str_mouse_position)
+        DatabaseOperation().set_variable_value(var, str_mouse_position)
 
 
 class WindowFocusWait:

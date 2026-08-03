@@ -36,7 +36,7 @@ class CommandThread(QThread):
         self.branch_name_index: int = 0  # 分支表名索引
         self.run_mode: tuple = ('全部指令', 0)  # 运行模式
         # 读取数据库设置
-        self.time_sleep = float(get_setting_data('暂停时间'))
+        self.time_sleep = float(self.db.get_setting_data('暂停时间'))
         self.branch_table_name: list = []
         # 互斥锁,用于暂停线程
         self.mutex = QMutex()
@@ -58,10 +58,6 @@ class CommandThread(QThread):
         :param number: 循环次数，-1为无限循环"""
         self.number_cycles = number
 
-    def show_message(self, message):
-        """显示消息"""
-        self.send_message.emit(message)
-
     def run(self):
         """执行指令"""
         self.start_state = True
@@ -71,7 +67,7 @@ class CommandThread(QThread):
         current_index: int = 0
         # 检查 self.run_mode 是否为空
         if not self.run_mode:
-            self.show_message("运行模式未设置")
+            self.send_message.emit("运行模式未设置")
             return
         # 不断尝试获取指令列表，直到成功
         while True:
@@ -86,7 +82,7 @@ class CommandThread(QThread):
                 current_index = self.run_mode[1]
             # 如果获取失败，等待一段时间再尝试
             if list_instructions is None:
-                self.show_message("未能从数据库中获取指令，重试中...")
+                self.send_message.emit("未能从数据库中获取指令，重试中...")
                 time.sleep(0.1)  # 等待5秒再重试
             else:
                 break
@@ -100,8 +96,8 @@ class CommandThread(QThread):
                 (loop_type == '有限循环' and self.number <= self.number_cycles):
             # 执行指令集中的指令
             self.execute_instructions(self.branch_name_index, current_index, list_instructions)
-            self.show_message('换行')
-            self.show_message(f'完成第{self.number}次循环')
+            self.send_message.emit('换行')
+            self.send_message.emit(f'完成第{self.number}次循环')
             self.number += 1
             time.sleep(self.time_sleep)
 
@@ -205,8 +201,8 @@ class CommandThread(QThread):
                     if cmd_type in command_mapping:
                         command_class, *args = command_mapping[cmd_type]
                         command_instance = command_class(*args)
-                        self.show_message('换行')
-                        self.show_message(f'执行ID为{str(dict(dic_)["ID"])}的指令：{cmd_type}')
+                        self.send_message.emit('换行')
+                        self.send_message.emit(f'执行ID为{str(dict(dic_)["ID"])}的指令：{cmd_type}')
                         command_instance.start_execute()
 
                     # 执行完毕后，跳转到下一条指令
@@ -222,13 +218,13 @@ class CommandThread(QThread):
 
                     # 自动跳过功能
                     if exception_handling == '自动跳过':
-                        self.show_message(f'ID为{str_id}的指令执行异常，已自动跳过。')
+                        self.send_message.emit(f'ID为{str_id}的指令执行异常，已自动跳过。')
                         current_index += 1
 
                     # 提示异常并暂停
                     elif exception_handling == '提示异常并暂停':
                         self.db.system_prompt_tone('执行异常')
-                        self.show_message(f'ID为{str_id}的指令执行异常，已提示异常并暂停。')
+                        self.send_message.emit(f'ID为{str_id}的指令执行异常，已提示异常并暂停。')
                         # 弹出带有OK按钮的提示框
                         choice = pymsgbox.confirm(
                             text=f'ID为{str_id}的指令执行异常！\n是否重试？\n\n错误类型：{info_e}',
@@ -246,7 +242,7 @@ class CommandThread(QThread):
                     # 抛出异常并停止
                     elif exception_handling == '提示异常并停止':
                         self.db.system_prompt_tone('执行异常')
-                        self.show_message(f'ID为{str_id}的指令执行异常，已提示异常并停止。')
+                        self.send_message.emit(f'ID为{str_id}的指令执行异常，已提示异常并停止。')
                         # 弹出提示框
                         pymsgbox.alert(
                             text=f'ID为{str_id}的指令抛出异常！\n\n错误类型：{info_e}',
@@ -260,14 +256,14 @@ class CommandThread(QThread):
                     # 终止所有任务
                     elif exception_handling == '终止所有任务':
                         self.db.system_prompt_tone('执行异常')
-                        self.show_message(f'ID为{str_id}的指令触发‘终止流程’指令。')
+                        self.send_message.emit(f'ID为{str_id}的指令触发‘终止流程’指令。')
                         current_index += 1
                         self.start_state = False
                         break
 
                     # 跳转分支指令
                     else:  # 跳转分支
-                        self.show_message(f'转到分支：{exception_handling}')
+                        self.send_message.emit(f'转到分支：{exception_handling}')
                         target_branch_name = exception_handling.split('-')[0]  # 分支表名
                         # 目标分支表名在分支表名中的索引
                         self.branch_table_name = self.db.get_branch_info(True)
@@ -280,5 +276,5 @@ class CommandThread(QThread):
                         break
 
             except IndexError:
-                self.show_message(f'无法进行分支跳转')
+                self.send_message.emit('无法进行分支跳转')
                 break

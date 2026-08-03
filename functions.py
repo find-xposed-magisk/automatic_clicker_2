@@ -103,11 +103,6 @@ def get_resource_folder() -> str:
     return os.path.dirname(os.path.abspath(__file__))
 
 
-def get_current_folder() -> str:
-    """兼容旧调用，返回只读程序资源目录。"""
-    return get_resource_folder()
-
-
 INSTALL_FOLDER = get_install_folder()
 RESOURCE_FOLDER = get_resource_folder()
 DATA_FOLDER = os.path.join(INSTALL_FOLDER, "data")
