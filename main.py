@@ -33,7 +33,6 @@ from functions import EXPORTS_FOLDER, LOGS_FOLDER, RESOURCE_FOLDER, \
 from WindowControl.icon import Icon
 from main_work import CommandThread
 from WindowControl.分支执行窗口 import BranchWindow
-from 功能类 import close_browser
 from WindowControl.导航窗口功能 import Na
 from 数据库操作 import *
 from Window.about_ui import Ui_About
@@ -51,7 +50,6 @@ collections.Iterable = collections.abc.Iterable
 
 
 # todo: 指令可编译为python代码
-# todo: 从微信获取变量
 # todo: 可暂时禁用指令功能
 # todo: win通知指令
 # todo: excel指令集
@@ -71,7 +69,6 @@ collections.Iterable = collections.abc.Iterable
 # todo: 后台截图点击指令
 # done: 命令添加窗口不能缩小
 # done: 图像点击位置可设置随机范围
-# done: 网页录入的指令没有替换变量的值
 
 # https://blog.csdn.net/qq_41567921/article/details/134813496
 
@@ -1309,7 +1306,6 @@ class Main_window(QMainWindow, Ui_MainWindow):
             QApplication.processEvents()
         self.db.system_prompt_tone("线程结束")  # 发出提示音
         self.db.show_normal_window_with_specified_title(self.windowTitle())  # 显示窗口
-        close_browser()  # 关闭浏览器驱动
 
     def check_update_software(self, show_MessageBox=True):
         """检查更新"""

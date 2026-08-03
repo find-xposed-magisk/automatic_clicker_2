@@ -14,6 +14,17 @@ from functions import DATA_FOLDER, DATABASE_PATH, IMAGES_FOLDER
 
 MAIN_FLOW = "主流程"
 
+REMOVED_COMMAND_TYPES = (
+    "打开网址",
+    "元素控制",
+    "网页录入",
+    "切换frame",
+    "保存表格",
+    "拖动元素",
+    "切换窗口",
+    "发送消息",
+)
+
 SETTING_TYPE_BASIC = "基础设置"
 SETTING_TYPE_THIRD_PARTY = "三方接口"
 SETTING_TYPE_SHORTCUT = "全局快捷键"
@@ -98,6 +109,15 @@ class DatabaseOperation:
                 "CREATE TABLE IF NOT EXISTS 资源文件夹 ("
                 "路径 TEXT NOT NULL PRIMARY KEY, 排序 INTEGER NOT NULL)"
             )
+            command_table_exists = cursor.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='命令'"
+            ).fetchone()
+            if command_table_exists:
+                placeholders = ",".join("?" for _ in REMOVED_COMMAND_TYPES)
+                cursor.execute(
+                    f"DELETE FROM 命令 WHERE 指令类型 IN ({placeholders})",
+                    REMOVED_COMMAND_TYPES,
+                )
             self._migrate_legacy_window_settings(cursor)
             self._migrate_legacy_global_parameters(cursor)
             cursor.execute(

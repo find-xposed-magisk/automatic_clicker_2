@@ -15,7 +15,6 @@ import keyboard
 import pygetwindow as gw
 import mouse
 import openpyxl
-import psutil
 import pyautogui
 import pymsgbox
 import pyperclip
@@ -33,10 +32,6 @@ from dateutil.parser import parse
 
 from functions import TEMP_FOLDER, get_str_now_time, line_number_increment, patch_pyautogui_unicode_cv2
 from 数据库操作 import DatabaseOperation
-from 网页操作 import WebOption
-
-sys.coinit_flags = 2  # STA
-from pywinauto import Application
 
 patch_pyautogui_unicode_cv2()
 
@@ -54,19 +49,8 @@ patch_pyautogui_unicode_cv2()
 #                     '异常处理': elem_[8]
 #                 }
 
-DRIVER = None  # 浏览器驱动
-
-
 def exit_main_work():
     sys.exit()
-
-
-def close_browser():
-    """关闭浏览器"""
-    global DRIVER
-    web_option = WebOption()
-    web_option.driver = DRIVER
-    web_option.close_browser()
 
 
 def get_variable_info(return_type: str = "dict"):
@@ -1179,120 +1163,6 @@ class InformationEntry:
             raise FileNotFoundError("没有找到单元格")
 
 
-class OpenWeb:
-    """打开网页"""
-
-    def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        self.out_mes = outputmessage  # 主窗口
-        self.ins_dic = ins_dic  # 指令字典
-        # 网页控制的部分功能
-        self.web_option = WebOption(self.out_mes)
-        self.is_test = False  # 是否测试
-        self.cycle_number = cycle_number  # 循环次数
-
-    def start_execute(self):
-        """执行重复次数"""
-        url = self.ins_dic.get("图像路径")
-        self.out_mes.out_mes("正在打开网页...等待中...", self.is_test)
-        global DRIVER
-        DRIVER = self.web_option.open_driver(url, True)
-        self.out_mes.out_mes("已打开网页", self.is_test)
-
-
-class EleControl:
-    """网页控制"""
-
-    def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        self.out_mes = outputmessage  # 主窗口
-        self.ins_dic = ins_dic  # 指令字典
-        # 网页控制的部分功能
-        self.web_option = WebOption(self.out_mes)
-        self.is_test = False  # 是否测试
-        self.cycle_number = cycle_number  # 循环次数
-
-    def parsing_ins_dic(self):
-        """解析指令字典"""
-        image_path = self.ins_dic.get("图像路径")
-        parameter_dic_ = eval(self.ins_dic.get("参数1（键鼠指令）"))
-        list_dic = {
-            "元素类型": parameter_dic_.get("元素类型"),
-            "元素值": image_path,
-            "操作类型": parameter_dic_.get("操作"),
-            "文本内容": sub_variable(parameter_dic_.get("文本")),
-            "超时类型": parameter_dic_.get("超时类型"),
-        }
-        return list_dic
-
-    def start_execute(self):
-        """执行重复次数"""
-        list_ins_ = self.parsing_ins_dic()
-        # 执行网页操作
-        global DRIVER
-        self.web_option.driver = DRIVER
-        self.web_option.text = list_ins_.get("文本内容")
-        self.web_option.single_shot_operation(
-            action=list_ins_.get("操作类型"),
-            element_value_=list_ins_.get("元素值"),
-            element_type_=list_ins_.get("元素类型"),
-            timeout_type_=list_ins_.get("超时类型"),
-        )
-        self.out_mes.out_mes("已执行元素控制", self.is_test)
-
-
-class WebEntry:
-    """将Excel中的值录入网页"""
-
-    def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 主窗口
-        self.out_mes = outputmessage
-        # 指令字典
-        self.ins_dic = ins_dic
-        self.InformationEntry = InformationEntry(self.out_mes, self.ins_dic)
-        # 网页控制的部分功能
-        self.web_option = WebOption(self.out_mes)
-        self.is_test = False  # 是否测试
-        self.cycle_number = cycle_number  # 循环次数
-
-    def parsing_ins_dic(self):
-        """解析指令字典"""
-        image_path = get_available_path(self.ins_dic.get("图像路径"), self.out_mes, self.is_test)
-        parameter_dic_ = eval(self.ins_dic.get("参数1（键鼠指令）"))
-        list_dic = {
-            "工作簿路径": image_path,
-            "工作表名称": parameter_dic_.get("工作表"),
-            "元素类型": parameter_dic_.get("元素类型"),
-            "元素值": parameter_dic_.get("元素值"),
-            "单元格位置": parameter_dic_.get("单元格"),
-            "行号递增": eval(parameter_dic_.get("行号递增")),
-            "超时类型": parameter_dic_.get("超时类型"),
-        }
-        return list_dic
-
-    def start_execute(self):
-        """执行重复次数"""
-        list_ins_ = self.parsing_ins_dic()
-        # 获取excel表格中的值
-        cell_value = self.InformationEntry.extra_excel_cell_value(
-            list_ins_.get("工作簿路径"),
-            list_ins_.get("工作表名称"),
-            list_ins_.get("单元格位置"),
-            list_ins_.get("行号递增"),
-            self.cycle_number,
-        )
-        # 执行网页操作
-        global DRIVER
-        self.web_option.driver = DRIVER
-        self.web_option.text = cell_value
-        self.out_mes.out_mes("已获取到单元格值", self.is_test)
-        self.web_option.single_shot_operation(
-            action="输入内容",
-            element_value_=list_ins_.get("元素值"),
-            element_type_=list_ins_.get("元素类型"),
-            timeout_type_=list_ins_.get("超时类型"),
-        )
-        self.out_mes.out_mes("已执行信息录入", self.is_test)
-
-
 class MouseDrag:
     """鼠标拖拽"""
 
@@ -1347,156 +1217,6 @@ class MouseDrag:
         for _ in range(re_try):
             self.mouse_drag(start_position, end_position, int(duration_))
             time.sleep(self.time_sleep)
-
-
-class SaveForm:
-    """保存网页表格"""
-
-    def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 主窗口
-        self.out_mes = outputmessage
-        # 指令字典
-        self.ins_dic = ins_dic
-        self.is_test = False  # 是否测试
-        self.cycle_number = cycle_number
-        # 网页控制的部分功能
-        self.web_option = WebOption(self.out_mes)
-
-    def parsing_ins_dic(self):
-        """解析指令字典"""
-        element_value = dict(self.ins_dic)["图像路径"]
-        parameter_dic_ = eval(self.ins_dic.get("参数1（键鼠指令）"))
-        return {
-            "元素类型": parameter_dic_.get("元素类型"),
-            "元素值": element_value,
-            "工作簿路径": parameter_dic_.get("工作簿"),
-            "工作表名称": parameter_dic_.get("工作表"),
-            "超时类型": parameter_dic_.get("异常"),
-        }
-
-    def start_execute(self):
-        """执行重复次数"""
-        list_ins_ = self.parsing_ins_dic()
-        # 执行网页操作
-        global DRIVER
-        self.web_option.driver = DRIVER
-        self.web_option.single_shot_operation(
-            action="保存表格",
-            element_value_=list_ins_.get("元素值"),
-            element_type_=list_ins_.get("元素类型"),
-            timeout_type_=list_ins_.get("超时类型"),
-        )
-        self.out_mes.out_mes("已执行保存网页表格", self.is_test)
-
-
-class ToggleFrame:
-    """切换frame"""
-
-    def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 主窗口
-        self.out_mes = outputmessage
-        # 指令字典
-        self.ins_dic = ins_dic
-        self.is_test = False  # 是否测试
-        self.cycle_number = cycle_number
-        # 网页控制的部分功能
-        self.web_option = WebOption(self.out_mes)
-
-    def parsing_ins_dic(self):
-        """解析指令字典"""
-        parameter_dic_ = eval(self.ins_dic.get("参数1（键鼠指令）"))
-        instruction_type = parameter_dic_.get("指令类型")
-        list_dic = {
-            "切换类型": instruction_type,
-            "frame类型": parameter_dic_.get("frame类型") if instruction_type == "切换到指定frame" else None,
-            "frame值": parameter_dic_.get("frame值") if instruction_type == "切换到指定frame" else None,
-        }
-        return list_dic
-
-    def start_execute(self):
-        """执行重复次数"""
-        list_ins_ = self.parsing_ins_dic()
-        # 执行网页操作
-        self.web_option.switch_to_frame(
-            iframe_type=list_ins_.get("frame类型"),
-            iframe_value=list_ins_.get("frame值"),
-            switch_type=list_ins_.get("切换类型"),
-        )
-        self.out_mes.out_mes("已执行切换frame", self.is_test)
-
-
-class SwitchWindow:
-    """切换网页窗口"""
-
-    def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 主窗口
-        self.out_mes = outputmessage
-        # 指令字典
-        self.ins_dic = ins_dic
-        self.is_test = False  # 是否测试
-        self.cycle_number = cycle_number
-        # 网页控制的部分功能
-        self.web_option = WebOption(self.out_mes)
-
-    def parsing_ins_dic(self):
-        """解析指令字典"""
-        parameter_dic_ = eval(self.ins_dic.get("参数1（键鼠指令）"))
-        list_dic = {
-            "切换类型": parameter_dic_.get("窗口类型"),
-            "窗口值": parameter_dic_.get("窗口"),
-        }
-        return list_dic
-
-    def start_execute(self):
-        """执行重复次数"""
-        list_ins_ = self.parsing_ins_dic()
-        # 执行网页操作
-        self.web_option.switch_to_window(
-            window_type=list_ins_.get("切换类型"), window_value=list_ins_.get("窗口值")
-        )
-        self.out_mes.out_mes("已执行切换窗口", self.is_test)
-
-
-class DragWebElements:
-    """拖拽网页元素"""
-
-    def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 主窗口
-        self.out_mes = outputmessage
-        # 指令字典
-        self.ins_dic = ins_dic
-        self.is_test = False
-        self.cycle_number = cycle_number
-        # 网页控制的部分功能
-        self.web_option = WebOption(self.out_mes)
-
-    def parsing_ins_dic(self):
-        """解析指令字典"""
-        element_value = dict(self.ins_dic)["图像路径"]
-        parameter_dic_ = eval(self.ins_dic.get("参数1（键鼠指令）"))
-        return {
-            "元素类型": parameter_dic_.get("元素类型"),
-            "元素值": element_value,
-            "x": int(parameter_dic_.get('距离X')),
-            "y": int(parameter_dic_.get('距离Y')),
-            "超时类型": parameter_dic_.get("异常"),
-        }
-
-    def start_execute(self):
-        """执行重复次数"""
-        list_ins_ = self.parsing_ins_dic()
-        # 执行网页操作
-        global DRIVER
-        self.web_option.driver = DRIVER
-        self.web_option.distance_x = int(dict(list_ins_)["x"])
-        self.web_option.distance_y = int(dict(list_ins_)["y"])
-        self.web_option.single_shot_operation(
-            action="拖动元素",
-            element_value_=list_ins_.get("元素值"),
-            element_type_=list_ins_.get("元素类型"),
-            timeout_type_=list_ins_.get("超时类型"),
-        )
-        self.out_mes.out_mes("已执行拖拽网页元素", self.is_test)
 
 
 class FullScreenCapture:
@@ -1554,115 +1274,6 @@ class FullScreenCapture:
         self.out_mes.out_mes(message, self.is_test)
 
 
-class SendWeChat:
-    """发送微信消息"""
-
-    def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
-        self.time_sleep = float(get_setting_data("暂停时间"))
-        self.out_mes = outputmessage
-        # 指令字典
-        self.ins_dic = ins_dic
-        # 是否是测试
-        self.is_test = False
-        self.cycle_number = cycle_number
-
-    def parsing_ins_dic(self):
-        """解析指令字典"""
-        parameter_dic_ = eval(self.ins_dic.get("参数1（键鼠指令）"))
-        return {
-            "联系人": parameter_dic_.get("联系人"),
-            "消息内容": parameter_dic_.get("消息内容"),
-        }
-
-    @staticmethod
-    def get_pid(name):
-        """
-        作用：根据进程名获取进程pid
-        返回：返回匹配第一个进程的pid
-        """
-        pids = psutil.process_iter()
-        for pid in pids:
-            if pid.name() == name:
-                return pid.pid
-
-    def send_message_to_wechat(self, contact_person, message, repeat_times=1):
-        """向微信好友发送消息
-        :param contact_person: 联系人
-        :param message: 消息内容
-        :param repeat_times: 重复次数"""
-
-        def get_correct_message():
-            """获取正确的消息内容"""
-            if message == "从剪切板粘贴":
-                return pyperclip.paste()
-            elif message == "当前日期时间":
-                return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-            else:
-                return sub_variable(message)
-
-        def output_info(judge, message_=None, failure_info=None):
-            """向主窗口或na输出提示信息
-            :param failure_info:失败信息
-            :param judge: （成功、失败）
-            :param message_: 消息内容，可选"""
-            output_message = None
-            if judge == "成功":
-                output_message = (
-                    f"微信已发送消息：{message_}" if message_ else f"已发送消息"
-                )
-            elif judge == "失败":
-                output_message = f"{failure_info}"
-            self.out_mes.out_mes(output_message, self.is_test)
-
-        hwnd = self.get_pid("WeChat.exe")  # 获取微信的后台进程，检查微信是否在运行
-        new_message = get_correct_message()
-        try:
-            if hwnd is not None:
-                pyautogui.hotkey("ctrl", "alt", "w")  # 打开微信窗口
-                app = Application(backend="uia").connect(process=hwnd)
-                wechat_window = app.window(class_name="WeChatMainWndForPC")
-
-                # 找到指定联系人并点击
-                # 定位到主窗口
-                wx_win = app.window(class_name='WeChatMainWndForPC')
-                wx_chat_win = wx_win.child_window(title=contact_person, control_type="ListItem")
-                # 聚焦到所需的对话框
-                wx_chat_win.click_input()
-
-                for i in range(repeat_times):  # 重复次数
-                    pyperclip.copy(new_message)  # 将消息内容复制到剪切板
-                    pyautogui.hotkey("ctrl", "v")
-                    pyautogui.press("enter")  # 模拟按下键盘enter键，发送消息
-                    time.sleep(self.time_sleep)
-
-                wechat_window.minimize()  # 最小化窗口
-                output_info("成功", new_message)  # 向主窗口输出提示信息
-            else:
-                output_info(
-                    "失败", new_message, "未找到微信窗口，发送失败。"
-                )  # 向主窗口输出提示信息
-        except Exception as e:
-            print(e)
-            output_info(
-                "失败", new_message, f"发送失败，错误信息：{str(e)}"
-            )  # 向主窗口输出提示信息
-
-    def start_execute(self):
-        """执行重复次数"""
-        list_ins_ = self.parsing_ins_dic()
-        re_try = self.ins_dic.get("重复次数")
-        # 执行滚轮滑动
-        if re_try == 1:
-            self.send_message_to_wechat(
-                list_ins_.get("联系人"), list_ins_.get("消息内容")
-            )
-        elif re_try > 1:
-            self.send_message_to_wechat(
-                list_ins_.get("联系人"), list_ins_.get("消息内容"), re_try
-            )
-
-
 class VerificationCode:
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
@@ -1670,8 +1281,6 @@ class VerificationCode:
         self.out_mes = outputmessage
         # 指令字典
         self.ins_dic = ins_dic
-        # 网页控制的部分功能
-        self.web_option = WebOption(self.out_mes)
         # 是否是测试
         self.is_test = False
         self.cycle_number = cycle_number

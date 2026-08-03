@@ -9,7 +9,7 @@ from unittest.mock import patch
 from openpyxl import Workbook
 
 import functions
-from 数据库操作 import DatabaseOperation
+from 数据库操作 import DatabaseOperation, REMOVED_COMMAND_TYPES
 
 
 class DataPathTests(unittest.TestCase):
@@ -75,6 +75,26 @@ class DataPathTests(unittest.TestCase):
             }
             self.assertEqual(exported_settings["测试值"], "基础设置")
             self.assertEqual(exported_settings["apiKey"], "三方接口")
+
+    def test_removed_commands_are_deleted_from_existing_database(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            database_path = os.path.join(temporary_directory, "commands.db")
+            with contextlib.closing(sqlite3.connect(database_path)) as connection:
+                connection.execute("CREATE TABLE 命令(指令类型 TEXT NOT NULL)")
+                connection.executemany(
+                    "INSERT INTO 命令 VALUES (?)",
+                    [(command_type,) for command_type in REMOVED_COMMAND_TYPES]
+                    + [("图像点击",)],
+                )
+                connection.commit()
+
+            DatabaseOperation(database_path)
+
+            with contextlib.closing(sqlite3.connect(database_path)) as connection:
+                command_types = connection.execute(
+                    "SELECT 指令类型 FROM 命令 ORDER BY 指令类型"
+                ).fetchall()
+            self.assertEqual(command_types, [("图像点击",)])
 
     def test_legacy_excel_settings_are_not_imported(self):
         workbook = Workbook()

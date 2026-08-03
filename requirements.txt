@@ -47,7 +47,6 @@ pywin32==308
 pywin32-ctypes==0.2.3
 pywinauto==0.6.8
 requests==2.32.3
-selenium==4.25.0
 setuptools==75.2.0
 shiboken6==6.8.1.1
 six==1.16.0
@@ -59,7 +58,6 @@ trio-websocket==0.11.1
 typing_extensions==4.12.2
 tzdata==2024.2
 urllib3==2.2.3
-webdriver-manager==4.0.2
 websocket-client==1.8.0
 wsproto==1.2.0
 xlrd==2.0.1
