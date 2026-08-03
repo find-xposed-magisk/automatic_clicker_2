@@ -34,8 +34,6 @@ from 数据库操作 import DatabaseOperation
 
 patch_pyautogui_unicode_cv2()
 
-# from pywinauto.findwindows import ElementNotFoundError
-
 # dic_ = {
 #                     'ID': elem_[0],
 #                     '图像路径': elem_[1],

@@ -35,7 +35,6 @@ pymsgbox
 pyautogui
 mouse
 keyboard
-pywinauto
 pandas
 pillow
 openpyxl
@@ -54,7 +53,7 @@ xlrd
 ```
 ## 一键安装方法
 ```txt
-pip install PyQt5 pyttsx4 pymsgbox pyautogui mouse keyboard pywinauto pandas pillow openpyxl requests system_hotkey pygments opencv-python baidu-aip chardet nuitka pyinstaller python-dateutil psutil xlrd
+pip install PyQt5 pyttsx4 pymsgbox pyautogui mouse keyboard pandas pillow openpyxl requests system_hotkey pygments opencv-python baidu-aip chardet nuitka pyinstaller python-dateutil psutil xlrd
 ```
 # 贡献者
 FasterThanLight

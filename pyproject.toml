@@ -10,7 +10,6 @@ dependencies = [
     "pyautogui",
     "mouse",
     "keyboard",
-    "pywinauto",
     "pandas",
     "pillow",
     "openpyxl",

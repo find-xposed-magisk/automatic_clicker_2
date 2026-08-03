@@ -3290,8 +3290,7 @@ class Na(QWidget, Ui_navigation):
                 ("openpyxl", "Excel操作"),
                 ("requests", "HTTP请求"),
                 ("python-dateutil", "日期处理"),
-                ("psutil", "系统监控"),
-                ("pywinauto", "Windows自动化")
+                ("psutil", "系统监控")
             ]
             shortcut_win = ShortcutTable(self, title, data, 600)  # 快捷键说明窗口
             shortcut_win.setWindowTitle("库的使用")
@@ -3330,7 +3329,7 @@ class Na(QWidget, Ui_navigation):
                 "执行python代码......"
                 "\n\n已内置的第三方库："
                 "\npyttsx4、pymsgbox、pyautogui、mouse、keyboard、pandas、"
-                "pillow、openpyxl、requests、python-dateutil、psutil、pywinauto"
+                "pillow、openpyxl、requests、python-dateutil、psutil"
                 "\n\n点击帮助按钮查看库的使用"
                 "\n\n请去除代码中的"
                 "\nif __name__ == '__main__': "
