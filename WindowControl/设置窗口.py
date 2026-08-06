@@ -71,7 +71,6 @@ class Setting(QDialog, Ui_Setting):
                     raise Exception('无效的快捷键！')
 
         self.db.update_settings(
-            启动检查更新=str(True if self.checkBox.isChecked() else False),
             退出提醒清空指令=str(True if self.checkBox_2.isChecked() else False),
             系统提示音=str(True if self.checkBox_3.isChecked() else False),
             任务完成后显示主窗口=str(True if self.checkBox_4.isChecked() else False),
@@ -117,7 +116,6 @@ class Setting(QDialog, Ui_Setting):
             'secretKey',
             '云码Token'
         )
-        self.checkBox.setChecked(self.db.get_bool_setting('启动检查更新'))
         self.checkBox_2.setChecked(self.db.get_bool_setting('退出提醒清空指令'))
         self.checkBox_3.setChecked(self.db.get_bool_setting('系统提示音'))
         self.checkBox_4.setChecked(self.db.get_bool_setting('任务完成后显示主窗口'))

@@ -46,7 +46,6 @@ def get_setting_type(setting_item: str) -> str:
 
 DEFAULT_SETTINGS = {
     "图像匹配精度": "0.8",
-    "启动检查更新": "True",
     "退出提醒清空指令": "False",
     "系统提示音": "False",
     "显示工具栏": "False",
@@ -65,7 +64,7 @@ DEFAULT_SETTINGS = {
     "快捷键-暂停和恢复": "alt+f11",
 }
 
-REMOVED_SETTING_ITEMS = ("模式", "时间间隔", "持续时间", "暂停时间")
+REMOVED_SETTING_ITEMS = ("模式", "时间间隔", "持续时间", "暂停时间", "启动检查更新")
 
 LEGACY_WINDOW_SETTING_KEYS = (
     "Clicker",

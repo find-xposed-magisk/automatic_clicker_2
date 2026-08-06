@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'about.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.0
+## Created by: Qt User Interface Compiler version 6.11.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -51,27 +51,27 @@ class Ui_About(object):
         self.label_5.setObjectName(u"label_5")
         palette = QPalette()
         brush = QBrush(QColor(255, 0, 0, 255))
-        brush.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Active, QPalette.WindowText, brush)
-        palette.setBrush(QPalette.Active, QPalette.Text, brush)
+        brush.setStyle(Qt.BrushStyle.SolidPattern)
+        palette.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.WindowText, brush)
+        palette.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.Text, brush)
         brush1 = QBrush(QColor(255, 0, 0, 128))
-        brush1.setStyle(Qt.SolidPattern)
+        brush1.setStyle(Qt.BrushStyle.SolidPattern)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette.setBrush(QPalette.Active, QPalette.PlaceholderText, brush1)
+        palette.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.PlaceholderText, brush1)
 #endif
-        palette.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
-        palette.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.WindowText, brush)
+        palette.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.Text, brush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush1)
+        palette.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.PlaceholderText, brush1)
 #endif
         brush2 = QBrush(QColor(120, 120, 120, 255))
-        brush2.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Disabled, QPalette.WindowText, brush2)
-        palette.setBrush(QPalette.Disabled, QPalette.Text, brush2)
+        brush2.setStyle(Qt.BrushStyle.SolidPattern)
+        palette.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText, brush2)
+        palette.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text, brush2)
         brush3 = QBrush(QColor(0, 0, 0, 128))
-        brush3.setStyle(Qt.SolidPattern)
+        brush3.setStyle(Qt.BrushStyle.SolidPattern)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush3)
+        palette.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.PlaceholderText, brush3)
 #endif
         self.label_5.setPalette(palette)
         font = QFont()
@@ -119,40 +119,12 @@ class Ui_About(object):
 
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.pushButton = QPushButton(About)
-        self.pushButton.setObjectName(u"pushButton")
+        self.pushButton_2 = QPushButton(About)
+        self.pushButton_2.setObjectName(u"pushButton_2")
         font2 = QFont()
         font2.setFamilies([u"Microsoft YaHei"])
         font2.setBold(True)
-        font2.setItalic(False)
-        self.pushButton.setFont(font2)
-        self.pushButton.setStyleSheet(u"QPushButton {\n"
-"    background-color: red;\n"
-"    color: white;\n"
-"    border-radius: 10px; /* \u8bbe\u7f6e\u5706\u89d2\u534a\u5f84 */\n"
-"    font-family: 'Microsoft YaHei'; /* \u8bbe\u7f6e\u5b57\u4f53\u4e3a\u5fae\u8f6f\u96c5\u9ed1 */\n"
-"    font-size: 16px; /* \u8bbe\u7f6e\u5b57\u4f53\u5927\u5c0f\uff0c\u53ef\u4ee5\u6839\u636e\u9700\u8981\u8c03\u6574 */\n"
-"    padding: 5px 10px; /* \u8bbe\u7f6e\u5185\u8fb9\u8ddd\uff0c\u4f7f\u6309\u94ae\u770b\u8d77\u6765\u66f4\u7f8e\u89c2 */\n"
-"border: 2px solid transparent; /* \u8bbe\u7f6e\u8fb9\u6846\u4e3a\u900f\u660e */\n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background-color: rgb(170, 0, 0); /* \u8bbe\u7f6e\u9f20\u6807\u60ac\u505c\u65f6\u7684\u80cc\u666f\u989c\u8272 */\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: rgb(85, 85, 127); /* \u8bbe\u7f6e\u6309\u94ae\u6309\u4e0b\u65f6\u7684\u80cc\u666f\u989c\u8272 */\n"
-"}\n"
-"")
-
-        self.horizontalLayout_4.addWidget(self.pushButton)
-
-        self.pushButton_2 = QPushButton(About)
-        self.pushButton_2.setObjectName(u"pushButton_2")
-        font3 = QFont()
-        font3.setFamilies([u"Microsoft YaHei"])
-        font3.setBold(True)
-        self.pushButton_2.setFont(font3)
+        self.pushButton_2.setFont(font2)
         self.pushButton_2.setStyleSheet(u"QPushButton {\n"
 "    background-color: red;\n"
 "    color: white;\n"
@@ -175,15 +147,14 @@ class Ui_About(object):
         self.horizontalLayout_4.addWidget(self.pushButton_2)
 
         self.horizontalLayout_4.setStretch(0, 1)
-        self.horizontalLayout_4.setStretch(1, 1)
 
         self.verticalLayout_2.addLayout(self.horizontalLayout_4)
 
         self.label_3 = QLabel(About)
         self.label_3.setObjectName(u"label_3")
-        font4 = QFont()
-        font4.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
-        self.label_3.setFont(font4)
+        font3 = QFont()
+        font3.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
+        self.label_3.setFont(font3)
         self.label_3.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_3.setWordWrap(True)
 
@@ -195,7 +166,7 @@ class Ui_About(object):
         self.gridLayout_2.setVerticalSpacing(4)
         self.pushButton_3 = QPushButton(About)
         self.pushButton_3.setObjectName(u"pushButton_3")
-        self.pushButton_3.setFont(font3)
+        self.pushButton_3.setFont(font2)
         self.pushButton_3.setStyleSheet(u"QPushButton {\n"
 "    background-color: rgb(219, 58, 150); /* \u8bbe\u7f6e\u80cc\u666f\u989c\u8272\u4e3a\u7c89\u7ea2\u8272 */\n"
 "    color: white;\n"
@@ -283,10 +254,10 @@ class Ui_About(object):
 
         self.label_4 = QLabel(About)
         self.label_4.setObjectName(u"label_4")
-        font5 = QFont()
-        font5.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
-        font5.setPointSize(7)
-        self.label_4.setFont(font5)
+        font4 = QFont()
+        font4.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
+        font4.setPointSize(7)
+        self.label_4.setFont(font4)
         self.label_4.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_4.setWordWrap(True)
 
@@ -303,7 +274,6 @@ class Ui_About(object):
         self.label.setText("")
         self.label_5.setText(QCoreApplication.translate("About", u"Clicker", None))
         self.label_2.setText(QCoreApplication.translate("About", u"\u7248\u672c\uff1av0.25 Bate", None))
-        self.pushButton.setText(QCoreApplication.translate("About", u"\u68c0\u67e5\u66f4\u65b0", None))
         self.pushButton_2.setText(QCoreApplication.translate("About", u"\u53cd\u9988\u53ca\u5efa\u8bae", None))
         self.label_3.setText(QCoreApplication.translate("About", u"PyAutoGUI\u53ef\u89c6\u5316\uff0c\u81ea\u52a8\u5904\u7406\u9700\u8981\u5927\u91cf\u91cd\u590d\u64cd\u4f5c\u9f20\u6807\u952e\u76d8\u7684\u4e8b\u4ef6\u3002", None))
         self.pushButton_3.setText(QCoreApplication.translate("About", u"\u6350\u8d60\u652f\u6301\u5f00\u53d1\u8005", None))

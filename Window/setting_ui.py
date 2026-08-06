@@ -71,7 +71,7 @@ class Ui_Setting(object):
         self.lineEdit = QLineEdit(self.groupBox_3)
         self.lineEdit.setObjectName(u"lineEdit")
 
-        self.gridLayout_4.addWidget(self.lineEdit, 0, 1, 1, 1)
+        self.gridLayout_4.addWidget(self.lineEdit, 0, 0, 1, 2)
 
         self.label_15 = QLabel(self.groupBox_3)
         self.label_15.setObjectName(u"label_15")
@@ -262,15 +262,7 @@ class Ui_Setting(object):
         self.checkBox_2.setObjectName(u"checkBox_2")
         self.checkBox_2.setStyleSheet(u"")
 
-        self.gridLayout_3.addWidget(self.checkBox_2, 0, 1, 1, 1)
-
-        self.checkBox = QCheckBox(Setting)
-        self.checkBox.setObjectName(u"checkBox")
-        self.checkBox.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
-        self.checkBox.setStyleSheet(u"")
-        self.checkBox.setChecked(True)
-
-        self.gridLayout_3.addWidget(self.checkBox, 0, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.checkBox_2, 0, 0, 1, 2)
 
         self.checkBox_5 = QCheckBox(Setting)
         self.checkBox_5.setObjectName(u"checkBox_5")
@@ -321,7 +313,6 @@ class Ui_Setting(object):
         self.pushButton.setText(QCoreApplication.translate("Setting", u"\u5e94\u7528", None))
         self.checkBox_4.setText(QCoreApplication.translate("Setting", u"\u4efb\u52a1\u5b8c\u6210\u540e\u663e\u793a\u4e3b\u7a97\u53e3", None))
         self.checkBox_2.setText(QCoreApplication.translate("Setting", u"\u6bcf\u6b21\u9000\u51fa\u63d0\u793a\u6e05\u7a7a\u6307\u4ee4", None))
-        self.checkBox.setText(QCoreApplication.translate("Setting", u"\u6bcf\u6b21\u542f\u52a8\u68c0\u67e5\u66f4\u65b0", None))
         self.checkBox_5.setText(QCoreApplication.translate("Setting", u"\u9ad8\u5206\u8fa8\u7387\u5c4f\u5e55\u81ea\u9002\u5e94", None))
     # retranslateUi
 

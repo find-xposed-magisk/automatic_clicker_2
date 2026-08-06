@@ -16,6 +16,7 @@ class DataPathTests(unittest.TestCase):
     def test_source_data_is_under_project_folder(self):
         self.assertEqual(functions.DATA_FOLDER, os.path.join(functions.INSTALL_FOLDER, "data"))
         self.assertEqual(functions.DATABASE_PATH, os.path.join(functions.DATA_FOLDER, "命令集.db"))
+        self.assertFalse(hasattr(functions, "UPDATES_FOLDER"))
 
     def test_frozen_install_and_resource_folders_are_separate(self):
         executable = os.path.join("D:\\Portable Clicker", "Clicker.exe")

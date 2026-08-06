@@ -1219,7 +1219,6 @@ QPushButton:pressed {
      <string>帮助</string>
     </property>
     <addaction name="actionabout"/>
-    <addaction name="actionj"/>
     <addaction name="actionhelp"/>
     <addaction name="actionk"/>
    </widget>
@@ -1258,7 +1257,6 @@ QPushButton:pressed {
    <addaction name="separator"/>
    <addaction name="actions_2"/>
    <addaction name="actionhelp"/>
-   <addaction name="actionj"/>
    <addaction name="actionabout"/>
   </widget>
   <action name="actionabout">
@@ -1268,15 +1266,6 @@ QPushButton:pressed {
    </property>
    <property name="text">
     <string>关于</string>
-   </property>
-  </action>
-  <action name="actionj">
-   <property name="icon">
-    <iconset resource="../images.qrc">
-     <normaloff>:/按钮图标/Window/res/更新.png</normaloff>:/按钮图标/Window/res/更新.png</iconset>
-   </property>
-   <property name="text">
-    <string>检查更新</string>
    </property>
   </action>
   <action name="actionhelp">

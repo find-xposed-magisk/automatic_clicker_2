@@ -110,7 +110,6 @@ DATABASE_PATH = os.path.join(DATA_FOLDER, "命令集.db")
 IMAGES_FOLDER = os.path.join(DATA_FOLDER, "images")
 EXPORTS_FOLDER = os.path.join(DATA_FOLDER, "exports")
 LOGS_FOLDER = os.path.join(DATA_FOLDER, "logs")
-UPDATES_FOLDER = os.path.join(DATA_FOLDER, "updates")
 TEMP_FOLDER = os.path.join(DATA_FOLDER, "temp")
 
 
@@ -121,7 +120,6 @@ def ensure_data_directories() -> None:
         IMAGES_FOLDER,
         EXPORTS_FOLDER,
         LOGS_FOLDER,
-        UPDATES_FOLDER,
         TEMP_FOLDER,
     ):
         os.makedirs(folder, exist_ok=True)

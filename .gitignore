@@ -41,7 +41,5 @@ Clicker-test-file/
 !/data/exports/.gitkeep
 /data/logs/*
 !/data/logs/.gitkeep
-/data/updates/*
-!/data/updates/.gitkeep
 /data/temp/*
 !/data/temp/.gitkeep

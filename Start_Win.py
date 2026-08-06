@@ -37,7 +37,6 @@ from 数据库操作 import *
 from Window.about_ui import Ui_About
 from Window.mainwindow_ui import Ui_MainWindow
 from Window.参数窗口_ui import Ui_Param
-from update.自动更新 import Check_Update, UpdateWindow
 from WindowControl.设置窗口 import Setting
 from WindowControl.资源文件夹窗口 import Global_s
 from info import CURRENT_VERSION, MAIN_WEBSITE, ISSUE_WEBSITE, QQ_GROUP, QQ, APP_NAME, \
@@ -100,13 +99,6 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.check_file_integrity()  # 检查文件完整性
         self.add_recent_to_fileMenu()  # 将最近文件添加到菜单中
         self.branch_win = BranchWindow(self)  # 分支选择窗口
-        # 检查更新
-        self.update_thread = Check_Update(self)  # 自动更新线程
-        self.update_thread.show_update_signal.connect(self.update_Qmessage)
-        self.update_thread.show_update_window_signal.connect(self.update_window)
-        is_update = self.db.get_bool_setting("启动检查更新")
-        if is_update:
-            self.check_update_software(False)
         # 显示导不同的窗口
         self.pushButton.clicked.connect(
             lambda: self.show_windows("导航")
@@ -134,9 +126,6 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.actionf.triggered.connect(
             lambda: self.data_import("资源文件夹路径")
         )  # 导入数据
-        self.actionj.triggered.connect(
-            lambda: self.check_update_software(True)
-        )
         # 主窗体开始按钮
         self.pushButton_5.clicked.connect(lambda: self.global_shortcut_key("开始线程"))
         self.start_time = None
@@ -1288,33 +1277,12 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.db.system_prompt_tone("线程结束")  # 发出提示音
         self.db.show_normal_window_with_specified_title(self.windowTitle())  # 显示窗口
 
-    def check_update_software(self, show_MessageBox=True):
-        """检查更新"""
-        self.update_thread.set_show_info(show_MessageBox)
-        self.update_thread.start()
-
-    def update_Qmessage(self, message, message_type):
-        message_box = {
-            "警告": QMessageBox.warning,
-            "错误": QMessageBox.critical,
-            "信息": QMessageBox.information
-        }
-        message_box[message_type](self, '提示', message)
-
-    def update_window(self, update_info_dic_):
-        """显示更新窗口"""
-        update_win = UpdateWindow(self, update_info_dic_)
-        update_win.setModal(True)
-        update_win.exec_()
-
-
 class About(QDialog, Ui_About):
     """关于窗体"""
 
     def __init__(self, parent: Optional[Main_window] = None):
         super().__init__(parent)
         # 初始化窗体
-        self._parent = parent
         self.setupUi(self)
         self.db = getattr(parent, "db", None) or DatabaseOperation()
         install_window_state(self, self.db, self.windowTitle())
@@ -1327,13 +1295,6 @@ class About(QDialog, Ui_About):
         self.gitee_2.clicked.connect(
             lambda: QDesktopServices.openUrl(QUrl(Github_WEBSITE))
         )
-        parent_ = self._parent
-        if parent_ is not None:
-            self.pushButton.clicked.connect(
-                lambda: parent_.check_update_software(True)
-            )
-        else:
-            self.pushButton.setEnabled(False)
         self.pushButton_2.clicked.connect(
             lambda: QDesktopServices.openUrl(QUrl(ISSUE_WEBSITE))
         )
