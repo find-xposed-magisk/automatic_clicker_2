@@ -1,7 +1,7 @@
 # 项目名称
 Clicker-0.26-Bate（尚未发布）
 # 使用说明
-主文件为main.py，运行即可。部分功能仍在开发中，可能会出现一些问题。
+启动入口为 `main.py`，主窗口控制器位于 `Start_Win.py`。运行 `main.py` 即可启动程序。部分功能仍在开发中，可能会出现一些问题。
 
 ## 数据目录
 
@@ -19,7 +19,7 @@ data/
 
 迁移或备份时复制整个 `data` 文件夹即可。`flat`、`Window` 和图标等目录属于程序静态资源，不是用户数据。用户手动添加的外部资源目录和外部 Excel 文件仍保留原路径引用，不会自动搬移。
 
-核心文件为：main.py、WindowControl/导航窗口功能.py、main_work.py、功能类.py。
+核心文件为：main.py、Start_Win.py、WindowControl/导航窗口功能.py、main_work.py、功能类.py。
 ## 添加指令的步骤：
 1. 在导航页的页面中添加指令的控件（Window/导航窗口.ui）
 2. 在导航页的页面中添加指令的处理函数（WindowControl/导航窗口功能.py）
