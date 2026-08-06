@@ -123,31 +123,10 @@ class OutputMessage:
         QApplication.processEvents()
 
 
-def timer(func):
-    def func_wrapper(*args, **kwargs):
-        from time import time
-
-        time_start = time()
-        result = func(*args, **kwargs)
-        time_end = time()
-        time_spend = time_end - time_start
-        print("%s cost time: %.3f s" % (func.__name__, time_spend))
-        return result
-
-    return func_wrapper
-
-
 class ImageClick:
     """图像点击"""
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
-        setting_data_dic = DatabaseOperation().get_setting_data(
-            "持续时间", "时间间隔", "暂停时间"
-        )
-        self.duration = float(setting_data_dic.get("持续时间"))
-        self.interval = float(setting_data_dic.get("时间间隔"))
-        self.time_sleep = float(setting_data_dic.get("暂停时间"))
         self.out_mes = outputmessage  # 用于输出信息到不同的窗口
         self.ins_dic = ins_dic  # 指令字典
         self.is_test = False  # 是否测试
@@ -230,7 +209,6 @@ class ImageClick:
                 precision=ins_dic.get("精度"),
                 click_position=ins_dic.get("点击偏移位置")
             )
-            time.sleep(self.time_sleep)
 
     def execute_click(
             self,
@@ -262,8 +240,6 @@ class ImageClick:
                         location.x + new_click_position[0],
                         location.y + new_click_position[1],
                         clicks=click_times,
-                        interval=self.interval,
-                        duration=self.duration,
                         button=lOrR,
                     )
                 elif self.is_test:
@@ -334,14 +310,7 @@ class MultipleImagesClick:
     """多图点击"""
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
         self.db = DatabaseOperation()
-        setting_data_dic = self.db.get_setting_data(
-            "持续时间", "时间间隔", "暂停时间"
-        )
-        self.duration = float(setting_data_dic.get("持续时间"))
-        self.interval = float(setting_data_dic.get("时间间隔"))
-        self.time_sleep = float(setting_data_dic.get("暂停时间"))
         self.out_mes = outputmessage  # 用于输出信息到不同的窗口
         self.ins_dic: dict = ins_dic  # 指令字典
 
@@ -390,8 +359,6 @@ class MultipleImagesClick:
                 skip=ins_dic.get("异常"),
                 precision=ins_dic.get("精度"),
             )
-            if reTry > 1:
-                time.sleep(self.time_sleep)
 
     def execute_click(self, click_times, gray_rec, lOrR, img_path_list, skip, precision, area=None):
         """执行鼠标点击事件
@@ -415,8 +382,6 @@ class MultipleImagesClick:
                         location.x,
                         location.y,
                         clicks=click_times,
-                        interval=self.interval,
-                        duration=self.duration,
                         button=lOrR,
                     )
                 elif self.is_test:
@@ -464,13 +429,6 @@ class CoordinateClick:
     """坐标点击"""
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
-        setting_data_dic = DatabaseOperation().get_setting_data(
-            "持续时间", "时间间隔", "暂停时间"
-        )
-        self.duration = float(setting_data_dic.get("持续时间"))
-        self.interval = float(setting_data_dic.get("时间间隔"))
-        self.time_sleep = float(setting_data_dic.get("暂停时间"))
         self.out_mes = outputmessage  # 用于输出信息
         self.ins_dic = ins_dic  # 指令字典
         self.is_test = False  # 是否测试
@@ -503,15 +461,12 @@ class CoordinateClick:
         # 执行坐标点击
         for _ in range(reTry):
             self.coor_click(click_times, lOrR, x__, y__)
-            time.sleep(self.time_sleep)
 
     def coor_click(self, click_times, lOrR, x__, y__):
         pyautogui.click(
             x=x__,
             y=y__,
             clicks=click_times,
-            interval=self.interval,
-            duration=self.duration,
             button=lOrR,
         )
         if click_times == 0:
@@ -674,8 +629,6 @@ class RollerSlide:
     """滑动鼠标滚轮"""
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
-        self.time_sleep = float(DatabaseOperation().get_setting_data("暂停时间"))
         self.out_mes = outputmessage  # 用于输出信息
         self.ins_dic = ins_dic  # 指令字典
         self.is_test = False  # 是否测试
@@ -716,7 +669,6 @@ class RollerSlide:
             while i < re_try + 1:
                 self.wheel_slip(scroll_direction, scroll_distance, type_)
                 i += 1
-                time.sleep(self.time_sleep)
 
     def wheel_slip(self, scroll_direction, scroll_distance, type_):
         """滚轮滑动事件"""
@@ -730,11 +682,6 @@ class TextInput:
     """输入文本"""
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
-        setting_data_dic = DatabaseOperation().get_setting_data(
-            "时间间隔", "暂停时间")
-        self.interval = float(setting_data_dic.get("时间间隔"))
-        self.time_sleep = float(setting_data_dic.get("暂停时间"))
         self.out_mes = outputmessage
         # 指令字典
         self.ins_dic = ins_dic
@@ -758,23 +705,16 @@ class TextInput:
         if not special_control_judgment:
             pyperclip.copy(value_str)
             pyautogui.hotkey("ctrl", "v")
-            time.sleep(self.time_sleep)
             self.out_mes.out_mes("执行文本输入：%s" % value_str, self.is_test)
         elif special_control_judgment:
-            pyautogui.typewrite(value_str, interval=self.interval)
+            pyautogui.typewrite(value_str)
             self.out_mes.out_mes("执行模拟手动文本输入：%s" % value_str, self.is_test)
-            time.sleep(self.time_sleep)
 
 
 class MoveMouse:
     """移动鼠标"""
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
-        setting_data_dic = DatabaseOperation().get_setting_data(
-            "持续时间", "暂停时间")
-        self.duration = float(setting_data_dic.get("持续时间"))
-        self.time_sleep = float(setting_data_dic.get("暂停时间"))
         self.out_mes = outputmessage  # 用于输出信息
         # 指令字典
         self.ins_dic = ins_dic
@@ -787,7 +727,6 @@ class MoveMouse:
         # 执行滚轮滑动
         for _ in range(re_try):
             self.mouse_move_fun()  # 执行鼠标移动
-            time.sleep(self.time_sleep)
 
     def mouse_move_fun(self) -> None:
         """执行鼠标移动"""
@@ -816,9 +755,7 @@ class MoveMouse:
         directions = {"↑": (0, -1), "↓": (0, 1), "←": (-1, 0), "→": (1, 0)}
         if direction in directions:
             x, y = directions.get(direction)
-            pyautogui.moveRel(
-                x * int(distance), y * int(distance), duration=self.duration
-            )
+            pyautogui.moveRel(x * int(distance), y * int(distance))
         self.out_mes.out_mes(
             "直线移动鼠标%s%s像素距离" % (direction, distance), self.is_test
         )
@@ -876,9 +813,6 @@ class PressKeyboard:
     """模拟按下键盘"""
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
-        self.time_sleep = float(DatabaseOperation().get_setting_data(
-            "暂停时间"))
         self.out_mes = outputmessage
         # 指令字典
         self.ins_dic = ins_dic
@@ -898,7 +832,6 @@ class PressKeyboard:
         re_try, keys, duration = self.parsing_ins_dic()
         for _ in range(re_try):
             self.press_keyboard(keys, duration)
-            time.sleep(self.time_sleep)
 
     def press_keyboard(self, key, duration):
         """键盘按键事件
@@ -921,8 +854,6 @@ class MiddleActivation:
     """鼠标中键激活"""
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
-        self.time_sleep = float(DatabaseOperation().get_setting_data("暂停时间"))
         # 主窗口
         self.out_mes = outputmessage
         # 指令字典
@@ -939,7 +870,6 @@ class MiddleActivation:
         # 执行滚轮滑动
         for _ in range(re_try):
             self.middle_mouse_button(command_type, click_count)
-            time.sleep(self.time_sleep)
 
     def middle_mouse_button(self, command_type, click_times):
         """中键点击事件"""
@@ -970,8 +900,6 @@ class MouseClick:
     """鼠标在当前位置点击"""
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
-        self.time_sleep = float(DatabaseOperation().get_setting_data("暂停时间"))
         self.out_mes = outputmessage
         # 指令字典
         self.ins_dic = ins_dic
@@ -996,7 +924,6 @@ class MouseClick:
             self.simulated_mouse_click(
                 click_times, button_type, duration, interval, auxiliary
             )
-            time.sleep(self.time_sleep)
 
     def simulated_mouse_click(self, click_times, lOrR, duration, interval, auxiliary):
         """模拟鼠标点击
@@ -1024,8 +951,6 @@ class InformationEntry:
     """从Excel中录入信息到窗口"""
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
-        self.time_sleep = float(DatabaseOperation().get_setting_data("暂停时间"))
         # 主窗口
         self.out_mes = outputmessage
         # 指令字典
@@ -1066,7 +991,6 @@ class InformationEntry:
         if re_try >= 1:
             for _ in range(re_try):
                 self.information_entry()
-                time.sleep(self.time_sleep)
 
     def information_entry(self):
         """信息录入"""
@@ -1142,8 +1066,6 @@ class MouseDrag:
     """鼠标拖拽"""
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
-        self.time_sleep = float(DatabaseOperation().get_setting_data("暂停时间"))
         # 主窗口
         self.out_mes = outputmessage
         # 指令字典
@@ -1191,7 +1113,6 @@ class MouseDrag:
         re_try = self.ins_dic.get("重复次数")
         for _ in range(re_try):
             self.mouse_drag(start_position, end_position, int(duration_))
-            time.sleep(self.time_sleep)
 
 
 class FullScreenCapture:
@@ -1345,7 +1266,6 @@ class PlayVoice:
     """播放声音"""
 
     def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        self.time_sleep = float(DatabaseOperation().get_setting_data("暂停时间"))
         self.out_mes = outputmessage  # 用于输出信息
         self.ins_dic = ins_dic  # 指令字典
         self.is_test = False  # 是否测试
@@ -1381,7 +1301,6 @@ class PlayVoice:
         reTry = self.ins_dic.get("重复次数")
         for _ in range(reTry):
             self.play_voice()
-            time.sleep(self.time_sleep)
 
     @staticmethod
     def system_prompt_tone(sound_type) -> None:

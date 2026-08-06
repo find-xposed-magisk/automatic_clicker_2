@@ -28,11 +28,8 @@ class Setting(QDialog, Ui_Setting):
         self.unregister_global_shortcut_keys()
 
         self.pushButton.clicked.connect(self.save_setting)  # 点击保存（应用）按钮
-        self.pushButton_3.clicked.connect(self.restore_default)  # 点击恢复至默认按钮
         self.pushButton_2.clicked.connect(lambda: self.open_link(BAIDU_OCR))  # 打开百度OCR链接
         self.pushButton_4.clicked.connect(lambda: self.open_link(YUN_CODE))  # 打开云码链接
-        self.radioButton_2.clicked.connect(lambda: self.change_mode('极速模式'))  # 开启极速模式
-        self.radioButton.clicked.connect(lambda: self.change_mode('普通模式'))  # 切换普通模式
         # 分支管理
         self.pushButton_7.clicked.connect(self.add_branch)  # 添加分支
         self.pushButton_8.clicked.connect(self.delete_branch)  # 删除分支
@@ -73,14 +70,7 @@ class Setting(QDialog, Ui_Setting):
                     )
                     raise Exception('无效的快捷键！')
 
-        # 模式选择
-        model = self.radioButton.text() if self.radioButton.isChecked() else \
-            self.radioButton_2.text() if self.radioButton_2.isChecked() else None
         self.db.update_settings(
-            时间间隔=str(self.horizontalSlider_2.value() / 1000),
-            持续时间=str(self.horizontalSlider_3.value() / 1000),
-            暂停时间=str(self.spinBox.value() / 1000),
-            模式=model,
             启动检查更新=str(True if self.checkBox.isChecked() else False),
             退出提醒清空指令=str(True if self.checkBox_2.isChecked() else False),
             系统提示音=str(True if self.checkBox_3.isChecked() else False),
@@ -117,47 +107,16 @@ class Setting(QDialog, Ui_Setting):
         except Exception as e:
             print('保存设置失败！', e)
 
-    def restore_default(self):
-        """设置恢复至默认"""
-        self.radioButton.isChecked()
-        self.horizontalSlider_2.setValue(200)
-        self.horizontalSlider_3.setValue(200)
-        self.spinBox.setValue(100)
-
     def load_setting_data(self):
         """加载设置数据库中的数据"""
         self.checkBox_5.toggled.disconnect()  # 断开信号槽连接，避免触发高DPI自适应
         # 加载设置数据
-        setting_data_dic = self.db.get_setting_data(
-            '时间间隔',
-            '持续时间',
-            '暂停时间',
-            '模式',
-            '启动检查更新',
-            '退出提醒清空指令',
-            '系统提示音',
-            '任务完成后显示主窗口',
-            '高DPI自适应'
-        )
-
-        # 设置模式
-        if setting_data_dic['模式'] == '极速模式':
-            self.radioButton_2.setChecked(True)
-            self.change_mode('极速模式')
-        else:
-            self.radioButton.setChecked(True)
-            self.change_mode('普通模式')
-
         app_data_dic = self.db.get_setting_data(
             'appId',
             'apiKey',
             'secretKey',
             '云码Token'
         )
-        self.horizontalSlider_2.setValue(int(float(setting_data_dic['时间间隔']) * 1000))
-        self.horizontalSlider_3.setValue(int(float(setting_data_dic['持续时间']) * 1000))
-        self.spinBox.setValue(int(float(setting_data_dic['暂停时间']) * 1000))
-
         self.checkBox.setChecked(self.db.get_bool_setting('启动检查更新'))
         self.checkBox_2.setChecked(self.db.get_bool_setting('退出提醒清空指令'))
         self.checkBox_3.setChecked(self.db.get_bool_setting('系统提示音'))
@@ -181,22 +140,6 @@ class Setting(QDialog, Ui_Setting):
         # 加载分支管理
         self.load_branch_info()
         self.checkBox_5.toggled.connect(self.high_dpi_adaptive)  # 重新连接信号槽
-
-    def change_mode(self, mode: str):
-        """切换模式
-        :param mode: 模式（极速模式、普通模式）"""
-        if mode == '极速模式':
-            self.horizontalSlider_2.setValue(0)
-            self.horizontalSlider_3.setValue(100)
-            self.spinBox.setValue(0)
-            self.horizontalSlider_2.setEnabled(False)
-            self.spinBox.setEnabled(False)
-            self.pushButton_3.setEnabled(False)
-        elif mode == '普通模式':
-            self.horizontalSlider_2.setEnabled(True)
-            self.spinBox.setEnabled(True)
-            self.pushButton_3.setEnabled(True)
-            self.restore_default()
 
     def load_branch_info(self):
         """向表格中加载分支信息"""

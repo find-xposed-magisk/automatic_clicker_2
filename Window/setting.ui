@@ -31,7 +31,8 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tab">
+      <!-- Legacy mode and global timing controls removed.
+      <widget class="QWidget" name="tab">
       <attribute name="title">
        <string>基础设置</string>
       </attribute>
@@ -400,8 +401,9 @@
         </widget>
        </item>
       </layout>
-     </widget>
-     <widget class="QWidget" name="tab_2">
+      </widget>
+      -->
+      <widget class="QWidget" name="tab_2">
       <attribute name="title">
        <string>其他设置</string>
       </attribute>
@@ -733,7 +735,8 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
+      <!-- Legacy restore-default button removed.
+      <item row="4" column="0">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QPushButton" name="pushButton_3">
@@ -742,8 +745,9 @@
          </property>
         </widget>
        </item>
-      </layout>
-     </item>
+       </layout>
+      </item>
+      -->
      <item row="2" column="0">
       <widget class="QCheckBox" name="checkBox_5">
        <property name="text">
@@ -758,38 +762,5 @@
  <resources>
   <include location="../images.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>horizontalSlider_2</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>label_6</receiver>
-   <slot>setNum(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>269</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>302</x>
-     <y>269</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>horizontalSlider_3</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>label_8</receiver>
-   <slot>setNum(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>323</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>302</x>
-     <y>323</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+  <connections/>
 </ui>

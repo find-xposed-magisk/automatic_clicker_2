@@ -83,18 +83,6 @@ collections.Iterable = collections.abc.Iterable
 # 4. 在功能类中添加运行功能
 
 
-def timer(func):
-    def func_wrapper(*args, **kwargs):
-        time_start = current_time()
-        result = func(*args, **kwargs)
-        time_end = current_time()
-        time_spend = time_end - time_start
-        print("%s cost time: %.3f s" % (func.__name__, time_spend))
-        return result
-
-    return func_wrapper
-
-
 class Main_window(QMainWindow, Ui_MainWindow):
     """主窗口"""
     clear_signal = Signal()  # 自定义信号，textEdit清空信息，防止在全局快捷键调用时程序崩溃

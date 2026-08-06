@@ -35,8 +35,6 @@ class CommandThread(QThread):
         # 运行时的参数
         self.branch_name_index: int = 0  # 分支表名索引
         self.run_mode: tuple = ('全部指令', 0)  # 运行模式
-        # 读取数据库设置
-        self.time_sleep = float(self.db.get_setting_data('暂停时间'))
         self.branch_table_name: list = []
         # 互斥锁,用于暂停线程
         self.mutex = QMutex()
@@ -99,7 +97,6 @@ class CommandThread(QThread):
             self.send_message.emit('换行')
             self.send_message.emit(f'完成第{self.number}次循环')
             self.number += 1
-            time.sleep(self.time_sleep)
 
         # 结束信号
         self.finished_signal.emit('任务完成')

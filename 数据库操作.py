@@ -46,10 +46,6 @@ def get_setting_type(setting_item: str) -> str:
 
 DEFAULT_SETTINGS = {
     "图像匹配精度": "0.8",
-    "时间间隔": "0.0",
-    "持续时间": "0.1",
-    "暂停时间": "0.0",
-    "模式": "极速模式",
     "启动检查更新": "True",
     "退出提醒清空指令": "False",
     "系统提示音": "False",
@@ -68,6 +64,8 @@ DEFAULT_SETTINGS = {
     "快捷键-分支选择": "shift+1",
     "快捷键-暂停和恢复": "alt+f11",
 }
+
+REMOVED_SETTING_ITEMS = ("模式", "时间间隔", "持续时间", "暂停时间")
 
 LEGACY_WINDOW_SETTING_KEYS = (
     "Clicker",
@@ -96,6 +94,12 @@ class DatabaseOperation:
         with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             self._migrate_settings_table(cursor)
+            cursor.execute(
+                "DELETE FROM 设置 WHERE 设置项 IN ({})".format(
+                    ",".join("?" for _ in REMOVED_SETTING_ITEMS)
+                ),
+                REMOVED_SETTING_ITEMS,
+            )
             cursor.execute(
                 "CREATE TABLE IF NOT EXISTS 窗口大小 ("
                 "窗口 TEXT NOT NULL PRIMARY KEY, 大小 TEXT NOT NULL)"
@@ -613,6 +617,8 @@ class DatabaseOperation:
         for row in sheet.iter_rows(min_row=2, max_col=5, values_only=True):
             category, name, value, extra, order_ = row
             if category not in grouped or not name:
+                continue
+            if category == "设置" and str(name) in REMOVED_SETTING_ITEMS:
                 continue
             grouped[category].append((str(name), value, extra, order_))
         with contextlib.closing(sqlite3.connect(self.db_path)) as conn:

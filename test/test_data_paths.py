@@ -9,7 +9,7 @@ from unittest.mock import patch
 from openpyxl import Workbook
 
 import functions
-from 数据库操作 import DatabaseOperation, REMOVED_COMMAND_TYPES
+from 数据库操作 import DatabaseOperation, REMOVED_COMMAND_TYPES, REMOVED_SETTING_ITEMS
 
 
 class DataPathTests(unittest.TestCase):
@@ -75,6 +75,7 @@ class DataPathTests(unittest.TestCase):
             }
             self.assertEqual(exported_settings["测试值"], "基础设置")
             self.assertEqual(exported_settings["apiKey"], "三方接口")
+            self.assertFalse(set(REMOVED_SETTING_ITEMS) & set(exported_settings))
 
     def test_removed_commands_are_deleted_from_existing_database(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -95,6 +96,33 @@ class DataPathTests(unittest.TestCase):
                     "SELECT 指令类型 FROM 命令 ORDER BY 指令类型"
                 ).fetchall()
             self.assertEqual(command_types, [("图像点击",)])
+
+    def test_removed_settings_are_deleted_from_existing_database(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            database_path = os.path.join(temporary_directory, "settings.db")
+            database = DatabaseOperation(database_path)
+            database.set_setting_values({item: "旧值" for item in REMOVED_SETTING_ITEMS})
+
+            migrated_database = DatabaseOperation(database_path)
+
+            for setting_item in REMOVED_SETTING_ITEMS:
+                self.assertIsNone(migrated_database.get_setting_value(setting_item))
+
+    def test_removed_settings_are_ignored_when_importing_excel(self):
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "设置"
+        sheet.append(["类型", "名称", "值", "附加值", "排序"])
+        for setting_item in REMOVED_SETTING_ITEMS:
+            sheet.append(["设置", setting_item, "旧值", "基础设置", None])
+        sheet.append(["设置", "测试值", "保留", "基础设置", None])
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            database = DatabaseOperation(os.path.join(temporary_directory, "test.db"))
+            self.assertTrue(database.import_settings_from_excel(workbook))
+            self.assertEqual(database.get_setting_value("测试值"), "保留")
+            for setting_item in REMOVED_SETTING_ITEMS:
+                self.assertIsNone(database.get_setting_value(setting_item))
 
     def test_legacy_excel_settings_are_not_imported(self):
         workbook = Workbook()
