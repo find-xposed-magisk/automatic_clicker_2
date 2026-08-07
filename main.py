@@ -20,7 +20,6 @@ from PySide6.QtWidgets import QApplication, QSplashScreen
 
 from functions import RESOURCE_FOLDER, ensure_data_directories, show_window
 from info import APP_NAME, CURRENT_VERSION
-from 数据库操作 import DatabaseOperation
 
 WINDOW_TITLE = f"{APP_NAME} {CURRENT_VERSION}"
 SINGLETON_KEY = f"FasterThanLight_{APP_NAME}_SingletonKey"
@@ -105,12 +104,6 @@ def show_splash_screen(app, image_path):
 def main():
     """初始化并启动 Clicker。"""
     ensure_data_directories()
-    db = DatabaseOperation()
-    if db.get_bool_setting("高DPI自适应", True):
-        QApplication.setHighDpiScaleFactorRoundingPolicy(
-            Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
-        )
-
     app = QApplication(sys.argv)
     app.setApplicationName(APP_NAME)
     app.setApplicationVersion(CURRENT_VERSION)

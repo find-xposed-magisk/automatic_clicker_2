@@ -52,7 +52,6 @@ DEFAULT_SETTINGS = {
     "任务完成后显示主窗口": "False",
     "当前文件路径": "None",
     "当前分支": MAIN_FLOW,
-    "高DPI自适应": "True",
     "执行中隐藏主窗口": "False",
     "appId": "",
     "apiKey": "",
@@ -64,7 +63,14 @@ DEFAULT_SETTINGS = {
     "快捷键-暂停和恢复": "alt+f11",
 }
 
-REMOVED_SETTING_ITEMS = ("模式", "时间间隔", "持续时间", "暂停时间", "启动检查更新")
+REMOVED_SETTING_ITEMS = (
+    "模式",
+    "时间间隔",
+    "持续时间",
+    "暂停时间",
+    "启动检查更新",
+    "高DPI自适应",
+)
 
 LEGACY_WINDOW_SETTING_KEYS = (
     "Clicker",

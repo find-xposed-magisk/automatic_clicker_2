@@ -35,7 +35,6 @@ class Setting(QDialog, Ui_Setting):
         self.pushButton_8.clicked.connect(self.delete_branch)  # 删除分支
         self.pushButton_5.clicked.connect(lambda: self.move_branch('up'))  # 上移分支
         self.pushButton_6.clicked.connect(lambda: self.move_branch('down'))  # 下移分支
-        self.checkBox_5.toggled.connect(self.high_dpi_adaptive)  # 高DPI自适应
         self.load_setting_data()  # 加载设置数据
 
     def unregister_global_shortcut_keys(self):
@@ -73,8 +72,7 @@ class Setting(QDialog, Ui_Setting):
         self.db.update_settings(
             退出提醒清空指令=str(True if self.checkBox_2.isChecked() else False),
             系统提示音=str(True if self.checkBox_3.isChecked() else False),
-            任务完成后显示主窗口=str(True if self.checkBox_4.isChecked() else False),
-            高DPI自适应=str(True if self.checkBox_5.isChecked() else False)
+            任务完成后显示主窗口=str(True if self.checkBox_4.isChecked() else False)
         )
         self.db.update_settings(
             appId=str(self.lineEdit.text()),
@@ -108,7 +106,6 @@ class Setting(QDialog, Ui_Setting):
 
     def load_setting_data(self):
         """加载设置数据库中的数据"""
-        self.checkBox_5.toggled.disconnect()  # 断开信号槽连接，避免触发高DPI自适应
         # 加载设置数据
         app_data_dic = self.db.get_setting_data(
             'appId',
@@ -119,7 +116,6 @@ class Setting(QDialog, Ui_Setting):
         self.checkBox_2.setChecked(self.db.get_bool_setting('退出提醒清空指令'))
         self.checkBox_3.setChecked(self.db.get_bool_setting('系统提示音'))
         self.checkBox_4.setChecked(self.db.get_bool_setting('任务完成后显示主窗口'))
-        self.checkBox_5.setChecked(self.db.get_bool_setting('高DPI自适应'))
 
         # 填入OCR API信息
         self.lineEdit.setText(app_data_dic.get('appId', ''))
@@ -137,7 +133,6 @@ class Setting(QDialog, Ui_Setting):
 
         # 加载分支管理
         self.load_branch_info()
-        self.checkBox_5.toggled.connect(self.high_dpi_adaptive)  # 重新连接信号槽
 
     def load_branch_info(self):
         """向表格中加载分支信息"""
@@ -241,10 +236,6 @@ class Setting(QDialog, Ui_Setting):
     def open_link(url):
         """打开网页"""
         QDesktopServices.openUrl(QUrl(url))
-
-    def high_dpi_adaptive(self):
-        """高DPI自适应"""
-        QMessageBox.information(self, '提醒', '该功能重启后才能生效！')
 
     def closeEvent(self, event):
         if self.main_window_open:  # 如果是主窗口打开

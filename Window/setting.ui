@@ -732,13 +732,6 @@
        </layout>
       </item>
       -->
-     <item row="2" column="0">
-      <widget class="QCheckBox" name="checkBox_5">
-       <property name="text">
-        <string>高分辨率屏幕自适应</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
   </layout>
