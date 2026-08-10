@@ -11,36 +11,39 @@
 from __future__ import print_function
 
 import collections
-import json
 import os.path
-import re
+import sqlite3
 import sys
 from time import time as current_time
-from typing import Optional, Tuple
+from typing import Optional
 
 import openpyxl
-from PySide6.QtCore import QEvent, Signal, Qt, QUrl
-from PySide6.QtGui import QAction, QDesktopServices, QKeyEvent
-from PySide6.QtWidgets import QMainWindow, QStatusBar, QMessageBox, QMenu, QStyle, QTableWidgetItem, QHeaderView, \
-    QFileDialog, QInputDialog, QDialog, QApplication
-from openpyxl.styles import Font, PatternFill, Alignment
-from openpyxl.utils import get_column_letter
+from PySide6.QtCore import QTimer, Signal, QUrl
+from PySide6.QtGui import QAction, QDesktopServices
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QFileDialog,
+    QMainWindow,
+    QMessageBox,
+    QStatusBar,
+    QVBoxLayout,
+)
 from system_hotkey import SystemHotkey
 
 from functions import EXPORTS_FOLDER, LOGS_FOLDER, RESOURCE_FOLDER, \
     get_str_now_time, is_hotkey_valid
-from WindowControl.icon import Icon
+from graph_repository import WorkbookValidationError
+from instruction_workspace import InstructionWorkspace
 from main_work import CommandThread
-from WindowControl.导航窗口功能 import Na
-from 数据库操作 import *
+from 数据库操作 import DatabaseOperation
 from Window.about_ui import Ui_About
 from Window.mainwindow_ui import Ui_MainWindow
-from Window.参数窗口_ui import Ui_Param
 from WindowControl.设置窗口 import Setting
 from WindowControl.资源文件夹窗口 import Global_s
 from info import CURRENT_VERSION, MAIN_WEBSITE, ISSUE_WEBSITE, QQ_GROUP, QQ, APP_NAME, \
     Github_WEBSITE, DONATE_WEBSITE
-from WindowControl.选择窗体 import ShortcutTable
+from WindowControl.快捷键说明 import ShortcutTable
 from WindowControl.窗口状态 import install_window_state
 
 collections.Iterable = collections.abc.Iterable
@@ -59,7 +62,7 @@ collections.Iterable = collections.abc.Iterable
 # todo: 快捷导入指令，拖动文件到窗口导入指令
 # todo: 成功和失败改变变量值的功能
 # todo: 鼠标随机移动添加区域限制
-# todo: 导航窗口、设置窗口打开时，按全局快捷键也会触发运行
+# todo: 设置窗口打开时，按全局快捷键也会触发运行
 # todo: 指令可以选择执行，表格中使用checkbox控制
 # todo: 指令可导出为json
 # todo: 鼠标拖动可设置速度
@@ -73,11 +76,7 @@ collections.Iterable = collections.abc.Iterable
 
 # pyinstaller --clean -y packaging\main.spec
 
-# 添加指令的步骤：
-# 1. 在导航页的页面中添加指令的控件
-# 2. 在导航页的页面中添加指令的处理函数
-# 3. 在导航页的treeWidget中添加指令的名称
-# 4. 在功能类中添加运行功能
+# 指令由 instructions.registry 统一注册，主窗口与执行线程按需惰性加载。
 
 
 class Main_window(QMainWindow, Ui_MainWindow):
@@ -94,13 +93,13 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.statusBar = QStatusBar()
         self.setStatusBar(self.statusBar)  # 实例化状态栏
         self.db = DatabaseOperation()
-        self.icon = Icon()  # 实例化图标
+        self.workspace = InstructionWorkspace(self.db.db_path, self)
+        self._install_instruction_workspace()
+        self._initial_graph_fit_pending = True
+        self.tabWidget.currentChanged.connect(self._schedule_initial_graph_fit)
         self.check_file_integrity()  # 检查文件完整性
         self.add_recent_to_fileMenu()  # 将最近文件添加到菜单中
-        # 显示导不同的窗口
-        self.pushButton.clicked.connect(
-            lambda: self.show_windows("导航")
-        )  # 显示导航窗口
+        self.pushButton.clicked.connect(self.workspace.add_selected_instruction)
         self.pushButton_3.clicked.connect(
             lambda: self.show_windows("全局")
         )  # 显示全局参数窗口
@@ -114,7 +113,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.actionk.triggered.connect(
             lambda: self.show_windows("快捷键说明")
         )  # 打开快捷键说明
-        # 主窗体表格功能
+        # 节点图导入导出
         self.actionx.triggered.connect(
             lambda: self.save_data("自动保存")
         )  # 保存指令数据
@@ -134,49 +133,64 @@ class Main_window(QMainWindow, Ui_MainWindow):
             lambda: self.global_shortcut_key("暂停和恢复线程")
         )  # 暂停和恢复按钮
         self.toolButton_8.clicked.connect(self.exporting_operation_logs)  # 导出日志按钮
-        # 右键菜单
-        self.tableWidget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.tableWidget.customContextMenuRequested.connect(self.generateMenu)
         # 指令执行线程
-        self.command_thread = CommandThread(self, None)
+        self.command_thread = CommandThread(self)
         self.command_thread.send_message.connect(self.send_message)
         self.command_thread.finished_signal.connect(self.thread_finished)
+        self.workspace.statusMessage.connect(self.statusBar.showMessage)
+        self.workspace.runSingleRequested.connect(
+            lambda command_id_: self.start("单行指令", command_id_)
+        )
+        self.workspace.runFromRequested.connect(
+            lambda command_id_: self.start("从当前行运行", command_id_)
+        )
         # 设置全局快捷键,用于执行指令的终止
         self.clear_signal.connect(self.clear_textEdit)
         self.hk_stop = SystemHotkey()
-        # 加载上次的指令表格
+        # 加载上次的节点图
         self.get_data()
-        self.tableWidget.installEventFilter(self)  # 安装事件过滤器,重新设置表格的快捷键
         # 加载窗体初始值
         self.load_initialization()
 
-    def merge_control_and_operation_panel(self):
-        """将控制和操作区合并为主内容右侧的单一面板。"""
-        self.gridLayout_4.removeWidget(self.tabWidget)
-        self.gridLayout_4.removeWidget(self.groupBox_3)
-        self.gridLayout_4.removeWidget(self.groupBox_4)
+    def showEvent(self, event_) -> None:
+        """首次真正显示并完成布局后再适应节点画布。"""
+        super().showEvent(event_)
+        self._schedule_initial_graph_fit()
 
+    def _schedule_initial_graph_fit(self, index_=None) -> None:
+        del index_
+        if self._initial_graph_fit_pending:
+            QTimer.singleShot(0, self._fit_graph_when_visible)
+
+    def _fit_graph_when_visible(self) -> None:
+        if (
+            self._initial_graph_fit_pending
+            and self.isVisible()
+            and self.tabWidget.currentWidget() is self.tab_2
+        ):
+            self.workspace.editor.view.fit_graph()
+            self._initial_graph_fit_pending = False
+
+    def merge_control_and_operation_panel(self):
+        """配置 .ui 中位于右侧的统一控制与操作区。"""
         self.groupBox_3.setTitle("控制与操作")
         self.groupBox_3.setMinimumWidth(260)
         self.gridLayout_2.setRowStretch(3, 1)
+        self.gridLayout_4.setColumnStretch(0, 0)
+        self.gridLayout_4.setColumnStretch(1, 4)
+        self.gridLayout_4.setColumnStretch(2, 1)
 
-        operation_buttons = (
-            self.pushButton_5,
-            self.pushButton_7,
-            self.pushButton_6,
-        )
-        for row_, button_ in enumerate(operation_buttons, start=4):
-            self.gridLayout_3.removeWidget(button_)
-            button_.setParent(self.groupBox_3)
-            self.gridLayout_2.addWidget(button_, row_, 0, 1, 2)
+    def _install_instruction_workspace(self) -> None:
+        """Place host-neutral palette/editor widgets into their .ui hosts."""
+        palette_host_ = self.instructionPaletteHost
+        palette_layout_ = palette_host_.layout() or QVBoxLayout(palette_host_)
+        palette_layout_.setContentsMargins(0, 0, 0, 0)
+        palette_layout_.addWidget(self.workspace.palette)
 
-        self.groupBox_4.setParent(None)
-        self.groupBox_4.deleteLater()
-
-        self.gridLayout_4.addWidget(self.tabWidget, 0, 0)
-        self.gridLayout_4.addWidget(self.groupBox_3, 0, 1)
-        self.gridLayout_4.setColumnStretch(0, 4)
-        self.gridLayout_4.setColumnStretch(1, 1)
+        editor_host_ = self.nodeEditorHost
+        editor_layout_ = editor_host_.layout() or QVBoxLayout(editor_host_)
+        editor_layout_.setContentsMargins(0, 0, 0, 0)
+        editor_layout_.addWidget(self.workspace.editor)
 
     def load_initialization(self):
         """加载窗体初始值"""
@@ -196,8 +210,6 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.db,
             self.windowTitle().split("v")[0].strip(),
         )
-        # 缩小tableWidget行高
-        self.tableWidget.verticalHeader().setDefaultSectionSize(20)
         check_file_integrity()  # 检查文件完整性
         # 显示工具栏
         judge = self.db.get_bool_setting("显示工具栏")
@@ -329,241 +341,25 @@ class Main_window(QMainWindow, Ui_MainWindow):
                     action.setChecked(True)
 
     def delete_data(self):
-        """删除选中的数据行"""
-        # 获取选中值的行号和id
-        try:
-            row = self.tableWidget.currentRow()
-            xx = int(self.tableWidget.item(row, 6).text())
-            # 删除数据库中指定id的数据
-            with sqlite3.connect(self.db.db_path) as con:
-                cursor = con.cursor()
-                cursor.execute("DELETE FROM 命令 WHERE ID=?", (xx,))
-                con.commit()
-            self.get_data(row)  # 调用get_data()函数，刷新表格
-            # 状态栏显示信息
-            self.statusBar.showMessage(f"删除指令。", 1000)
-        except AttributeError:
-            pass
+        """删除节点画布中选中的指令。"""
+        return self.workspace.remove_commands()
 
     def copy_data(self):
-        """复制指定id的指令数据，插入到对应的id位置"""
-
-        def get_new_order():
-            """获取新的指令数据"""
-            cursor.execute("SELECT * FROM 命令 WHERE ID=?", (id_,))
-            list_order = cursor.fetchone()
-            new_id_ = int(list_order[0]) + 1  # 获取id
-            return (new_id_,) + list_order[1:]
-
-        try:
-            row = self.tableWidget.currentRow()
-            id_ = int(self.tableWidget.item(row, 6).text())  # 指令ID
-            with sqlite3.connect(self.db.db_path) as con:
-                cursor = con.cursor()
-                new_list_order = get_new_order()  # 获取新的指令数据
-                try:
-                    cursor.execute(
-                        "INSERT INTO 命令 VALUES (?,?,?,?,?,?,?,?,?,?)", new_list_order
-                    )
-                    con.commit()
-                except sqlite3.IntegrityError:
-                    # 如果下一个id已经存在，则将后面的id全部加1
-                    max_id_ = 1000000
-                    cursor.execute("UPDATE 命令 SET ID=ID+? WHERE ID>?", (max_id_, id_))
-                    cursor.execute(
-                        "UPDATE 命令 SET ID=ID-? WHERE ID>?",
-                        (max_id_ - 1, max_id_ + int(id_)),
-                    )
-                    cursor.execute(
-                        "INSERT INTO 命令 VALUES (?,?,?,?,?,?,?,?,?,?)", new_list_order
-                    )
-                    con.commit()
-            self.get_data(row)
-            self.statusBar.showMessage(f"复制指令。", 1000)
-        except AttributeError:
-            pass
+        """复制节点画布中选中的指令。"""
+        return self.workspace.copy_commands()
 
     def modify_parameters(self):
-        """修改参数"""
-        try:
-            # 获取当前行行号列号
-            row = self.tableWidget.currentRow()
-            id_ = int(self.tableWidget.item(row, 6).text())  # 指令ID
-            ins_type = self.tableWidget.item(row, 1).text()  # 指令类型
-            # 将导航页的tabWidget设置为对应的页
-            navigation = Na(self)  # 实例化导航页窗口
-            # 修改数据中的参数
-            navigation.pushButton_2.setText("修改指令")
-            navigation.modify_id = id_
-            navigation.show()
-            # 获取参数元组：(图像路径，参数，重复次数，异常处理，备注)
-            restore_parameters = (
-                self.tableWidget.item(row, 0).text(),
-                self.tableWidget.item(row, 4).text(),
-                self.tableWidget.item(row, 5).text(),
-                self.tableWidget.item(row, 2).text(),
-                self.tableWidget.item(row, 3).text(),
-            )
-            navigation.switch_navigation_page(ins_type, restore_parameters)
-        except AttributeError:
+        """用对应的独立参数窗口修改当前节点。"""
+        selected_ = self.workspace.selected_command_ids()
+        if not selected_:
             QMessageBox.information(
                 self,
                 "提示",
-                "请先选择一行待修改的数据！",
+                "请先选择一条待修改的指令。",
                 QMessageBox.StandardButton.Ok,
             )
-
-    def open_params_win(self):
-        """打开参数窗口"""
-        row = self.tableWidget.currentRow()
-        params = self.tableWidget.item(row, 4).text()  # parameters
-        if (params is not None) and (params != "") and (params != "None"):
-            # 格式化字典
-            formatted_dict = json.dumps(
-                {
-                    k: str(v).capitalize() if isinstance(v, bool) else v
-                    for k, v in eval(params).items()
-                },
-                indent=4,
-                ensure_ascii=False,
-            )
-        else:
-            formatted_dict = ""
-        # 显示参数窗口
-        param_win = Param(self)  # create a new window
-        param_win.setModal(True)
-        param_win.textEdit.setText(formatted_dict)
-        param_win.exec_()
-
-    def generateMenu(self, pos):
-        """生成右键菜单"""
-
-        def clear_table():
-            """清空表格和数据库"""
-            choice = QMessageBox.question(self, "提示", "确认清除所有指令吗？",
-                                          QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No)
-            if choice == QMessageBox.StandardButton.Yes:
-                self.db.clear_all_ins()
-                self.get_data()
-            else:
-                pass
-
-        def insert_data_before(judge):
-            """在目标指令前插入指令
-            :param judge: （向前插入、向后插入）"""
-            try:
-                # 获取当前行行号列号
-                row_ = self.tableWidget.currentRow()
-                target_id = int(self.tableWidget.item(row_, 6).text())  # 指令ID
-                navigation = Na(self)  # 实例化导航页窗口
-                navigation.show()
-                # 修改数据中的参数
-                navigation.pushButton_2.setText(judge)
-                navigation.modify_id = target_id
-                navigation.modify_row = row_
-            except AttributeError:
-                QMessageBox.information(
-                    self,
-                    "提示",
-                    "请先选择一行待修改的数据！",
-                    QMessageBox.StandardButton.Ok,
-                )
-
-        # 表格右键菜单
-        row_num = -1
-        for i_ in self.tableWidget.selectionModel().selection().indexes():
-            row_num = i_.row()
-        if row_num != -1:  # 未选中数据不弹出右键菜单
-            menu = QMenu()  # 实例化菜单
-
-            run_ins = menu.addAction("运行选中指令")
-            run_ins.setIcon(
-                self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay)
-            )
-
-            run_from_this_ins = menu.addAction("从当前行运行")
-            run_from_this_ins.setIcon(
-                self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay)
-            )
-
-            menu.addSeparator()
-            refresh = menu.addAction("刷新")
-            refresh.setIcon(
-                self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
-            )  # 设置图标
-
-            modify_params = menu.addAction("查看参数")
-            modify_params.setIcon(self.icon.view)  # 设置图标
-
-            up_ins = menu.addAction("上移")
-            up_ins.setShortcut("Shift+↑")
-            up_ins.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowUp))  # 设置图标
-
-            down_ins = menu.addAction("下移")
-            down_ins.setShortcut("Shift+↓")
-            down_ins.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowDown))  # 设置图标
-
-            menu.addSeparator()
-            insert_ins_before = menu.addAction("在前面插入指令")
-            insert_ins_before.setIcon(self.icon.move_up)  # 设置图标
-
-            insert_ins_after = menu.addAction("在后面插入指令")
-            insert_ins_after.setIcon(self.icon.move_down)  # 设置图标
-
-            menu.addSeparator()
-            copy_ins = menu.addAction("复制指令")
-            copy_ins.setShortcut("Ctrl+C")
-            copy_ins.setIcon(self.icon.copy)  # 设置图标
-
-            modify_ins = menu.addAction("修改指令")
-            modify_ins.setShortcut("Ctrl+Y")
-            modify_ins.setIcon(self.icon.modify_instruction)  # 设置图标
-
-            del_ins = menu.addAction("删除指令")
-            del_ins.setShortcut("Delete")
-            del_ins.setIcon(
-                self.style().standardIcon(QStyle.StandardPixmap.SP_DialogCancelButton)
-            )  # 设置图标
-
-            del_all_ins = menu.addAction("删除全部指令")
-            del_all_ins.setIcon(self.icon.delete)  # 设置图标
-
-            action = menu.exec_(self.tableWidget.mapToGlobal(pos))
-        else:
-            return
-
-        # 各项操作
-        if action == copy_ins:
-            self.copy_data()  # 复制指令
-        if action == modify_params:
-            self.open_params_win()  # 修改指令参数
-        elif action == del_ins:
-            self.delete_data()  # 删除指令
-        elif action == up_ins:
-            self.go_up_down("up")
-        elif action == down_ins:
-            self.go_up_down("down")
-        elif action == modify_ins:
-            self.modify_parameters()  # 修改指令
-        elif action == insert_ins_before:
-            insert_data_before("向前插入")
-        elif action == insert_ins_after:
-            insert_data_before("向后插入")
-        elif action == refresh:
-            self.get_data()
-            self.statusBar.showMessage(f"刷新指令表格。", 1000)
-        elif action == del_all_ins:
-            clear_table()
-            self.statusBar.showMessage(f"清空指令表格。", 1000)
-        elif action == run_ins:
-            # 获取选中的行的id
-            row = self.tableWidget.currentRow()
-            id_ = int(self.tableWidget.item(row, 6).text())
-            self.start('单行指令', id_)
-        elif action == run_from_this_ins:
-            # 获取选中行的行号
-            row = self.tableWidget.currentRow()
-            self.start('从当前行运行', row)
+            return False
+        return self.workspace.edit_command(selected_[0])
 
     def show_windows(self, judge):
         """打开窗体"""
@@ -576,9 +372,6 @@ class Main_window(QMainWindow, Ui_MainWindow):
             global_s = Global_s(self)  # 全局设置窗口
             global_s.setModal(True)
             global_s.exec()
-        elif judge == "导航":
-            navigation = Na(self)  # 实例化导航页窗口
-            navigation.show()
         elif judge == "关于":
             about = About(self)  # 设置关于窗体
             about.setModal(True)
@@ -591,9 +384,6 @@ class Main_window(QMainWindow, Ui_MainWindow):
                 ("Ctrl+Enter", "添加指令"),
                 ("Ctrl+C", "复制指令"),
                 ("Delete", "删除指令"),
-                ("Shift+↑", "上移指令"),
-                ("Shift+↓", "下移指令"),
-                ("Ctrl+Y", "修改指令"),
                 ("Ctrl+D", "导入指令"),
                 ("Ctrl+S", "保存指令"),
                 ("Ctrl+Alt+S", "另存为Excel")
@@ -603,206 +393,67 @@ class Main_window(QMainWindow, Ui_MainWindow):
             shortcut_win.exec()
 
     def get_data(self, row=None):
-        """从数据库获取数据并存入表格
-        :param row: 设置焦点行号"""
-        try:
-            self.tableWidget.clearContents()
-            self.tableWidget.setRowCount(0)
-            # 获取数据库数据
-            with sqlite3.connect(self.db.db_path) as con:
-                cursor = con.cursor()
-                cursor.execute(
-                    "SELECT 图像名称,指令类型,异常处理,备注,参数1,重复次数,ID "
-                    "FROM 命令 ORDER BY ID"
-                )
-                list_order = cursor.fetchall()
-            # 在表格中写入数据
-            for i_ in range(len(list_order)):
-                self.tableWidget.insertRow(i_)
-                for j in range(len(list_order[i_])):
-                    self.tableWidget.setItem(
-                        i_, j, QTableWidgetItem(str(list_order[i_][j]))
-                    )
-            # 自适应列宽（排除第一列和第四列）
-            header = self.tableWidget.horizontalHeader()
-            for col in range(header.count()):
-                if col != 0 and col != 4:
-                    header.setSectionResizeMode(col, QHeaderView.ResizeMode.ResizeToContents)
-            # 设置焦点
-            if row is not None:
-                self.tableWidget.setCurrentCell(int(row), 0)
-            repeat_number_ = int(self.db.get_setting_value("运行重复次数") or 1)
-            self.radioButton.setChecked(repeat_number_ == -1)
-            self.radioButton_2.setChecked(repeat_number_ != -1)
-            self.spinBox.setValue(max(repeat_number_, 1))
+        """重新加载节点图和全局运行次数。"""
+        self.workspace.reload_graph(row)
+        repeat_number_ = int(self.db.get_setting_value("运行重复次数") or 1)
+        self.radioButton.setChecked(repeat_number_ == -1)
+        self.radioButton_2.setChecked(repeat_number_ != -1)
+        self.spinBox.setValue(max(repeat_number_, 1))
 
-        except sqlite3.OperationalError:
-            pass
+    def save_data(self, judge: str) -> bool:
+        """按节点编辑器四工作表协议导出指令、图和设置。"""
 
-    def go_up_down(self, judge):
-        """向上或向下移动选中的行"""
-
-        def database_exchanges_two_rows(id_1: int, id_2: int) -> None:
-            """交换数据库中的两行数据
-            :param id_1: 要交换的第一行的id
-            :param id_2: 要交换的第二行的id"""
-            # cursor, con = sqlitedb()
-            with sqlite3.connect(self.db.db_path) as con:
-                cursor = con.cursor()
-                # 交换两行的id
-                cursor.execute(
-                    "update 命令 set ID=? where ID=?",
-                    (
-                        999999,
-                        id_1,
-                    ),
-                )
-                cursor.execute(
-                    "update 命令 set ID=? where ID=?",
-                    (
-                        id_1,
-                        id_2,
-                    ),
-                )
-                cursor.execute(
-                    "update 命令 set ID=? where ID=?",
-                    (
-                        id_2,
-                        999999,
-                    ),
-                )
-                con.commit()
-
-        try:
-            # 获取选中值的行号和id
-            row = self.tableWidget.currentRow()
-            id_ = int(self.tableWidget.item(row, 6).text())
-            if judge == "up":
-                if row != 0:
-                    # 查询上一行的id
-                    id_row_up = int(self.tableWidget.item(row - 1, 6).text())
-                    # 交换两行的id
-                    database_exchanges_two_rows(id_, id_row_up)
-                    self.get_data(row - 1)
-                    self.statusBar.showMessage(f"上移指令。", 1000)
-            elif judge == "down":
-                if row != self.tableWidget.rowCount() - 1:
-                    # 查询下一行的id
-                    id_row_down = int(self.tableWidget.item(row + 1, 6).text())
-                    # 交换两行的id
-                    database_exchanges_two_rows(id_, id_row_down)
-                    self.get_data(row + 1)
-                    self.statusBar.showMessage(f"下移指令。", 1000)
-        except AttributeError:
-            pass
-
-    def save_data(self, judge: str):
-        """保存指令与设置到 Excel
-        :param judge: 保存的文件类型（excel、自动保存）"""
-
-        def get_save_file_and_folder() -> Tuple[Optional[str], Optional[str]]:
-            """获取保存文件名和文件夹路径"""
-            directory_path = os.path.normpath(os.path.join(EXPORTS_FOLDER, "指令数据.xlsx"))
-            # 获取保存文件名和文件夹路径
-            file_path, _ = QFileDialog.getSaveFileName(
-                parent=self,
-                caption="保存文件",
-                filter="(*.xlsx)",
-                dir=directory_path,
+        def choose_save_path_() -> Optional[str]:
+            default_path_ = os.path.normpath(os.path.join(EXPORTS_FOLDER, "指令数据.xlsx"))
+            selected_path_, _ = QFileDialog.getSaveFileName(
+                self, "保存文件", default_path_, "Excel 工作簿 (*.xlsx)"
             )
-            return (os.path.normpath(os.path.split(file_path)[0]),
-                    os.path.normpath(os.path.split(file_path)[1])) \
-                if file_path else (None, None)
+            return os.path.normpath(selected_path_) if selected_path_ else None
 
-        def get_file_and_folder_from_setting() -> Tuple[Optional[str], Optional[str]]:
-            """从设置中获取最近打开的文件路径作为保存路径，用于自动保存"""
-            recently_opened = self.db.get_setting_value("当前文件路径")
-            if (
-                recently_opened
-                and recently_opened != "None"
-                and os.path.exists(recently_opened)
-            ):
-                return os.path.split(recently_opened)
-            self.statusBar.showMessage("未找到最近导入的文件路径。已自动切换为另存为...", 3000)
-            return get_save_file_and_folder()
-
-        def prompt_save_success(save_path_: str):
-            """提示保存成功"""
-            # 提示保存成功，是否打开文件夹
-            if judge != "自动保存" and QMessageBox.question(
-                    self, "提示", "指令数据保存成功！是否打开文件夹？",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                    QMessageBox.StandardButton.No
-            ) == QMessageBox.StandardButton.Yes:
-                os.startfile(save_path_)
-            self.statusBar.showMessage(f"指令数据已保存至{save_path_}。", 3000)
-
-        def adaptive_column_width(sheet_, max_width=50):
-            """
-            自动设置单元格宽度，并加上最大宽度限制。
-
-            :param sheet_: 工作表对象
-            :param max_width: 列宽的最大限制（默认为50）
-            """
-            for col in range(1, sheet_.max_column + 1):
-                max_length = 0
-                for cell in sheet_[get_column_letter(col)]:
-                    # 计算单元格内容的长度，中文字符的长度为0.7
-                    cell_length = (0.7 * len(re.findall(r"([\u4e00-\u9fa5])", str(cell.value)))
-                                   + len(str(cell.value)))
-                    max_length = max(max_length, cell_length)
-                # 设置列宽，但不超过最大宽度
-                adjusted_width = min(max_length + 5, max_width)
-                sheet_.column_dimensions[get_column_letter(col)].width = adjusted_width
-
-        def set_title_style(sheet_):
-            """设置标题样式"""
-            header_font = Font(bold=True, color="FFFFFF")
-            header_fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")
-            header_alignment = Alignment(horizontal="center", vertical="center")
-            for cell in sheet_[1]:  # 第一行标题
-                cell.font = header_font
-                cell.fill = header_fill
-                cell.alignment = header_alignment
-
-        # 判断是否为另存为,如果不是则自动判断文件类型
-        try:
-            folder_path, file_name = get_save_file_and_folder() \
-                if judge != "自动保存" else get_file_and_folder_from_setting()
-            # 开始保存数据
-            if file_name is not None and folder_path is not None:
-                # 使用openpyxl模块创建Excel文件
-                wb = openpyxl.Workbook()
-                headers = [
-                    "ID",
-                    "图像名称",
-                    "指令类型",
-                    "参数信息",
-                    "参数-2",
-                    "参数-3",
-                    "参数-4",
-                    "重复次数",
-                    "异常处理",
-                    "备注",
-                ]
-                sheet = wb.active
-                sheet.title = "命令"
-                sheet.append(headers)
-                set_title_style(sheet)
-                for instruction_ in self.db.extracted_ins_from_database():
-                    sheet.append(instruction_)
-                adaptive_column_width(sheet)
-                self.db.export_settings_to_excel(wb)
-                adaptive_column_width(wb['设置'])
-                # 保存Excel文件
-                save_path = os.path.normpath(
-                    os.path.join(str(folder_path), str(file_name))
+        save_path_ = None
+        if judge == "自动保存":
+            recent_path_ = self.db.get_setting_value("当前文件路径")
+            if recent_path_ and recent_path_ != "None":
+                save_path_ = os.path.normpath(recent_path_)
+            if not save_path_:
+                self.statusBar.showMessage(
+                    "未找到最近导入的文件路径，已切换为另存为。", 3000
                 )
-                wb.save(save_path)
-                prompt_save_success(save_path)  # 提示保存成功
+        save_path_ = save_path_ or choose_save_path_()
+        if not save_path_:
+            return False
+
+        workbook_ = openpyxl.Workbook()
+        try:
+            self.workspace.repository.export_to_workbook(workbook_, self.db)
+            workbook_.save(save_path_)
         except PermissionError:
-            QMessageBox.critical(self, "错误", "保存失败，文件被占用！", QMessageBox.StandardButton.Ok,
-                                 QMessageBox.StandardButton.NoButton)
+            QMessageBox.critical(
+                self, "错误", "保存失败，文件被占用！", QMessageBox.StandardButton.Ok
+            )
+            return False
+        except Exception as error_:
+            QMessageBox.warning(
+                self, "保存失败", str(error_), QMessageBox.StandardButton.Ok
+            )
+            return False
+        finally:
+            workbook_.close()
+
+        self.db.update_settings(当前文件路径=save_path_)
+        if judge != "自动保存" and QMessageBox.question(
+            self,
+            "提示",
+            "指令数据保存成功！是否打开所在文件夹？",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        ) == QMessageBox.StandardButton.Yes:
+            try:
+                os.startfile(os.path.dirname(save_path_))
+            except OSError as error_:
+                self.statusBar.showMessage(f"无法打开文件夹：{error_}", 3000)
+        self.statusBar.showMessage(f"指令数据已保存至{save_path_}。", 3000)
+        return True
 
     def closeEvent(self, event):
         """关闭窗口事件"""
@@ -811,126 +462,80 @@ class Main_window(QMainWindow, Ui_MainWindow):
             显示工具栏=str(self.actiong.isChecked()),
             执行中隐藏主窗口=str(self.checkBox_2.isChecked()),
         )
-        # 终止线程
-        if self.command_thread.isRunning():
-            self.command_thread.terminate()
         # 是否退出清空数据库
         if self.db.get_bool_setting("退出提醒清空指令"):
             choice = QMessageBox.question(
                 self, "提示", "确定退出并清空所有指令？\n将自动保存当前指令数据。"
                 , QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No)
             if choice == QMessageBox.StandardButton.Yes:
-                # 退出终止后台进程并清空数据库
-                self.save_data("自动保存")
-                event.accept()
-                self.db.clear_all_ins()
+                # 只有确认保存成功后才能清空数据。
+                if not self.save_data("自动保存"):
+                    event.ignore()
+                    return
             else:
                 event.ignore()
+                return
+
+        if self.command_thread.isRunning() and not self.command_thread.stop_and_wait():
+            QMessageBox.warning(
+                self,
+                "无法退出",
+                "执行线程尚未停止，已取消退出。",
+                QMessageBox.StandardButton.Ok,
+            )
+            event.ignore()
+            return
+
+        if self.db.get_bool_setting("退出提醒清空指令"):
+            self.db.clear_all_ins()
+        event.accept()
 
     def data_import(self, file_path: str) -> None:
-        """导入数据功能"""
-
-        def data_import_from_excel(target_path_: str) -> None:
-            expected_headers_ = [
-                "ID", "图像名称", "指令类型", "参数信息", "参数-2",
-                "参数-3", "参数-4", "重复次数", "异常处理", "备注",
-            ]
-            workbook_ = openpyxl.load_workbook(target_path_)
-            try:
-                if "命令" not in workbook_.sheetnames:
-                    raise ValueError("缺少“命令”工作表")
-                unexpected_sheets_ = set(workbook_.sheetnames) - {"命令", "设置"}
-                if unexpected_sheets_:
-                    raise ValueError("不支持旧版多分支工作表")
-                command_sheet_ = workbook_["命令"]
-                headers_ = [
-                    command_sheet_.cell(1, column_).value
-                    for column_ in range(1, len(expected_headers_) + 1)
-                ]
-                if headers_ != expected_headers_ or command_sheet_.max_column != 10:
-                    raise ValueError("命令工作表格式不正确")
-
-                instructions_ = [
-                    tuple(command_sheet_.cell(row_, column_).value for column_ in range(1, 11))
-                    for row_ in range(2, command_sheet_.max_row + 1)
-                    if any(command_sheet_.cell(row_, column_).value is not None for column_ in range(1, 11))
-                ]
-                ids_ = [instruction_[0] for instruction_ in instructions_]
-                if (
-                        any(not isinstance(id_, int) or id_ <= 0 for id_ in ids_)
-                        or len(ids_) != len(set(ids_))
-                ):
-                    raise ValueError("指令 ID 必须是唯一的正整数")
-                for instruction_ in instructions_:
-                    if not isinstance(instruction_[2], str) or not instruction_[2].strip():
-                        raise ValueError("指令类型不能为空")
-                    if not isinstance(instruction_[7], int) or instruction_[7] <= 0:
-                        raise ValueError("指令重复次数必须是正整数")
-                if (
-                        "设置" in workbook_.sheetnames
-                        and not self.db.validate_settings_excel(workbook_)
-                ):
-                    raise ValueError("设置工作表格式不正确")
-
-                with sqlite3.connect(self.db.db_path) as connection_:
-                    connection_.execute("DELETE FROM 命令")
-                    connection_.executemany(
-                        "INSERT INTO 命令(ID,图像名称,指令类型,参数1,参数2,参数3,参数4,"
-                        "重复次数,异常处理,备注) VALUES (?,?,?,?,?,?,?,?,?,?)",
-                        instructions_,
-                    )
-                if "设置" in workbook_.sheetnames:
-                    self.db.import_settings_from_excel(workbook_)
-            finally:
-                workbook_.close()
-            if file_path == "资源文件夹路径":
-                QMessageBox.information(
-                    self,
-                    "提示",
-                    "指令数据导入成功！",
-                    QMessageBox.StandardButton.Ok,
-                )
-
-        # 获取资源文件夹路径，如果不存在则使用用户的主目录
+        """完整验证新工作簿后，事务性替换当前指令图。"""
         if file_path == "资源文件夹路径":
-            directory_path = EXPORTS_FOLDER
-            target_path, _ = QFileDialog.getOpenFileName(
-                parent=self,
-                caption="请选择指令备份文件",
-                dir=directory_path,
-                filter="(*.xlsx)"
+            target_path_, _ = QFileDialog.getOpenFileName(
+                self,
+                "请选择指令备份文件",
+                EXPORTS_FOLDER,
+                "Excel 工作簿 (*.xlsx)",
             )
-            if target_path:
-                suffix = os.path.splitext(target_path)[1]
-            else:
+            if not target_path_:
                 return
         else:
-            target_path = file_path
-            suffix = os.path.splitext(file_path)[1]
+            target_path_ = file_path
+        target_path_ = os.path.normpath(target_path_)
+        if os.path.splitext(target_path_)[1].lower() != ".xlsx":
+            QMessageBox.warning(
+                self, "导入失败", "只支持节点编辑器新版 .xlsx 文件。",
+                QMessageBox.StandardButton.Ok,
+            )
+            return
 
-        # 如果为.xlsx文件
-        if suffix == ".xlsx":
-            try:
-                data_import_from_excel(target_path)
-            except (ValueError, sqlite3.DatabaseError) as error_:
-                QMessageBox.warning(
-                    self,
-                    "导入失败",
-                    str(error_),
-                    QMessageBox.StandardButton.Ok,
-                    QMessageBox.StandardButton.NoButton,
-                )
-                return
-        # 将最近导入的文件路径写入数据库,用于保存时自动设置路径
-        self.db.update_settings(当前文件路径=os.path.normpath(target_path))
-        self.db.writes_to_recently_opened_files(
-            os.path.normpath(target_path)
-        )  # 写入最近打开的文件
-        self.statusBar.showMessage(f"指令数据导入成功！已自动设置保存路径。", 1000)
-        self.menuzv.clear()  # 清空最近打开文件菜单
-        self.add_recent_to_fileMenu()  # 将最近文件添加到菜单中
+        workbook_ = None
+        try:
+            workbook_ = openpyxl.load_workbook(target_path_)
+            self.workspace.repository.import_from_workbook(workbook_)
+        except (WorkbookValidationError, ValueError, sqlite3.DatabaseError, OSError) as error_:
+            QMessageBox.warning(
+                self, "导入失败", str(error_), QMessageBox.StandardButton.Ok
+            )
+            return
+        finally:
+            if workbook_ is not None:
+                workbook_.close()
 
-    def start(self, run_mode='全部指令', info=0):
+        self.workspace.reload_graph()
+        self.db.update_settings(当前文件路径=target_path_)
+        self.db.writes_to_recently_opened_files(target_path_)
+        self.menuzv.clear()
+        self.add_recent_to_fileMenu()
+        self.statusBar.showMessage("指令数据导入成功，已自动设置保存路径。", 3000)
+        if file_path == "资源文件夹路径":
+            QMessageBox.information(
+                self, "提示", "指令数据导入成功！", QMessageBox.StandardButton.Ok
+            )
+
+    def start(self, run_mode='全部指令', info=0) -> bool:
         """主窗体开始按钮
         :param run_mode: 运行模式（全部指令、单行指令、从当前行运行）
         :param info: 指令ID"""
@@ -942,18 +547,22 @@ class Main_window(QMainWindow, Ui_MainWindow):
             if self.checkBox_2.isChecked():  # 如果勾选了执行中隐藏主窗口
                 self.hide()
 
-        if self.command_thread.isRunning():  # 如果线程正在运行,则终止
-            self.command_thread.terminate()
+        if self.command_thread.isRunning():
+            if not self.command_thread.stop_and_wait():
+                self.statusBar.showMessage("原任务尚未停止，未启动新任务。", 5000)
+                return False
+        self.command_thread.prepare_for_start()
         operation_before_execution()  # 执行前的操作
         self.command_thread.set_run_mode(run_mode, info)
         # 设置重复次数
         repeat_number = self.spinBox.value() if self.radioButton_2.isChecked() else -1
         self.command_thread.set_repeat_number(repeat_number)  # 设置重复次数
         self.db.set_setting_value("运行重复次数", repeat_number)
-        # 开始运行
-        self.command_thread.start()
         # 记录开始时间的时间戳
         self.start_time = current_time()
+        # 开始运行
+        self.command_thread.start()
+        return True
 
     def clear_textEdit(self):
         """清空日志，主要用于在全局快捷键线程中调用，避免线程阻塞引发的程序闪退"""
@@ -983,68 +592,23 @@ class Main_window(QMainWindow, Ui_MainWindow):
                 QMessageBox.StandardButton.Ok,
             )
 
-    def eventFilter(self, obj, event: QEvent):
-        # 重写self.tableWidget的快捷键事件
-        if obj == self.tableWidget and isinstance(event, QKeyEvent):
-            if event.type() == QEvent.Type.KeyPress:
-                key_ = event.key()
-                modifiers_ = event.modifiers()
-                # 如果按下delete键
-                if key_ == Qt.Key.Key_Delete:
-                    self.delete_data()
-                # 如果按下ctrl+c键
-                if (
-                    modifiers_ == Qt.KeyboardModifier.ControlModifier
-                    and key_ == Qt.Key.Key_C
-                ):
-                    self.copy_data()
-                # 如果按下shift+向上键
-                if (
-                    modifiers_ == Qt.KeyboardModifier.ShiftModifier
-                    and key_ == Qt.Key.Key_Up
-                ):
-                    self.go_up_down("up")
-                    # 将焦点下移一行,抵消上移的误差
-                    self.tableWidget.setCurrentCell(
-                        self.tableWidget.currentRow() + 1, 0
-                    )
-                # 如果按下shift+向下键
-                if (
-                    modifiers_ == Qt.KeyboardModifier.ShiftModifier
-                    and key_ == Qt.Key.Key_Down
-                ):
-                    self.go_up_down("down")
-                    # 将焦点上移一行,抵消下移的误差
-                    self.tableWidget.setCurrentCell(
-                        self.tableWidget.currentRow() - 1, 0
-                    )
-                # 如果按下ctrl+x键
-                if (
-                    modifiers_ == Qt.KeyboardModifier.ControlModifier
-                    and key_ == Qt.Key.Key_Y
-                ):
-                    self.modify_parameters()  # 修改指令
-        return super().eventFilter(obj, event)
-
-        # 热键处理函数
-
     def global_shortcut_key(self, i_str):
         """全局热键处理函数"""
         self.db.system_prompt_tone("全局快捷键")  # 发出提示音
 
         if i_str == "终止线程":
             if self.command_thread.isRunning():
-                self.command_thread.terminate()  # 终止线程
+                stopped_ = self.command_thread.stop_and_wait()
                 # 获取当前时间
-                self.send_message("任务终止！")
+                self.send_message("任务终止！" if stopped_ else "任务正在等待当前指令结束。")
                 if self.checkBox_2.isChecked():
                     self.show()
                 QApplication.processEvents()
                 self.db.show_normal_window_with_specified_title(self.windowTitle())  # 显示窗口
 
         elif i_str == "开始线程":
-            self.start('全部指令', 0)  # 开始线程
-            self.send_message("任务开始！")
+            if self.start('全部指令', 0):  # 开始线程
+                self.send_message("任务开始！")
 
         elif i_str == "暂停和恢复线程":
             if self.command_thread.isRunning():
@@ -1067,7 +631,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
         def send_elapsed_time():
             """发送耗时"""
-            elapsed_time = current_time() - self.start_time
+            elapsed_time = current_time() - (self.start_time or current_time())
             # 将秒转换为毫秒或者保留两位小数的秒数
             if elapsed_time < 1:
                 elapsed_time_ms = round(elapsed_time * 1000)  # 毫秒
@@ -1110,24 +674,5 @@ class About(QDialog, Ui_About):
 
     def closeEvent(self, event):
         super().closeEvent(event)
-
-
-class Param(QDialog, Ui_Param):
-    """参数设置窗口"""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        # 初始化窗体
-        self.setupUi(self)
-        self.db = getattr(parent, "db", None) or DatabaseOperation()
-        install_window_state(self, self.db, self.windowTitle())
-        self.pushButton.clicked.connect(self.modify_parameters)  # 保存参数
-
-    def closeEvent(self, event):
-        super().closeEvent(event)
-
-    def modify_parameters(self):
-        self.parent().modify_parameters()
-        self.close()
 
 

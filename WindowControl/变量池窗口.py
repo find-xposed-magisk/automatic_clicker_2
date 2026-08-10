@@ -115,10 +115,6 @@ class VariablePool_Win(QDialog, Ui_VariablePool):
                 self.parent.load_lists("变量选择")
             except AttributeError:
                 pass
-            try:  # 重新加载父窗口的数据，用于导航窗口的变量更新
-                self.parent.tab_widget_change()
-            except AttributeError:
-                pass
 
 
 if __name__ == "__main__":

@@ -1,8 +1,9 @@
-import ast
 import contextlib
 import ctypes
 import datetime
+import json
 import os
+import re
 import sqlite3
 import time
 
@@ -11,22 +12,7 @@ import win32gui
 import winsound
 
 from functions import DATA_FOLDER, DATABASE_PATH, IMAGES_FOLDER
-
-REMOVED_COMMAND_TYPES = (
-    "打开网址",
-    "元素控制",
-    "网页录入",
-    "切换frame",
-    "保存表格",
-    "拖动元素",
-    "切换窗口",
-    "发送消息",
-)
-
-COMMAND_COLUMNS = (
-    "ID", "图像名称", "指令类型", "参数1", "参数2", "参数3", "参数4",
-    "重复次数", "异常处理", "备注",
-)
+from graph_repository import COMMAND_COLUMNS, GraphRepository
 
 SETTING_TYPE_BASIC = "基础设置"
 SETTING_TYPE_THIRD_PARTY = "三方接口"
@@ -74,12 +60,9 @@ REMOVED_SETTING_ITEMS = (
     "高DPI自适应",
 )
 
-UNSUPPORTED_SETTING_ITEMS = frozenset({"当前分支", "快捷键-分支选择"})
-
 LEGACY_WINDOW_SETTING_KEYS = (
     "Clicker",
     "设置",
-    "导航页",
     "全局参数",
     "关于",
     "选择变量",
@@ -90,6 +73,13 @@ LEGACY_WINDOW_SETTING_KEYS = (
 class DatabaseOperation:
     MIN_WINDOW_WIDTH = 120
     MIN_WINDOW_HEIGHT = 80
+    _LEGACY_WINDOW_SIZE_PATTERN = re.compile(
+        r"^[\(\[]\s*(-?\d+)\s*,\s*(-?\d+)\s*[\)\]]$"
+    )
+    _LEGACY_WINDOW_STATE_PATTERN = re.compile(
+        r'''^\{\s*["']size["']\s*:\s*[\(\[]\s*(-?\d+)\s*,\s*(-?\d+)'''
+        r'''\s*[\)\]]\s*,\s*["']maximized["']\s*:\s*(True|False)\s*\}$'''
+    )
 
     def __init__(self, db_path: str = DATABASE_PATH):
         self.db_path = db_path
@@ -99,6 +89,7 @@ class DatabaseOperation:
     def create_all_tables(self) -> None:
         """创建配置相关表，并迁移旧版数据库中的全局参数。"""
         with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
+            conn.execute("PRAGMA foreign_keys=ON")
             cursor = conn.cursor()
             self._migrate_settings_table(cursor)
             cursor.execute(
@@ -116,21 +107,14 @@ class DatabaseOperation:
                 "路径 TEXT NOT NULL PRIMARY KEY, 排序 INTEGER NOT NULL)"
             )
             cursor.execute(
-                "CREATE TABLE IF NOT EXISTS 命令 ("
-                "ID INTEGER NOT NULL PRIMARY KEY, 图像名称 TEXT, 指令类型 TEXT NOT NULL, "
-                "参数1 TEXT, 参数2 TEXT, 参数3 TEXT, 参数4 TEXT, "
-                "重复次数 INTEGER NOT NULL, 异常处理 TEXT, 备注 TEXT)"
+                "CREATE TABLE IF NOT EXISTS 最近打开 ("
+                "文件路径 TEXT NOT NULL, 打开时间 INTEGER NOT NULL)"
             )
-            command_columns = tuple(
-                row[1] for row in cursor.execute("PRAGMA table_info('命令')")
-            )
-            if command_columns != COMMAND_COLUMNS:
-                raise RuntimeError("命令表必须使用新的 10 列单流程结构")
-            placeholders = ",".join("?" for _ in REMOVED_COMMAND_TYPES)
             cursor.execute(
-                f"DELETE FROM 命令 WHERE 指令类型 IN ({placeholders})",
-                REMOVED_COMMAND_TYPES,
+                "CREATE TABLE IF NOT EXISTS 变量池 ("
+                "变量名称 TEXT NOT NULL UNIQUE, 备注 TEXT, 值 TEXT)"
             )
+            GraphRepository.initialize_schema(conn)
             self._migrate_legacy_window_settings(cursor)
             self._migrate_legacy_global_parameters(cursor)
             cursor.execute(
@@ -226,7 +210,7 @@ class DatabaseOperation:
                     "INSERT OR IGNORE INTO 窗口大小(窗口, 大小) VALUES (?, ?)",
                     (
                         f"{setting_key}-{resolution}",
-                        str({"size": state["size"], "maximized": state["maximized"]}),
+                        self._serialize_window_state(state),
                     ),
                 )
             cursor.execute("DELETE FROM 设置 WHERE 设置项=?", (setting_key,))
@@ -388,10 +372,23 @@ class DatabaseOperation:
 
     @classmethod
     def _parse_window_state(cls, value):
-        try:
-            parsed = ast.literal_eval(str(value))
-        except (SyntaxError, ValueError, TypeError):
-            return None
+        parsed = value
+        if isinstance(value, str):
+            text_ = value.strip()
+            try:
+                parsed = json.loads(text_)
+            except (json.JSONDecodeError, TypeError):
+                size_match_ = cls._LEGACY_WINDOW_SIZE_PATTERN.fullmatch(text_)
+                state_match_ = cls._LEGACY_WINDOW_STATE_PATTERN.fullmatch(text_)
+                if size_match_:
+                    parsed = [int(size_match_.group(1)), int(size_match_.group(2))]
+                elif state_match_:
+                    parsed = {
+                        "size": [int(state_match_.group(1)), int(state_match_.group(2))],
+                        "maximized": state_match_.group(3) == "True",
+                    }
+                else:
+                    return None
         if isinstance(parsed, dict):
             size = cls._parse_size_value(parsed.get("size"))
             return None if size is None else {
@@ -400,6 +397,17 @@ class DatabaseOperation:
             }
         size = cls._parse_size_value(parsed)
         return None if size is None else {"size": size, "maximized": False}
+
+    @staticmethod
+    def _serialize_window_state(state) -> str:
+        return json.dumps(
+            {
+                "size": list(state["size"]),
+                "maximized": bool(state.get("maximized", False)),
+            },
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
 
     def get_window_state(self, window_name: str):
         if not window_name:
@@ -426,7 +434,9 @@ class DatabaseOperation:
             if existing is None:
                 return
             save_size = existing["size"]
-        payload = str({"size": save_size, "maximized": bool(maximized)})
+        payload = self._serialize_window_state(
+            {"size": save_size, "maximized": bool(maximized)}
+        )
         window_info = f"{window_name}-{self.get_screen_resolution()}"
         with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
             conn.execute(
@@ -530,25 +540,51 @@ class DatabaseOperation:
             for path, order_ in conn.execute("SELECT 路径, 排序 FROM 资源文件夹 ORDER BY 排序"):
                 sheet.append(["资源文件夹", path, None, None, order_])
 
-    @staticmethod
-    def _read_settings_from_excel(workbook):
+    @classmethod
+    def _read_settings_from_excel(cls, workbook):
         if "设置" not in workbook.sheetnames:
             return None
         sheet = workbook["设置"]
+        if sheet.max_column != 5:
+            return None
         headers = [sheet.cell(1, column).value for column in range(1, 6)]
         if headers != ["类型", "名称", "值", "附加值", "排序"]:
             return None
         grouped = {"设置": [], "窗口大小": [], "资源文件夹": []}
-        for row in sheet.iter_rows(min_row=2, max_col=5, values_only=True):
+        seen_names = {category: set() for category in grouped}
+        seen_resource_orders = set()
+        seen_resource_paths = set()
+        for row_index, row in enumerate(
+            sheet.iter_rows(min_row=2, max_col=5, values_only=True), start=0
+        ):
             category, name, value, extra, order_ = row
-            if category == "分支":
-                return None
-            if category not in grouped or not name:
+            if all(item is None for item in row):
                 continue
-            if category == "设置" and str(name) in UNSUPPORTED_SETTING_ITEMS:
+            if category not in grouped or not isinstance(name, str) or not name.strip():
                 return None
+            name = name.strip()
+            if name in seen_names[category]:
+                return None
+            seen_names[category].add(name)
             if category == "设置" and str(name) in REMOVED_SETTING_ITEMS:
                 continue
+            if category == "窗口大小" and cls._parse_window_state(value) is None:
+                return None
+            if category == "资源文件夹":
+                name = cls.portable_resource_path(name)
+                if name in seen_resource_paths:
+                    return None
+                seen_resource_paths.add(name)
+                if order_ is None:
+                    order_ = row_index
+                if (
+                    isinstance(order_, bool)
+                    or not isinstance(order_, int)
+                    or order_ < 0
+                    or order_ in seen_resource_orders
+                ):
+                    return None
+                seen_resource_orders.add(order_)
             grouped[category].append((str(name), value, extra, order_))
         return grouped
 
@@ -560,29 +596,43 @@ class DatabaseOperation:
         if grouped is None:
             return False
         with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
-            for name, value, _, _ in grouped["设置"]:
-                conn.execute(
-                    "INSERT INTO 设置(类型, 设置项, 值) VALUES (?, ?, ?) "
-                    "ON CONFLICT(设置项) DO UPDATE SET "
-                    "类型=excluded.类型, 值=excluded.值",
-                    (get_setting_type(name), name, str(value)),
-                )
-            if grouped["窗口大小"]:
-                conn.execute("DELETE FROM 窗口大小")
-                for name, value, _, _ in grouped["窗口大小"]:
-                    if self._parse_window_state(value) is not None:
-                        conn.execute("INSERT INTO 窗口大小(窗口, 大小) VALUES (?, ?)", (name, str(value)))
-            if grouped["资源文件夹"]:
-                conn.execute("DELETE FROM 资源文件夹")
-                for index, (path, _, _, order_) in enumerate(grouped["资源文件夹"]):
-                    conn.execute(
-                        "INSERT INTO 资源文件夹(路径, 排序) VALUES (?, ?)",
-                        (self.portable_resource_path(path), int(order_ if order_ is not None else index)),
-                    )
-                self._normalize_order(conn, "资源文件夹", "路径")
+            self._apply_parsed_settings(conn, grouped)
             conn.commit()
         self.ensure_setting_values(DEFAULT_SETTINGS)
         return True
+
+    @classmethod
+    def _apply_parsed_settings(cls, conn, grouped) -> None:
+        """在调用方事务中应用已验证的设置工作表数据。"""
+        for name, value, _, _ in grouped["设置"]:
+            conn.execute(
+                "INSERT INTO 设置(类型, 设置项, 值) VALUES (?, ?, ?) "
+                "ON CONFLICT(设置项) DO UPDATE SET "
+                "类型=excluded.类型, 值=excluded.值",
+                (get_setting_type(name), name, "" if value is None else str(value)),
+            )
+        if grouped["窗口大小"]:
+            conn.execute("DELETE FROM 窗口大小")
+            conn.executemany(
+                "INSERT INTO 窗口大小(窗口, 大小) VALUES (?, ?)",
+                [
+                    (name, cls._serialize_window_state(cls._parse_window_state(value)))
+                    for name, value, _, _ in grouped["窗口大小"]
+                ],
+            )
+        if grouped["资源文件夹"]:
+            conn.execute("DELETE FROM 资源文件夹")
+            ordered_resources = sorted(
+                grouped["资源文件夹"],
+                key=lambda row_: int(row_[3]),
+            )
+            conn.executemany(
+                "INSERT INTO 资源文件夹(路径, 排序) VALUES (?, ?)",
+                [
+                    (cls.portable_resource_path(path), index)
+                    for index, (path, _, _, _) in enumerate(ordered_resources)
+                ],
+            )
 
     def system_prompt_tone(self, judge: str) -> None:
         if not self.get_bool_setting("系统提示音"):
@@ -623,20 +673,27 @@ class DatabaseOperation:
 
     def clear_all_ins(self):
         """清空数据库中的全部指令。"""
-        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
-            conn.execute("DELETE FROM 命令")
-            conn.commit()
+        self.get_graph_repository().clear()
 
     def extracted_ins_from_database(self) -> list:
-        """按 ID 顺序提取单一指令流。"""
-        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
-            return conn.execute("SELECT * FROM 命令 ORDER BY ID").fetchall()
+        """按图顺序提取单一指令流。"""
+        return self.get_graph_repository().list_commands()
 
     def extracted_ins_target_id_from_database(self, id_: int) -> list:
         """获取目标 ID 的指令。
         :param id_: 目标id"""
-        with contextlib.closing(sqlite3.connect(self.db_path)) as conn:
-            return conn.execute("SELECT * FROM 命令 WHERE ID=?", (id_,)).fetchall()
+        command = self.get_graph_repository().get_command(id_)
+        return [] if command is None else [command]
+
+    def get_graph_repository(self) -> GraphRepository:
+        """返回绑定当前数据库的节点图仓储。"""
+        return GraphRepository(self.db_path)
+
+    def export_instruction_workbook(self, workbook) -> None:
+        self.get_graph_repository().export_to_workbook(workbook, self)
+
+    def import_instruction_workbook(self, workbook) -> None:
+        self.get_graph_repository().import_from_workbook(workbook)
 
     def writes_to_recently_opened_files(self, file_path: str):
         """将最近打开的文件写入数据库

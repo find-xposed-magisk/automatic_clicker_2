@@ -3,13 +3,10 @@ import sys
 import time
 
 import cv2
-from PyQt5.QtCore import QPoint, QRectF
-from PyQt5.QtCore import QRect, Qt, pyqtSignal, QSettings
-from PyQt5.QtGui import QBrush, QWindow
-from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QColor
-from PyQt5.QtWidgets import QApplication, QLabel
+from PySide6.QtCore import QPoint, QRect, QRectF, QSettings, Qt, Signal as pyqtSignal
+from PySide6.QtGui import QBrush, QColor, QCursor, QFont, QPainter, QPen, QPixmap, QWindow
+from PySide6.QtWidgets import QApplication, QLabel
 from numpy import uint8, array
-from pynput.mouse import Controller
 
 
 #
@@ -415,7 +412,8 @@ class Slabel(QLabel):  # 区域截图功能
         self.setToolTip("左键框选，右键返回")
 
     def search_in_which_screen(self):
-        mousepos = Controller().position
+        cursor_position_ = QCursor.pos()
+        mousepos = (cursor_position_.x(), cursor_position_.y())
         screens = QApplication.screens()
         secondscreen = QApplication.primaryScreen()
         for i in screens:

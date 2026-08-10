@@ -9,7 +9,8 @@ from unittest.mock import patch
 from openpyxl import Workbook
 
 import functions
-from 数据库操作 import DatabaseOperation, REMOVED_COMMAND_TYPES, REMOVED_SETTING_ITEMS
+from graph_repository import GraphSchemaError
+from 数据库操作 import DatabaseOperation, REMOVED_SETTING_ITEMS
 
 
 class DataPathTests(unittest.TestCase):
@@ -60,13 +61,16 @@ class DataPathTests(unittest.TestCase):
                 command_columns = [
                     row[1] for row in connection.execute("PRAGMA table_info('命令')")
                 ]
-            self.assertTrue({"设置", "窗口大小", "资源文件夹", "命令"} <= tables)
+            self.assertTrue(
+                {"设置", "窗口大小", "资源文件夹", "命令", "节点", "节点连接"}
+                <= tables
+            )
             self.assertNotIn("分支", tables)
             self.assertEqual(
                 command_columns,
                 [
-                    "ID", "图像名称", "指令类型", "参数1", "参数2", "参数3",
-                    "参数4", "重复次数", "异常处理", "备注",
+                    "ID", "类型标识", "参数JSON", "重复次数", "异常处理",
+                    "备注", "排序",
                 ],
             )
             self.assertEqual(
@@ -87,7 +91,7 @@ class DataPathTests(unittest.TestCase):
             self.assertEqual(exported_settings["apiKey"], "三方接口")
             self.assertFalse(set(REMOVED_SETTING_ITEMS) & set(exported_settings))
 
-    def test_removed_commands_are_deleted_from_existing_database(self):
+    def test_old_ten_column_command_schema_is_rejected_without_data_loss(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             database_path = os.path.join(temporary_directory, "commands.db")
             with contextlib.closing(sqlite3.connect(database_path)) as connection:
@@ -97,24 +101,17 @@ class DataPathTests(unittest.TestCase):
                     "指令类型 TEXT NOT NULL, 参数1 TEXT, 参数2 TEXT, 参数3 TEXT, "
                     "参数4 TEXT, 重复次数 INTEGER NOT NULL, 异常处理 TEXT, 备注 TEXT)"
                 )
-                connection.executemany(
-                    "INSERT INTO 命令 VALUES (?, NULL, ?, NULL, NULL, NULL, NULL, 1, '自动跳过', NULL)",
-                    [
-                        (index, command_type)
-                        for index, command_type in enumerate(
-                            REMOVED_COMMAND_TYPES + ("图像点击",), start=1
-                        )
-                    ],
+                connection.execute(
+                    "INSERT INTO 命令 VALUES "
+                    "(1, NULL, '图像点击', NULL, NULL, NULL, NULL, 1, '自动跳过', NULL)"
                 )
                 connection.commit()
 
-            DatabaseOperation(database_path)
+            with self.assertRaisesRegex(GraphSchemaError, "节点编辑器新结构"):
+                DatabaseOperation(database_path)
 
             with contextlib.closing(sqlite3.connect(database_path)) as connection:
-                command_types = connection.execute(
-                    "SELECT 指令类型 FROM 命令 ORDER BY 指令类型"
-                ).fetchall()
-            self.assertEqual(command_types, [("图像点击",)])
+                self.assertEqual(connection.execute("SELECT COUNT(*) FROM 命令").fetchone()[0], 1)
 
     def test_legacy_branch_command_schema_is_rejected_without_data_loss(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -133,7 +130,7 @@ class DataPathTests(unittest.TestCase):
                 )
                 connection.commit()
 
-            with self.assertRaisesRegex(RuntimeError, "10 列单流程结构"):
+            with self.assertRaisesRegex(GraphSchemaError, "节点编辑器新结构"):
                 DatabaseOperation(database_path)
 
             with contextlib.closing(sqlite3.connect(database_path)) as connection:

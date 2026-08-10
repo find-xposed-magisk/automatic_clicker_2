@@ -16,11 +16,10 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QGridLayout,
-    QGroupBox, QHBoxLayout, QHeaderView, QMainWindow,
-    QMenu, QMenuBar, QPushButton, QRadioButton,
-    QSizePolicy, QSpacerItem, QSpinBox, QTabWidget,
-    QTableWidget, QTableWidgetItem, QTextEdit, QToolBar,
+from PySide6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QGroupBox,
+    QHBoxLayout, QMainWindow, QMenu, QMenuBar,
+    QPushButton, QRadioButton, QSizePolicy, QSpacerItem,
+    QSpinBox, QTabWidget, QTextEdit, QToolBar,
     QToolButton, QVBoxLayout, QWidget)
 import images_rc
 
@@ -28,7 +27,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(430, 521)
+        MainWindow.resize(1180, 720)
         font = QFont()
         font.setFamilies([u"Microsoft YaHei UI"])
         MainWindow.setFont(font)
@@ -85,6 +84,15 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout_4 = QGridLayout(self.centralwidget)
         self.gridLayout_4.setObjectName(u"gridLayout_4")
+        self.instructionPaletteHost = QWidget(self.centralwidget)
+        self.instructionPaletteHost.setObjectName(u"instructionPaletteHost")
+        self.instructionPaletteHost.setMinimumSize(QSize(220, 0))
+        self.instructionPaletteLayout = QVBoxLayout(self.instructionPaletteHost)
+        self.instructionPaletteLayout.setObjectName(u"instructionPaletteLayout")
+        self.instructionPaletteLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.gridLayout_4.addWidget(self.instructionPaletteHost, 0, 0, 1, 1)
+
         self.tabWidget = QTabWidget(self.centralwidget)
         self.tabWidget.setObjectName(u"tabWidget")
         palette = QPalette()
@@ -171,82 +179,13 @@ class Ui_MainWindow(object):
         self.tab_2.setObjectName(u"tab_2")
         self.verticalLayout_2 = QVBoxLayout(self.tab_2)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.tableWidget = QTableWidget(self.tab_2)
-        if (self.tableWidget.columnCount() < 7):
-            self.tableWidget.setColumnCount(7)
-        __qtablewidgetitem = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(0, __qtablewidgetitem)
-        __qtablewidgetitem1 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(1, __qtablewidgetitem1)
-        __qtablewidgetitem2 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(2, __qtablewidgetitem2)
-        __qtablewidgetitem3 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(3, __qtablewidgetitem3)
-        __qtablewidgetitem4 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(4, __qtablewidgetitem4)
-        __qtablewidgetitem5 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(5, __qtablewidgetitem5)
-        __qtablewidgetitem6 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(6, __qtablewidgetitem6)
-        self.tableWidget.setObjectName(u"tableWidget")
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.tableWidget.sizePolicy().hasHeightForWidth())
-        self.tableWidget.setSizePolicy(sizePolicy)
-        palette1 = QPalette()
-        brush5 = QBrush(QColor(255, 255, 255, 255))
-        brush5.setStyle(Qt.SolidPattern)
-        palette1.setBrush(QPalette.Active, QPalette.Text, brush5)
-        brush6 = QBrush(QColor(240, 240, 240, 255))
-        brush6.setStyle(Qt.SolidPattern)
-        palette1.setBrush(QPalette.Active, QPalette.AlternateBase, brush6)
-        brush7 = QBrush(QColor(255, 255, 255, 128))
-        brush7.setStyle(Qt.NoBrush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Active, QPalette.PlaceholderText, brush7)
-#endif
-        palette1.setBrush(QPalette.Inactive, QPalette.Text, brush5)
-        palette1.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush6)
-        brush8 = QBrush(QColor(255, 255, 255, 128))
-        brush8.setStyle(Qt.NoBrush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush8)
-#endif
-        palette1.setBrush(QPalette.Disabled, QPalette.Text, brush3)
-        palette1.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush6)
-        brush9 = QBrush(QColor(0, 0, 255, 128))
-        brush9.setStyle(Qt.NoBrush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush9)
-#endif
-        self.tableWidget.setPalette(palette1)
-        font2 = QFont()
-        font2.setFamilies([u"Microsoft YaHei UI"])
-        font2.setPointSize(8)
-        font2.setBold(False)
-        font2.setItalic(False)
-        self.tableWidget.setFont(font2)
-        self.tableWidget.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.tableWidget.setStyleSheet(u"QTableWidget {\n"
-"    alternate-background-color: #f0f0f0; /* \u8bbe\u7f6e\u4ea4\u66ff\u884c\u7684\u80cc\u666f\u8272 */\n"
-"    color: white;\n"
-"}\n"
-"")
-        self.tableWidget.setAutoScrollMargin(16)
-        self.tableWidget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.tableWidget.setAlternatingRowColors(False)
-        self.tableWidget.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
-        self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.tableWidget.setGridStyle(Qt.PenStyle.SolidLine)
-        self.tableWidget.setRowCount(0)
-        self.tableWidget.horizontalHeader().setCascadingSectionResizes(False)
-        self.tableWidget.horizontalHeader().setMinimumSectionSize(20)
-        self.tableWidget.horizontalHeader().setDefaultSectionSize(80)
-        self.tableWidget.horizontalHeader().setProperty(u"showSortIndicator", False)
-        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.nodeEditorHost = QWidget(self.tab_2)
+        self.nodeEditorHost.setObjectName(u"nodeEditorHost")
+        self.nodeEditorLayout = QVBoxLayout(self.nodeEditorHost)
+        self.nodeEditorLayout.setObjectName(u"nodeEditorLayout")
+        self.nodeEditorLayout.setContentsMargins(0, 0, 0, 0)
 
-        self.verticalLayout_2.addWidget(self.tableWidget)
+        self.verticalLayout_2.addWidget(self.nodeEditorHost)
 
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setSpacing(0)
@@ -265,10 +204,10 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.pushButton_3 = QPushButton(self.tab_2)
         self.pushButton_3.setObjectName(u"pushButton_3")
-        font3 = QFont()
-        font3.setFamilies([u"Microsoft YaHei"])
-        font3.setBold(True)
-        self.pushButton_3.setFont(font3)
+        font2 = QFont()
+        font2.setFamilies([u"Microsoft YaHei"])
+        font2.setBold(True)
+        self.pushButton_3.setFont(font2)
         self.pushButton_3.setStyleSheet(u"QPushButton {\n"
 "    background-color: red;\n"
 "    color: white;\n"
@@ -298,48 +237,50 @@ class Ui_MainWindow(object):
 
         self.pushButton = QPushButton(self.tab_2)
         self.pushButton.setObjectName(u"pushButton")
-        palette2 = QPalette()
-        palette2.setBrush(QPalette.Active, QPalette.Button, brush)
-        palette2.setBrush(QPalette.Active, QPalette.Text, brush)
-        palette2.setBrush(QPalette.Active, QPalette.ButtonText, brush)
-        palette2.setBrush(QPalette.Active, QPalette.Base, brush5)
-        palette2.setBrush(QPalette.Active, QPalette.Window, brush)
+        palette1 = QPalette()
+        palette1.setBrush(QPalette.Active, QPalette.Button, brush)
+        palette1.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette1.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        brush5 = QBrush(QColor(255, 255, 255, 255))
+        brush5.setStyle(Qt.SolidPattern)
+        palette1.setBrush(QPalette.Active, QPalette.Base, brush5)
+        palette1.setBrush(QPalette.Active, QPalette.Window, brush)
+        brush6 = QBrush(QColor(255, 0, 0, 128))
+        brush6.setStyle(Qt.NoBrush)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette.Active, QPalette.PlaceholderText, brush6)
+#endif
+        palette1.setBrush(QPalette.Inactive, QPalette.Button, brush)
+        palette1.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette1.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette1.setBrush(QPalette.Inactive, QPalette.Base, brush5)
+        palette1.setBrush(QPalette.Inactive, QPalette.Window, brush)
+        brush7 = QBrush(QColor(255, 0, 0, 128))
+        brush7.setStyle(Qt.NoBrush)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush7)
+#endif
+        brush8 = QBrush(QColor(249, 249, 249, 77))
+        brush8.setStyle(Qt.SolidPattern)
+        palette1.setBrush(QPalette.Disabled, QPalette.Button, brush8)
+        palette1.setBrush(QPalette.Disabled, QPalette.Text, brush3)
+        brush9 = QBrush(QColor(0, 0, 0, 92))
+        brush9.setStyle(Qt.SolidPattern)
+        palette1.setBrush(QPalette.Disabled, QPalette.ButtonText, brush9)
+        palette1.setBrush(QPalette.Disabled, QPalette.Base, brush)
+        palette1.setBrush(QPalette.Disabled, QPalette.Window, brush)
         brush10 = QBrush(QColor(255, 0, 0, 128))
         brush10.setStyle(Qt.NoBrush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette2.setBrush(QPalette.Active, QPalette.PlaceholderText, brush10)
+        palette1.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush10)
 #endif
-        palette2.setBrush(QPalette.Inactive, QPalette.Button, brush)
-        palette2.setBrush(QPalette.Inactive, QPalette.Text, brush)
-        palette2.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
-        palette2.setBrush(QPalette.Inactive, QPalette.Base, brush5)
-        palette2.setBrush(QPalette.Inactive, QPalette.Window, brush)
-        brush11 = QBrush(QColor(255, 0, 0, 128))
-        brush11.setStyle(Qt.NoBrush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette2.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush11)
-#endif
-        brush12 = QBrush(QColor(249, 249, 249, 77))
-        brush12.setStyle(Qt.SolidPattern)
-        palette2.setBrush(QPalette.Disabled, QPalette.Button, brush12)
-        palette2.setBrush(QPalette.Disabled, QPalette.Text, brush3)
-        brush13 = QBrush(QColor(0, 0, 0, 92))
-        brush13.setStyle(Qt.SolidPattern)
-        palette2.setBrush(QPalette.Disabled, QPalette.ButtonText, brush13)
-        palette2.setBrush(QPalette.Disabled, QPalette.Base, brush)
-        palette2.setBrush(QPalette.Disabled, QPalette.Window, brush)
-        brush14 = QBrush(QColor(255, 0, 0, 128))
-        brush14.setStyle(Qt.NoBrush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette2.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush14)
-#endif
-        self.pushButton.setPalette(palette2)
-        font4 = QFont()
-        font4.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
-        font4.setPointSize(10)
-        font4.setBold(True)
-        font4.setItalic(False)
-        self.pushButton.setFont(font4)
+        self.pushButton.setPalette(palette1)
+        font3 = QFont()
+        font3.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
+        font3.setPointSize(10)
+        font3.setBold(True)
+        font3.setItalic(False)
+        self.pushButton.setFont(font3)
         self.pushButton.setStyleSheet(u"")
         self.pushButton.setIconSize(QSize(40, 20))
 
@@ -347,75 +288,76 @@ class Ui_MainWindow(object):
 
         self.tabWidget.addTab(self.tab_2, "")
 
-        self.gridLayout_4.addWidget(self.tabWidget, 0, 0, 1, 2)
+        self.gridLayout_4.addWidget(self.tabWidget, 0, 1, 1, 1)
 
         self.groupBox_3 = QGroupBox(self.centralwidget)
         self.groupBox_3.setObjectName(u"groupBox_3")
-        palette3 = QPalette()
-        palette3.setBrush(QPalette.Active, QPalette.WindowText, brush)
-        palette3.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
-        palette3.setBrush(QPalette.Disabled, QPalette.WindowText, brush3)
-        self.groupBox_3.setPalette(palette3)
-        font5 = QFont()
-        font5.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
-        font5.setBold(True)
-        self.groupBox_3.setFont(font5)
+        self.groupBox_3.setMinimumSize(QSize(260, 0))
+        palette2 = QPalette()
+        palette2.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        palette2.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette2.setBrush(QPalette.Disabled, QPalette.WindowText, brush3)
+        self.groupBox_3.setPalette(palette2)
+        font4 = QFont()
+        font4.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
+        font4.setBold(True)
+        self.groupBox_3.setFont(font4)
         self.gridLayout_2 = QGridLayout(self.groupBox_3)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.radioButton_2 = QRadioButton(self.groupBox_3)
         self.radioButton_2.setObjectName(u"radioButton_2")
         self.radioButton_2.setEnabled(True)
-        palette4 = QPalette()
-        brush15 = QBrush(QColor(0, 0, 0, 255))
-        brush15.setStyle(Qt.SolidPattern)
-        palette4.setBrush(QPalette.Active, QPalette.WindowText, brush15)
-        palette4.setBrush(QPalette.Inactive, QPalette.WindowText, brush15)
-        palette4.setBrush(QPalette.Disabled, QPalette.WindowText, brush3)
-        palette4.setBrush(QPalette.Disabled, QPalette.Button, brush12)
-        palette4.setBrush(QPalette.Disabled, QPalette.ButtonText, brush13)
-        self.radioButton_2.setPalette(palette4)
+        palette3 = QPalette()
+        brush11 = QBrush(QColor(0, 0, 0, 255))
+        brush11.setStyle(Qt.SolidPattern)
+        palette3.setBrush(QPalette.Active, QPalette.WindowText, brush11)
+        palette3.setBrush(QPalette.Inactive, QPalette.WindowText, brush11)
+        palette3.setBrush(QPalette.Disabled, QPalette.WindowText, brush3)
+        palette3.setBrush(QPalette.Disabled, QPalette.Button, brush8)
+        palette3.setBrush(QPalette.Disabled, QPalette.ButtonText, brush9)
+        self.radioButton_2.setPalette(palette3)
         self.radioButton_2.setChecked(True)
 
         self.gridLayout_2.addWidget(self.radioButton_2, 1, 0, 1, 1)
 
         self.radioButton = QRadioButton(self.groupBox_3)
         self.radioButton.setObjectName(u"radioButton")
-        palette5 = QPalette()
-        palette5.setBrush(QPalette.Active, QPalette.WindowText, brush15)
-        palette5.setBrush(QPalette.Inactive, QPalette.WindowText, brush15)
-        palette5.setBrush(QPalette.Disabled, QPalette.WindowText, brush3)
-        palette5.setBrush(QPalette.Disabled, QPalette.Button, brush12)
-        palette5.setBrush(QPalette.Disabled, QPalette.ButtonText, brush13)
-        self.radioButton.setPalette(palette5)
+        palette4 = QPalette()
+        palette4.setBrush(QPalette.Active, QPalette.WindowText, brush11)
+        palette4.setBrush(QPalette.Inactive, QPalette.WindowText, brush11)
+        palette4.setBrush(QPalette.Disabled, QPalette.WindowText, brush3)
+        palette4.setBrush(QPalette.Disabled, QPalette.Button, brush8)
+        palette4.setBrush(QPalette.Disabled, QPalette.ButtonText, brush9)
+        self.radioButton.setPalette(palette4)
 
         self.gridLayout_2.addWidget(self.radioButton, 0, 0, 1, 1)
 
         self.spinBox = QSpinBox(self.groupBox_3)
         self.spinBox.setObjectName(u"spinBox")
-        palette6 = QPalette()
-        palette6.setBrush(QPalette.Active, QPalette.Text, brush)
-        brush16 = QBrush(QColor(255, 0, 0, 128))
-        brush16.setStyle(Qt.NoBrush)
+        palette5 = QPalette()
+        palette5.setBrush(QPalette.Active, QPalette.Text, brush)
+        brush12 = QBrush(QColor(255, 0, 0, 128))
+        brush12.setStyle(Qt.NoBrush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette6.setBrush(QPalette.Active, QPalette.PlaceholderText, brush16)
+        palette5.setBrush(QPalette.Active, QPalette.PlaceholderText, brush12)
 #endif
-        palette6.setBrush(QPalette.Inactive, QPalette.Text, brush)
-        brush17 = QBrush(QColor(255, 0, 0, 128))
-        brush17.setStyle(Qt.NoBrush)
+        palette5.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        brush13 = QBrush(QColor(255, 0, 0, 128))
+        brush13.setStyle(Qt.NoBrush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette6.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush17)
+        palette5.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush13)
 #endif
-        palette6.setBrush(QPalette.Disabled, QPalette.Text, brush3)
-        brush18 = QBrush(QColor(255, 0, 0, 128))
-        brush18.setStyle(Qt.NoBrush)
+        palette5.setBrush(QPalette.Disabled, QPalette.Text, brush3)
+        brush14 = QBrush(QColor(255, 0, 0, 128))
+        brush14.setStyle(Qt.NoBrush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette6.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush18)
+        palette5.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush14)
 #endif
-        self.spinBox.setPalette(palette6)
-        font6 = QFont()
-        font6.setFamilies([u"SimSun"])
-        font6.setBold(True)
-        self.spinBox.setFont(font6)
+        self.spinBox.setPalette(palette5)
+        font5 = QFont()
+        font5.setFamilies([u"SimSun"])
+        font5.setBold(True)
+        self.spinBox.setFont(font5)
         self.spinBox.setMinimum(-1)
         self.spinBox.setMaximum(1000000)
         self.spinBox.setDisplayIntegerBase(10)
@@ -424,73 +366,62 @@ class Ui_MainWindow(object):
 
         self.checkBox_2 = QCheckBox(self.groupBox_3)
         self.checkBox_2.setObjectName(u"checkBox_2")
-        palette7 = QPalette()
-        palette7.setBrush(QPalette.Active, QPalette.WindowText, brush15)
-        palette7.setBrush(QPalette.Inactive, QPalette.WindowText, brush15)
-        palette7.setBrush(QPalette.Disabled, QPalette.WindowText, brush3)
-        palette7.setBrush(QPalette.Disabled, QPalette.Button, brush12)
-        palette7.setBrush(QPalette.Disabled, QPalette.ButtonText, brush13)
-        self.checkBox_2.setPalette(palette7)
+        palette6 = QPalette()
+        palette6.setBrush(QPalette.Active, QPalette.WindowText, brush11)
+        palette6.setBrush(QPalette.Inactive, QPalette.WindowText, brush11)
+        palette6.setBrush(QPalette.Disabled, QPalette.WindowText, brush3)
+        palette6.setBrush(QPalette.Disabled, QPalette.Button, brush8)
+        palette6.setBrush(QPalette.Disabled, QPalette.ButtonText, brush9)
+        self.checkBox_2.setPalette(palette6)
 
         self.gridLayout_2.addWidget(self.checkBox_2, 2, 0, 1, 1)
 
+        self.verticalSpacer_4 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.gridLayout_4.addWidget(self.groupBox_3, 1, 0, 1, 1)
+        self.gridLayout_2.addItem(self.verticalSpacer_4, 4, 0, 1, 2)
 
-        self.groupBox_4 = QGroupBox(self.centralwidget)
-        self.groupBox_4.setObjectName(u"groupBox_4")
-        palette8 = QPalette()
-        palette8.setBrush(QPalette.Active, QPalette.WindowText, brush)
-        palette8.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
-        palette8.setBrush(QPalette.Disabled, QPalette.WindowText, brush3)
-        self.groupBox_4.setPalette(palette8)
-        self.groupBox_4.setFont(font5)
-        self.groupBox_4.setStyleSheet(u"")
-        self.gridLayout_3 = QGridLayout(self.groupBox_4)
-        self.gridLayout_3.setObjectName(u"gridLayout_3")
-        self.gridLayout_3.setHorizontalSpacing(6)
-        self.gridLayout_3.setContentsMargins(9, 0, 9, 2)
-        self.pushButton_5 = QPushButton(self.groupBox_4)
+        self.pushButton_5 = QPushButton(self.groupBox_3)
         self.pushButton_5.setObjectName(u"pushButton_5")
-        self.pushButton_5.setFont(font3)
+        self.pushButton_5.setFont(font2)
         self.pushButton_5.setStyleSheet(u"QPushButton {\n"
 "    background-color: red;\n"
 "    color: white;\n"
-"    border-radius: 10px; /* \u8bbe\u7f6e\u5706\u89d2\u534a\u5f84 */\n"
-"    font-family: 'Microsoft YaHei'; /* \u8bbe\u7f6e\u5b57\u4f53\u4e3a\u5fae\u8f6f\u96c5\u9ed1 */\n"
-"    padding: 3px 5px; /* \u8bbe\u7f6e\u5185\u8fb9\u8ddd\uff0c\u4f7f\u6309\u94ae\u770b\u8d77\u6765\u66f4\u7f8e\u89c2 */\n"
-"border: 2px solid transparent; /* \u8bbe\u7f6e\u8fb9\u6846\u4e3a\u900f\u660e */\n"
+"    border-radius: 10px;\n"
+"    font-family: 'Microsoft YaHei';\n"
+"    padding: 3px 5px;\n"
+"    border: 2px solid transparent;\n"
 "}\n"
 "\n"
 "QPushButton:hover {\n"
-"    background-color: rgb(170, 0, 0); /* \u8bbe\u7f6e\u9f20\u6807\u60ac\u505c\u65f6\u7684\u80cc\u666f\u989c\u8272 */\n"
+"    background-color: rgb(170, 0, 0);\n"
 "}\n"
 "\n"
 "QPushButton:pressed {\n"
-"    background-color: rgb(85, 85, 127); /* \u8bbe\u7f6e\u6309\u94ae\u6309\u4e0b\u65f6\u7684\u80cc\u666f\u989c\u8272 */\n"
+"    background-color: rgb(85, 85, 127);\n"
 "}")
 
-        self.gridLayout_3.addWidget(self.pushButton_5, 0, 0, 1, 2)
+        self.gridLayout_2.addWidget(self.pushButton_5, 5, 0, 1, 2)
 
-        self.pushButton_6 = QPushButton(self.groupBox_4)
-        self.pushButton_6.setObjectName(u"pushButton_6")
-        self.pushButton_6.setFont(font5)
-
-        self.gridLayout_3.addWidget(self.pushButton_6, 3, 0, 1, 2)
-
-        self.pushButton_7 = QPushButton(self.groupBox_4)
+        self.pushButton_7 = QPushButton(self.groupBox_3)
         self.pushButton_7.setObjectName(u"pushButton_7")
-        self.pushButton_7.setFont(font5)
+        self.pushButton_7.setFont(font4)
 
-        self.gridLayout_3.addWidget(self.pushButton_7, 2, 0, 1, 2)
+        self.gridLayout_2.addWidget(self.pushButton_7, 6, 0, 1, 2)
+
+        self.pushButton_6 = QPushButton(self.groupBox_3)
+        self.pushButton_6.setObjectName(u"pushButton_6")
+        self.pushButton_6.setFont(font4)
+
+        self.gridLayout_2.addWidget(self.pushButton_6, 7, 0, 1, 2)
 
 
-        self.gridLayout_4.addWidget(self.groupBox_4, 1, 1, 1, 1)
+        self.gridLayout_4.addWidget(self.groupBox_3, 0, 2, 1, 1)
 
+        self.gridLayout_4.setColumnStretch(1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 430, 33))
+        self.menubar.setGeometry(QRect(0, 0, 1180, 33))
         self.menu = QMenu(self.menubar)
         self.menu.setObjectName(u"menu")
         self.menu_5 = QMenu(self.menu)
@@ -570,34 +501,19 @@ class Ui_MainWindow(object):
         self.toolButton_8.setText(QCoreApplication.translate("MainWindow", u"\u5bfc\u51fa", None))
         self.toolButton_7.setText(QCoreApplication.translate("MainWindow", u"\u6e05\u7a7a", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"\u5904\u7406\u72b6\u6001", None))
-        ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
-        ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"\u56fe\u50cf\u540d\u79f0", None));
-        ___qtablewidgetitem1 = self.tableWidget.horizontalHeaderItem(1)
-        ___qtablewidgetitem1.setText(QCoreApplication.translate("MainWindow", u"\u952e\u9f20\u6307\u4ee4", None));
-        ___qtablewidgetitem2 = self.tableWidget.horizontalHeaderItem(2)
-        ___qtablewidgetitem2.setText(QCoreApplication.translate("MainWindow", u"\u5f02\u5e38\u5904\u7406", None));
-        ___qtablewidgetitem3 = self.tableWidget.horizontalHeaderItem(3)
-        ___qtablewidgetitem3.setText(QCoreApplication.translate("MainWindow", u"\u6307\u4ee4\u5907\u6ce8", None));
-        ___qtablewidgetitem4 = self.tableWidget.horizontalHeaderItem(4)
-        ___qtablewidgetitem4.setText(QCoreApplication.translate("MainWindow", u"\u53c2\u6570", None));
-        ___qtablewidgetitem5 = self.tableWidget.horizontalHeaderItem(5)
-        ___qtablewidgetitem5.setText(QCoreApplication.translate("MainWindow", u"\u91cd\u590d", None));
-        ___qtablewidgetitem6 = self.tableWidget.horizontalHeaderItem(6)
-        ___qtablewidgetitem6.setText(QCoreApplication.translate("MainWindow", u"ID", None));
         self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"\u8bbe\u7f6e\u8d44\u6e90\u6587\u4ef6\u5939", None))
         self.pushButton.setText(QCoreApplication.translate("MainWindow", u"\u6dfb\u52a0\u6307\u4ee4\uff08Ctrl+Enter\uff09", None))
 #if QT_CONFIG(shortcut)
         self.pushButton.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+Return", None))
 #endif // QT_CONFIG(shortcut)
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"\u6307\u4ee4\u96c6\u5408", None))
-        self.groupBox_3.setTitle(QCoreApplication.translate("MainWindow", u"\u63a7\u5236", None))
+        self.groupBox_3.setTitle(QCoreApplication.translate("MainWindow", u"\u63a7\u5236\u4e0e\u64cd\u4f5c", None))
         self.radioButton_2.setText(QCoreApplication.translate("MainWindow", u"\u91cd\u590d\u6b21\u6570\uff1a", None))
         self.radioButton.setText(QCoreApplication.translate("MainWindow", u"\u65e0\u9650\u5faa\u73af", None))
         self.checkBox_2.setText(QCoreApplication.translate("MainWindow", u"\u8fd0\u884c\u65f6\u9690\u85cf\u7a97\u53e3", None))
-        self.groupBox_4.setTitle(QCoreApplication.translate("MainWindow", u"\u64cd\u4f5c", None))
         self.pushButton_5.setText(QCoreApplication.translate("MainWindow", u"\u5f00\u59cb\u8fd0\u884c\uff08F10\uff09", None))
-        self.pushButton_6.setText(QCoreApplication.translate("MainWindow", u"\u7ed3\u675f\u4efb\u52a1\uff08F11\uff09", None))
         self.pushButton_7.setText(QCoreApplication.translate("MainWindow", u"\u6682\u505c/\u6062\u590d", None))
+        self.pushButton_6.setText(QCoreApplication.translate("MainWindow", u"\u7ed3\u675f\u4efb\u52a1\uff08F11\uff09", None))
         self.menu.setTitle(QCoreApplication.translate("MainWindow", u"\u6587\u4ef6", None))
         self.menu_5.setTitle(QCoreApplication.translate("MainWindow", u"\u53e6\u5b58\u4e3a", None))
         self.menuzv.setTitle(QCoreApplication.translate("MainWindow", u"\u6700\u8fd1\u6253\u5f00", None))

@@ -1,246 +1,309 @@
-# coding: utf-8
-# Copyright (c) [2022] [federalsadler@sohu.com]
-# [Clicker] is licensed under Mulan PSL v2.
-# You can use this software according to the terms and conditions of the Mulan PSL v2.
-# You may obtain a copy of Mulan PSL v2 at:
-# http://license.coscl.org.cn/MulanPSL2
-# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-# EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-# MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-# See the Mulan PSL v2 for more details.
-from PySide6.QtCore import QThread, Signal, QMutex, QWaitCondition
+"""Linear command execution thread backed by the instruction registry."""
 
-from 功能类 import *
+from __future__ import annotations
+
+from PySide6.QtCore import QMutex, QThread, QWaitCondition, Signal
+
+from graph_repository import GraphRepository, GraphValidationError
+from instructions.models import CommandRecord, ExecutionContext
+from instructions.registry import get_instruction_spec
+from 数据库操作 import DatabaseOperation
 
 
 class CommandThread(QThread):
-    """指令线程"""
-    send_message = Signal(str, name='send_message')
-    finished_signal = Signal(str, name='finished_signal')
-    send_type_and_id = Signal(str, str, name='send_type_and_id')
+    """Execute the validated start-to-end chain in stored linear order."""
 
-    def __init__(self, main_window, navigation):
-        super(CommandThread, self).__init__(parent=None)
-        # 窗体属性
+    send_message = Signal(str, name="send_message")
+    finished_signal = Signal(str, name="finished_signal")
+    send_type_and_id = Signal(str, str, name="send_type_and_id")
+
+    def __init__(self, main_window):
+        super().__init__(parent=None)
         self.main_window = main_window
-        self.navigation = navigation
-        self.out_mes = OutputMessage(self, self.navigation)
         self.db = DatabaseOperation()
-        # 循环控制
-        self.number: int = 1  # 在窗体中显示循环次数
-        self.number_cycles: int = 0  # 循环次数
-        # 终止和暂停标志
-        self.start_state: bool = True
-        self.suspended: bool = False
-        # 运行时的参数
-        self.run_mode: tuple = ('全部指令', 0)  # 运行模式
-        # 互斥锁,用于暂停线程
-        self.mutex = QMutex()
-        self.condition = QWaitCondition()
-        self.is_paused: bool = False
-
-    def set_run_mode(self, mode: str, info: int):
-        """设置运行模式
-        :param mode: 运行模式（全部指令、单行指令）
-        :param info: 指令ID"""
-        self.run_mode = (mode, info)
-
-    def set_repeat_number(self, number: int):
-        """设置循环次数
-        :param number: 循环次数，-1为无限循环"""
-        self.number_cycles = number
-
-    def run(self):
-        """执行指令"""
+        self.repository = GraphRepository(self.db.db_path)
+        self.number = 1
+        self.number_cycles = 1
         self.start_state = True
         self.suspended = False
-        # 从数据库中获取要执行的指令列表，并设置不同的运行模式
-        list_instructions: list = []
-        current_index: int = 0
-        # 检查 self.run_mode 是否为空
-        if not self.run_mode:
-            self.send_message.emit("运行模式未设置")
+        self.run_mode: tuple[str, int] = ("全部指令", 0)
+        self.mutex = QMutex()
+        self.condition = QWaitCondition()
+        self.is_paused = False
+        self._active_context: ExecutionContext | None = None
+        self._stop_requested = False
+
+    def set_run_mode(self, mode: str, info: int) -> None:
+        """Set mode to 全部指令、单行指令 or 从当前行运行.
+
+        ``info`` is always a stable command ID for the two scoped modes.
+        """
+        self.run_mode = (str(mode), int(info))
+
+    def set_repeat_number(self, number: int) -> None:
+        self.number_cycles = int(number)
+
+    def prepare_for_start(self) -> None:
+        """在启动一次新运行前重置可协作停止状态。"""
+        if self.isRunning():
+            raise RuntimeError("执行线程仍在运行")
+        self.mutex.lock()
+        try:
+            self._stop_requested = False
+            self.start_state = True
+            self.is_paused = False
+            self._active_context = None
+        finally:
+            self.mutex.unlock()
+
+    def run(self) -> None:
+        self.mutex.lock()
+        try:
+            self.start_state = not self._stop_requested
+            self.suspended = False
+            self.is_paused = False
+        finally:
+            self.mutex.unlock()
+        if not self.start_state:
+            self.finished_signal.emit("任务已终止")
             return
-        # 不断尝试获取指令列表，直到成功
-        while True:
-            if self.run_mode[0] == '全部指令':
-                list_instructions = self.db.extracted_ins_from_database()
-                current_index = 0
-            elif self.run_mode[0] == '单行指令':
-                list_instructions = self.db.extracted_ins_target_id_from_database(self.run_mode[1])
-                current_index = 0
-            elif self.run_mode[0] == '从当前行运行':
-                list_instructions = self.db.extracted_ins_from_database()
-                current_index = self.run_mode[1]
-            # 如果获取失败，等待一段时间再尝试
-            if list_instructions is None:
-                self.send_message.emit("未能从数据库中获取指令，重试中...")
-                time.sleep(0.1)  # 等待5秒再重试
-            else:
-                break
-        # print('指令列表：', list_instructions)
-        # 执行指令
-        # 设置主流程循环前的参数
-        loop_type = '无限循环' if self.number_cycles == -1 else '有限循环'
+        try:
+            commands_ = self._commands_for_mode()
+        except Exception as error_:
+            self.send_message.emit(f"无法开始运行：{error_}")
+            self.finished_signal.emit("任务未启动")
+            return
+
+        if not commands_:
+            self.send_message.emit("没有可执行的指令。")
+            self.finished_signal.emit("任务完成")
+            return
+
+        variables_ = self._load_variables()
+        services_ = getattr(self.main_window, "execution_services", {}) or {}
+        loop_is_infinite_ = self.number_cycles == -1
         self.number = 1
-        # 开始循环执行指令
-        while (self.start_state and loop_type == '无限循环') or \
-                (loop_type == '有限循环' and self.number <= self.number_cycles):
-            # 执行指令集中的指令
-            self.execute_instructions(current_index, list_instructions)
-            self.send_message.emit('换行')
-            self.send_message.emit(f'完成第{self.number}次循环')
+        while self.start_state and (
+            loop_is_infinite_ or self.number <= self.number_cycles
+        ):
+            context_ = ExecutionContext(
+                variables=variables_,
+                services=services_,
+                output=lambda message_: self.send_message.emit(f"----{message_}"),
+                iteration=self.number,
+                metadata={"database": self.db, "main_window": self.main_window},
+            )
+            self.mutex.lock()
+            try:
+                self._active_context = context_
+            finally:
+                self.mutex.unlock()
+            try:
+                self._execute_commands(commands_, context_)
+                self._persist_variables(context_.variables)
+            finally:
+                self.mutex.lock()
+                try:
+                    if self._active_context is context_:
+                        self._active_context = None
+                finally:
+                    self.mutex.unlock()
+            if not self.start_state:
+                break
+            self.send_message.emit("换行")
+            self.send_message.emit(f"完成第{self.number}次循环")
             self.number += 1
 
-        # 结束信号
-        self.finished_signal.emit('任务完成')
+        self.finished_signal.emit("任务完成" if self.start_state else "任务已终止")
 
-    def pause(self):
+    def _commands_for_mode(self) -> list[CommandRecord]:
+        # Defensive graph validation is required immediately before every run.
+        self.repository.validate_graph()
+        commands_ = self.repository.list_commands()
+        mode_, command_id_ = self.run_mode
+        if mode_ == "全部指令":
+            return commands_
+        if mode_ == "单行指令":
+            return [command_ for command_ in commands_ if command_.id == command_id_]
+        if mode_ == "从当前行运行":
+            for index_, command_ in enumerate(commands_):
+                if command_.id == command_id_:
+                    return commands_[index_:]
+            raise KeyError(f"指令不存在：{command_id_}")
+        raise ValueError(f"不支持的运行模式：{mode_}")
+
+    def pause(self) -> None:
         self.mutex.lock()
-        self.is_paused = True
-        self.mutex.unlock()
-        print('暂停线程')
+        try:
+            if self.start_state:
+                self.is_paused = True
+        finally:
+            self.mutex.unlock()
 
-    def resume(self):
+    def resume(self) -> None:
         self.mutex.lock()
-        self.is_paused = False
-        self.condition.wakeAll()
-        self.mutex.unlock()
-        print('恢复线程')
+        try:
+            self.is_paused = False
+            self.condition.wakeAll()
+        finally:
+            self.mutex.unlock()
 
-    def check_mutex(self):
+    def request_stop(self) -> None:
+        """协作式停止线程，并确保暂停等待立即被唤醒。"""
         self.mutex.lock()
-        while self.is_paused:
-            self.condition.wait(self.mutex)
-        self.mutex.unlock()
+        try:
+            self.start_state = False
+            self._stop_requested = True
+            self.is_paused = False
+            if self._active_context is not None:
+                self._active_context.stop_requested = True
+            self.condition.wakeAll()
+        finally:
+            self.mutex.unlock()
 
-    def execute_instructions(self, current_index, list_instructions_):
-        """执行接受到的操作指令"""
-        # 读取指令
-        while current_index < len(list_instructions_) and not self.check_mutex():
-            try:
-                elem_ = list_instructions_[current_index]
-                dic_ = {
-                    'ID': elem_[0],
-                    '图像路径': elem_[1],
-                    '指令类型': elem_[2],
-                    '参数1（键鼠指令）': elem_[3],
-                    '参数2': elem_[4],
-                    '参数3': elem_[5],
-                    '参数4': elem_[6],
-                    '重复次数': elem_[7],
-                    '异常处理': elem_[8]
-                }
-                # 读取指令类型
-                cmd_type = dict(dic_)['指令类型']
-                exception_handling = dict(dic_)['异常处理']
+    def stop_and_wait(
+        self, timeout_ms: int = 5000, terminate_wait_ms: int = 2000
+    ) -> bool:
+        """
+        先协作式停止并唤醒暂停等待，超时后再有界强制终止。
+
+        强制终止只作为长时间 sleep 或外部阻塞调用的最后兜底。
+        在进入该路径前，request_stop 已经清除暂停并唤醒条件变量。
+        """
+        self.request_stop()
+        if not self.isRunning():
+            return True
+        if self.wait(max(0, int(timeout_ms))):
+            return True
+        self.terminate()
+        stopped_ = bool(self.wait(max(0, int(terminate_wait_ms))))
+        if stopped_:
+            # terminate() may interrupt code near a mutex operation.  The old
+            # worker has exited, so replace synchronization primitives before
+            # this QThread instance is reused.
+            self.mutex = QMutex()
+            self.condition = QWaitCondition()
+            self.is_paused = False
+            self._active_context = None
+        return stopped_
+
+    def check_mutex(self) -> bool:
+        self.mutex.lock()
+        try:
+            while self.is_paused and self.start_state:
+                self.condition.wait(self.mutex)
+            return self.start_state
+        finally:
+            self.mutex.unlock()
+
+    def _execute_commands(
+        self, commands_: list[CommandRecord], context_: ExecutionContext
+    ) -> None:
+        for command_ in commands_:
+            if not self.start_state:
+                return
+            while self.start_state:
+                if not self.check_mutex():
+                    return
                 try:
-                    # 命令类型与对应操作类的映射
-                    command_mapping = {
-                        "图像点击": (ImageClick, self.out_mes, dic_),
-                        "多图点击": (MultipleImagesClick, self.out_mes, dic_),
-                        "坐标点击": (CoordinateClick, self.out_mes, dic_),
-                        "时间等待": (TimeWaiting, self.out_mes, dic_),
-                        "图像等待": (ImageWaiting, self.out_mes, dic_),
-                        "滚轮滑动": (RollerSlide, self.out_mes, dic_),
-                        "文本输入": (TextInput, self.out_mes, dic_),
-                        "移动鼠标": (MoveMouse, self.out_mes, dic_),
-                        "按下键盘": (PressKeyboard, self.out_mes, dic_),
-                        "中键激活": (MiddleActivation, self.out_mes, dic_),
-                        "鼠标点击": (MouseClick, self.out_mes, dic_),
-                        "信息录入": (InformationEntry, self.out_mes, dic_, self.number),
-                        "鼠标拖拽": (MouseDrag, self.out_mes, dic_),
-                        "屏幕截图": (FullScreenCapture, self.out_mes, dic_),
-                        "数字验证码": (VerificationCode, self.out_mes, dic_),
-                        "提示音": (PlayVoice, self.out_mes, dic_),
-                        "倒计时窗口": (WaitWindow, self.out_mes, dic_),
-                        "提示窗口": (DialogWindow, self.out_mes, dic_),
-                        "终止流程": (TerminationProcess, self.out_mes, dic_),
-                        "窗口控制": (WindowControl, self.out_mes, dic_),
-                        "按键等待": (KeyWait, self.out_mes, dic_),
-                        "获取时间": (GetTimeValue, self.out_mes, dic_),
-                        "获取Excel": (GetExcelCellValue, self.out_mes, dic_, self.number),
-                        "获取对话框": (GetDialogValue, self.out_mes, dic_),
-                        "获取剪切板": (GetClipboard, self.out_mes, dic_),
-                        "运行Python": (RunPython, self.out_mes, dic_),
-                        "运行cmd": (RunCmd, self.out_mes, dic_),
-                        "运行外部文件": (RunExternalFile, self.out_mes, dic_),
-                        "写入单元格": (InputCellExcel, self.out_mes, dic_, self.number),
-                        "OCR识别": (TextRecognition, self.out_mes, dic_),
-                        "获取鼠标位置": (GetMousePositon, self.out_mes, dic_),
-                        "窗口焦点等待": (WindowFocusWait, self.out_mes, dic_),
-                    }
-                    # 根据命令类型执行相应操作
-                    if cmd_type in command_mapping:
-                        command_class, *args = command_mapping[cmd_type]
-                        command_instance = command_class(*args)
-                        self.send_message.emit('换行')
-                        self.send_message.emit(f'执行ID为{str(dict(dic_)["ID"])}的指令：{cmd_type}')
-                        command_instance.start_execute()
-
-                    # 执行完毕后，跳转到下一条指令
-                    current_index += 1
-
-                except Exception as e:
-                    info_e = str(e)
-                    if not info_e:
-                        info_e = str(type(e))
-                    # except IndexError:
-                    #     info_e = 'test'
-                    str_id = str(dict(dic_)['ID'])
-
-                    # 自动跳过功能
-                    if exception_handling == '自动跳过':
-                        self.send_message.emit(f'ID为{str_id}的指令执行异常，已自动跳过。')
-                        current_index += 1
-
-                    # 提示异常并暂停
-                    elif exception_handling == '提示异常并暂停':
-                        self.db.system_prompt_tone('执行异常')
-                        self.send_message.emit(f'ID为{str_id}的指令执行异常，已提示异常并暂停。')
-                        # 弹出带有OK按钮的提示框
-                        choice = pymsgbox.confirm(
-                            text=f'ID为{str_id}的指令执行异常！\n是否重试？\n\n错误类型：{info_e}',
-                            title='提示',
-                            buttons=[pymsgbox.ABORT_TEXT, pymsgbox.RETRY_TEXT, pymsgbox.IGNORE_TEXT])
-                        # 选择的按钮
-                        if choice == pymsgbox.RETRY_TEXT:  # 重试指令
-                            pass
-                        elif choice == pymsgbox.IGNORE_TEXT:  # 忽略该指令,继续执行下一条指令
-                            current_index += 1
-                        elif choice == pymsgbox.ABORT_TEXT:  # 终止任务
-                            self.start_state = False
-                            break
-
-                    # 抛出异常并停止
-                    elif exception_handling == '提示异常并停止':
-                        self.db.system_prompt_tone('执行异常')
-                        self.send_message.emit(f'ID为{str_id}的指令执行异常，已提示异常并停止。')
-                        # 弹出提示框
-                        pymsgbox.alert(
-                            text=f'ID为{str_id}的指令抛出异常！\n\n错误类型：{info_e}',
-                            title='提示',
-                            icon=pymsgbox.STOP
-                        )
-                        current_index += 1
-                        self.start_state = False
-                        break
-
-                    # 终止所有任务
-                    elif exception_handling == '终止所有任务':
-                        self.db.system_prompt_tone('执行异常')
-                        self.send_message.emit(f'ID为{str_id}的指令触发‘终止流程’指令。')
-                        current_index += 1
-                        self.start_state = False
-                        break
-
-                    else:
+                    self._execute_one(command_, context_)
+                    self._persist_variables(context_.variables)
+                    if context_.stop_requested:
                         self.send_message.emit(
-                            f'ID为{str_id}的指令异常处理方式无效，任务已停止。'
+                            f"ID为{command_.id}的指令触发了终止流程。"
                         )
-                        self.start_state = False
+                        self.request_stop()
+                        return
+                    break
+                except Exception as error_:
+                    action_ = self._handle_command_error(command_, error_)
+                    if action_ == "retry":
+                        continue
+                    if action_ == "continue":
                         break
-            except (IndexError, TypeError) as error_:
-                self.send_message.emit(f'指令数据格式无效，任务已停止：{error_}')
-                self.start_state = False
-                break
+                    self.start_state = False
+                    return
+
+    def _execute_one(
+        self, command_: CommandRecord, context_: ExecutionContext
+    ) -> None:
+        spec_ = get_instruction_spec(command_.type_id)
+        executor_ = spec_.create_executor()
+        self.send_message.emit("换行")
+        self.send_message.emit(
+            f"执行ID为{command_.id}的指令：{spec_.display_name}"
+        )
+        self.send_type_and_id.emit(command_.type_id, str(command_.id))
+        executor_.execute(context_, command_)
+
+    def _handle_command_error(
+        self, command_: CommandRecord, error_: Exception
+    ) -> str:
+        policy_ = command_.error_policy
+        error_text_ = str(error_) or type(error_).__name__
+        command_id_ = command_.id
+        if policy_ == "自动跳过":
+            self.send_message.emit(
+                f"ID为{command_id_}的指令执行异常，已自动跳过：{error_text_}"
+            )
+            return "continue"
+
+        self.db.system_prompt_tone("执行异常")
+        if policy_ == "提示异常并暂停":
+            import pymsgbox
+
+            self.send_message.emit(
+                f"ID为{command_id_}的指令执行异常，等待处理。"
+            )
+            choice_ = pymsgbox.confirm(
+                text=(
+                    f"ID为{command_id_}的指令执行异常！\n是否重试？"
+                    f"\n\n错误类型：{error_text_}"
+                ),
+                title="提示",
+                buttons=[
+                    pymsgbox.ABORT_TEXT,
+                    pymsgbox.RETRY_TEXT,
+                    pymsgbox.IGNORE_TEXT,
+                ],
+            )
+            if choice_ == pymsgbox.RETRY_TEXT:
+                return "retry"
+            if choice_ == pymsgbox.IGNORE_TEXT:
+                return "continue"
+            return "stop"
+
+        if policy_ == "提示异常并停止":
+            import pymsgbox
+
+            self.send_message.emit(
+                f"ID为{command_id_}的指令执行异常，任务已停止。"
+            )
+            pymsgbox.alert(
+                text=f"ID为{command_id_}的指令抛出异常！\n\n错误类型：{error_text_}",
+                title="提示",
+                icon=pymsgbox.STOP,
+            )
+            return "stop"
+
+        self.send_message.emit(
+            f"ID为{command_id_}的异常处理方式“{policy_}”无效，任务已停止。"
+        )
+        return "stop"
+
+    def _load_variables(self) -> dict:
+        try:
+            return dict(self.db.get_variable_info("dict"))
+        except Exception as error_:
+            self.send_message.emit(f"读取变量池失败：{error_}")
+            return {}
+
+    def _persist_variables(self, variables_: dict) -> None:
+        for name_, value_ in variables_.items():
+            try:
+                self.db.set_variable_value(str(name_), value_)
+            except Exception as error_:
+                self.send_message.emit(f"写入变量“{name_}”失败：{error_}")
+
+
+__all__ = ["CommandThread", "GraphValidationError"]

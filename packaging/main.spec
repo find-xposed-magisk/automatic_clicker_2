@@ -1,9 +1,37 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 import os
+import sys
 
 
 project_root = os.path.dirname(os.path.abspath(SPECPATH))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from instructions.registry import hidden_imports as instruction_hidden_imports
+
+
+def collect_instruction_datas():
+    """收集独立指令编辑器 UI 和随模块发布的静态资源。"""
+    instructions_root = os.path.join(project_root, 'instructions')
+    collected = []
+    for directory, subdirectories, filenames in os.walk(instructions_root):
+        subdirectories[:] = sorted(
+            name for name in subdirectories
+            if name != '__pycache__' and not name.startswith('.')
+        )
+        destination = os.path.relpath(directory, project_root)
+        for filename in sorted(filenames):
+            suffix = os.path.splitext(filename)[1].lower()
+            is_generated_ui = filename.endswith('_ui.py')
+            is_static_resource = suffix not in {'.py', '.pyc', '.pyo'}
+            if is_generated_ui or is_static_resource:
+                collected.append((os.path.join(directory, filename), destination))
+    return collected
+
+
+instruction_datas = collect_instruction_datas()
+dynamic_instruction_imports = list(instruction_hidden_imports())
 
 
 a = Analysis(
@@ -14,8 +42,8 @@ a = Analysis(
         (os.path.join(project_root, 'data', '命令集.db'), 'data'),
         (os.path.join(project_root, 'flat', 'Combinear.qss'), 'flat'),
         (os.path.join(project_root, 'flat', '开屏.png'), 'flat'),
-    ],
-    hiddenimports=['pyttsx4.drivers'],
+    ] + instruction_datas,
+    hiddenimports=['pyttsx4.drivers', *dynamic_instruction_imports],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
