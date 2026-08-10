@@ -145,6 +145,9 @@ class NodeItem(QGraphicsObject):
         if change == QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged:
             for port in self.input_ports + self.output_ports:
                 port.update_edges()
+            scene = self.scene()
+            if scene is not None and hasattr(scene, "auto_connect_nearby_ports"):
+                scene.auto_connect_nearby_ports(self)
         elif change == QGraphicsItem.GraphicsItemChange.ItemSelectedHasChanged:
             self.update()
         return super().itemChange(change, value)

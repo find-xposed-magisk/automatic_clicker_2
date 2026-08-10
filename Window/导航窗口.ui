@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <ui version="4.0">
  <class>navigation</class>
  <widget class="QWidget" name="navigation">
@@ -24,7 +24,7 @@
     <normaloff>:/按钮图标/Window/res/图标.png</normaloff>:/按钮图标/Window/res/图标.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true" />
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_16" stretch="1,3">
    <item>
@@ -62,7 +62,7 @@
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true"/>
+        <string notr="true" />
        </property>
        <column>
         <property name="text">
@@ -123,11 +123,6 @@
           <string>鼠标拖拽</string>
          </property>
         </item>
-        <item>
-         <property name="text">
-          <string>颜色判断</string>
-         </property>
-        </item>
        </item>
        <item>
         <property name="text">
@@ -163,11 +158,6 @@
         <property name="text">
          <string>获取变量</string>
         </property>
-        <item>
-         <property name="text">
-          <string>变量判断</string>
-         </property>
-        </item>
         <item>
          <property name="text">
           <string>获取时间</string>
@@ -270,11 +260,6 @@
         </property>
         <item>
          <property name="text">
-          <string>跳转分支</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
           <string>终止流程</string>
          </property>
         </item>
@@ -306,7 +291,7 @@
         <enum>QTabWidget::TabShape::Rounded</enum>
        </property>
        <property name="currentIndex">
-        <number>42</number>
+        <number>0</number>
        </property>
        <property name="elideMode">
         <enum>Qt::TextElideMode::ElideNone</enum>
@@ -475,7 +460,7 @@ QPushButton:pressed {
               <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="currentText">
-              <string/>
+              <string />
              </property>
              <property name="insertPolicy">
               <enum>QComboBox::InsertPolicy::NoInsert</enum>
@@ -486,12 +471,12 @@ QPushButton:pressed {
             </widget>
            </item>
            <item row="1" column="1" colspan="3">
-            <widget class="QComboBox" name="comboBox"/>
+            <widget class="QComboBox" name="comboBox" />
            </item>
            <item row="2" column="4">
             <widget class="QPushButton" name="pushButton_11">
              <property name="styleSheet">
-              <string notr="true"/>
+              <string notr="true" />
              </property>
              <property name="text">
               <string>高级设置</string>
@@ -1122,7 +1107,7 @@ QPushButton:pressed {
             <item row="0" column="1">
              <widget class="QPushButton" name="pushButton_66">
               <property name="styleSheet">
-               <string notr="true"/>
+               <string notr="true" />
               </property>
               <property name="text">
                <string>高级设置</string>
@@ -1930,7 +1915,7 @@ QPushButton:pressed {
          <item>
           <widget class="QGroupBox" name="groupBox_28">
            <property name="styleSheet">
-            <string notr="true"/>
+            <string notr="true" />
            </property>
            <property name="title">
             <string>移动指定距离</string>
@@ -1945,7 +1930,7 @@ QPushButton:pressed {
             <item>
              <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,1">
               <item row="1" column="1">
-               <widget class="QLineEdit" name="lineEdit"/>
+               <widget class="QLineEdit" name="lineEdit" />
               </item>
               <item row="1" column="0">
                <widget class="QLabel" name="label_13">
@@ -2152,7 +2137,7 @@ QPushButton:pressed {
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox_61"/>
+             <widget class="QComboBox" name="comboBox_61" />
             </item>
             <item row="1" column="1">
              <widget class="QPushButton" name="pushButton_57">
@@ -3284,7 +3269,7 @@ QPushButton:pressed {
                </widget>
               </item>
               <item row="1" column="1" colspan="2">
-               <widget class="QComboBox" name="comboBox_18"/>
+               <widget class="QComboBox" name="comboBox_18" />
               </item>
               <item row="3" column="0" colspan="2">
                <widget class="QLabel" name="label_48">
@@ -3304,7 +3289,7 @@ QPushButton:pressed {
                </widget>
               </item>
               <item row="0" column="1" colspan="2">
-               <widget class="QComboBox" name="comboBox_17"/>
+               <widget class="QComboBox" name="comboBox_17" />
               </item>
               <item row="2" column="0">
                <widget class="QLabel" name="label_47">
@@ -3462,7 +3447,7 @@ QPushButton:pressed {
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLineEdit" name="lineEdit_18"/>
+             <widget class="QLineEdit" name="lineEdit_18" />
             </item>
             <item row="1" column="2">
              <widget class="QLabel" name="label_169">
@@ -3604,7 +3589,7 @@ QPushButton:pressed {
              </widget>
             </item>
             <item row="0" column="2">
-             <widget class="QComboBox" name="comboBox_45"/>
+             <widget class="QComboBox" name="comboBox_45" />
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_137">
@@ -3614,7 +3599,7 @@ QPushButton:pressed {
              </widget>
             </item>
             <item row="1" column="2">
-             <widget class="QComboBox" name="comboBox_46"/>
+             <widget class="QComboBox" name="comboBox_46" />
             </item>
             <item row="2" column="0">
              <widget class="QLabel" name="label_138">
@@ -3658,7 +3643,7 @@ QPushButton:pressed {
            </property>
            <layout class="QGridLayout" name="gridLayout_50" columnstretch="1,1">
             <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox_47"/>
+             <widget class="QComboBox" name="comboBox_47" />
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_139">
@@ -4010,7 +3995,7 @@ QPushButton:pressed {
                </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QLineEdit" name="lineEdit_3"/>
+               <widget class="QLineEdit" name="lineEdit_3" />
               </item>
               <item row="1" column="2">
                <widget class="QLabel" name="label_105">
@@ -4191,14 +4176,14 @@ QPushButton:pressed {
            <item>
             <widget class="QTextEdit" name="textEdit">
              <property name="html">
-              <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+              <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name="qrichtext" content="1" /&gt;&lt;meta charset="utf-8" /&gt;&lt;style type="text/css"&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'微软雅黑'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'黑体,黑体';&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+li.unchecked::marker { content: "\2610"; }
+li.checked::marker { content: "\2612"; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=" font-family:'微软雅黑'; font-size:9pt; font-weight:400; font-style:normal;"&gt;
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'黑体,黑体';"&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="placeholderText">
               <string>请输入文本......</string>
@@ -5196,608 +5181,6 @@ QPushButton:pressed {
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tab_46">
-        <attribute name="title">
-         <string>颜色判断</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_88">
-         <item>
-          <widget class="QLabel" name="label_187">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>操作说明：判断目标像素点的颜色，执行对应的控制。</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignCenter</set>
-           </property>
-           <property name="wordWrap">
-            <bool>false</bool>
-           </property>
-           <property name="margin">
-            <number>0</number>
-           </property>
-           <property name="indent">
-            <number>-1</number>
-           </property>
-           <property name="openExternalLinks">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_39" stretch="1,1">
-           <item>
-            <widget class="QGroupBox" name="groupBox_82">
-             <property name="title">
-              <string>像素点坐标：</string>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_80">
-              <item row="0" column="3">
-               <spacer name="horizontalSpacer_29">
-                <property name="orientation">
-                 <enum>Qt::Orientation::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>91</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="3" column="0" colspan="5">
-               <widget class="QPushButton" name="pushButton_82">
-                <property name="font">
-                 <font>
-                  <family>微软雅黑</family>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>获取颜色（按住拖动）</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <layout class="QGridLayout" name="gridLayout_79">
-                <item row="0" column="0">
-                 <widget class="QLabel" name="label_192">
-                  <property name="font">
-                   <font>
-                    <family>微软雅黑</family>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>X：</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QLabel" name="label_197">
-                  <property name="font">
-                   <font>
-                    <family>微软雅黑</family>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>0</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QLabel" name="label_196">
-                  <property name="font">
-                   <font>
-                    <family>微软雅黑</family>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Y：</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QLabel" name="label_195">
-                  <property name="font">
-                   <font>
-                    <family>微软雅黑</family>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>0</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="0" column="0">
-               <spacer name="horizontalSpacer_27">
-                <property name="orientation">
-                 <enum>Qt::Orientation::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>91</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="1" column="0" colspan="5">
-               <layout class="QHBoxLayout" name="horizontalLayout_40">
-                <item>
-                 <widget class="QLabel" name="label_198">
-                  <property name="text">
-                   <string>允许色彩误差：</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QSpinBox" name="spinBox_31">
-                  <property name="maximum">
-                   <number>255</number>
-                  </property>
-                  <property name="value">
-                   <number>20</number>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="2" column="0" colspan="5">
-               <widget class="QPushButton" name="pushButton_79">
-                <property name="font">
-                 <font>
-                  <family>Microsoft YaHei</family>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">QPushButton {
-    background-color: red;
-    color: white;
-    border-radius: 10px; /* 设置圆角半径 */
-    font-family: 'Microsoft YaHei'; /* 设置字体为微软雅黑 */
-    padding: 3px 5px; /* 设置内边距，使按钮看起来更美观 */
-border: 2px solid transparent; /* 设置边框为透明 */
-}
-
-QPushButton:hover {
-    background-color: rgb(170, 0, 0); /* 设置鼠标悬停时的背景颜色 */
-}
-
-QPushButton:pressed {
-    background-color: rgb(85, 85, 127); /* 设置按钮按下时的背景颜色 */
-}</string>
-                </property>
-                <property name="text">
-                 <string>获取坐标（按住拖动）</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="4">
-               <widget class="QToolButton" name="toolButton_3">
-                <property name="text">
-                 <string>显示位置</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../images.qrc">
-                  <normaloff>:/按钮图标/Window/qss_icons/calendar_nextmonth.png</normaloff>:/按钮图标/Window/qss_icons/calendar_nextmonth.png</iconset>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="groupBox_81">
-             <property name="title">
-              <string>目标像素点颜色：</string>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_77">
-              <item row="0" column="0">
-               <layout class="QGridLayout" name="gridLayout_76">
-                <item row="0" column="0">
-                 <widget class="QLabel" name="label_188">
-                  <property name="text">
-                   <string>R:</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QSpinBox" name="spinBox_26">
-                  <property name="maximum">
-                   <number>255</number>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QSpinBox" name="spinBox_29">
-                  <property name="maximum">
-                   <number>255</number>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QLabel" name="label_189">
-                  <property name="text">
-                   <string>G:</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QLabel" name="label_190">
-                  <property name="text">
-                   <string>B:</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QSpinBox" name="spinBox_30">
-                  <property name="maximum">
-                   <number>255</number>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLabel" name="label_191">
-                <property name="styleSheet">
-                 <string notr="true">background-color: rgb(0, 255, 0);</string>
-                </property>
-                <property name="text">
-                 <string>色彩预览</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignmentFlag::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0" colspan="2">
-               <widget class="QPushButton" name="pushButton_80">
-                <property name="text">
-                 <string>打开颜色选择器</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_83">
-           <property name="title">
-            <string>如果目标像素点颜色为目标色，则转到分支：</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_89">
-            <item>
-             <layout class="QGridLayout" name="gridLayout_78" columnstretch="1,1,1,1">
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_193">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>分支名称：</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignmentFlag::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QComboBox" name="comboBox_74">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="3">
-               <widget class="QComboBox" name="comboBox_75">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QLabel" name="label_194">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>开始位置：</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignmentFlag::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_41">
-           <property name="orientation">
-            <enum>Qt::Orientation::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>189</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_81">
-           <property name="palette">
-            <palette>
-             <active>
-              <colorrole role="WindowText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Button">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>0</red>
-                 <green>170</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Text">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Base">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>0</red>
-                 <green>170</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Window">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>0</red>
-                 <green>170</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="PlaceholderText">
-               <brush brushstyle="NoBrush">
-                <color alpha="128">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </active>
-             <inactive>
-              <colorrole role="WindowText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Button">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>0</red>
-                 <green>170</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Text">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Base">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>0</red>
-                 <green>170</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Window">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>0</red>
-                 <green>170</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="PlaceholderText">
-               <brush brushstyle="NoBrush">
-                <color alpha="128">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </inactive>
-             <disabled>
-              <colorrole role="WindowText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Button">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>0</red>
-                 <green>170</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Text">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="92">
-                 <red>0</red>
-                 <green>0</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Base">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>0</red>
-                 <green>170</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Window">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>0</red>
-                 <green>170</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="PlaceholderText">
-               <brush brushstyle="NoBrush">
-                <color alpha="128">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </disabled>
-            </palette>
-           </property>
-           <property name="font">
-            <font>
-             <family>Microsoft YaHei</family>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton {
-    background-color: rgb(0, 170, 0);
-    color: white;
-    border-radius: 10px; /* 设置圆角半径 */
-    font-family: 'Microsoft YaHei'; /* 设置字体为微软雅黑 */
-    padding: 3px 5px; /* 设置内边距，使按钮看起来更美观 */
-    border: 2px solid transparent; /* 设置边框为透明 */
-}
-
-QPushButton:hover {
-    background-color: rgb(0, 150, 0); /* 设置鼠标悬停时的背景颜色 */
-}
-
-QPushButton:pressed {
-    background-color: rgb(0, 100, 0); /* 设置按钮按下时的背景颜色 */
-}
-</string>
-           </property>
-           <property name="text">
-            <string>指令测试</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
        <widget class="QWidget" name="tab_10">
         <attribute name="title">
          <string>信息录入</string>
@@ -6101,7 +5484,7 @@ QPushButton:pressed {
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QComboBox" name="comboBox_13"/>
+             <widget class="QComboBox" name="comboBox_13" />
             </item>
             <item row="2" column="0">
              <widget class="QLabel" name="label_39">
@@ -6127,7 +5510,7 @@ QPushButton:pressed {
            </property>
            <layout class="QGridLayout" name="gridLayout_66" columnstretch="1,5">
             <item row="1" column="1">
-             <widget class="QComboBox" name="comboBox_15"/>
+             <widget class="QComboBox" name="comboBox_15" />
             </item>
             <item row="0" column="1">
              <widget class="QComboBox" name="comboBox_14">
@@ -6675,7 +6058,7 @@ QPushButton:pressed {
            </property>
            <layout class="QGridLayout" name="gridLayout_65" columnstretch="1,1">
             <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox_63"/>
+             <widget class="QComboBox" name="comboBox_63" />
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_161">
@@ -7113,7 +6496,7 @@ QPushButton:pressed {
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QComboBox" name="comboBox_31"/>
+               <widget class="QComboBox" name="comboBox_31" />
               </item>
               <item row="1" column="0">
                <widget class="QLabel" name="label_77">
@@ -7126,7 +6509,7 @@ QPushButton:pressed {
                </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QLineEdit" name="lineEdit_16"/>
+               <widget class="QLineEdit" name="lineEdit_16" />
               </item>
              </layout>
             </item>
@@ -7898,7 +7281,7 @@ QPushButton:pressed {
               <item>
                <widget class="QLineEdit" name="lineEdit_2">
                 <property name="text">
-                 <string/>
+                 <string />
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -7925,7 +7308,7 @@ QPushButton:pressed {
               <item>
                <widget class="QLineEdit" name="lineEdit_6">
                 <property name="text">
-                 <string/>
+                 <string />
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -8586,7 +7969,7 @@ QPushButton:pressed {
               <item row="0" column="1">
                <widget class="QLineEdit" name="lineEdit_8">
                 <property name="text">
-                 <string/>
+                 <string />
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -8643,7 +8026,7 @@ QPushButton:pressed {
               <item row="1" column="1" colspan="3">
                <widget class="QLineEdit" name="lineEdit_20">
                 <property name="text">
-                 <string/>
+                 <string />
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -8906,61 +8289,6 @@ QPushButton:pressed {
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tab_30">
-        <attribute name="title">
-         <string>跳转分支</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_71">
-         <item>
-          <widget class="QGroupBox" name="groupBox_37">
-           <property name="title">
-            <string>跳转分支</string>
-           </property>
-           <layout class="QGridLayout" name="gridLayout_42" columnstretch="1,1,1,1">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_126">
-              <property name="text">
-               <string>分支名称：</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox_37"/>
-            </item>
-            <item row="0" column="2">
-             <widget class="QLabel" name="label_127">
-              <property name="text">
-               <string>开始位置：</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="3">
-             <widget class="QComboBox" name="comboBox_38"/>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_23">
-           <property name="orientation">
-            <enum>Qt::Orientation::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>413</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </widget>
        <widget class="QWidget" name="tab_31">
         <attribute name="title">
          <string>终止流程</string>
@@ -9089,7 +8417,7 @@ QPushButton:pressed {
            </property>
            <layout class="QGridLayout" name="gridLayout_49" columnstretch="1,1">
             <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox_44"/>
+             <widget class="QComboBox" name="comboBox_44" />
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_135">
@@ -9416,7 +8744,7 @@ QPushButton:pressed {
            </property>
            <layout class="QGridLayout" name="gridLayout_61" columnstretch="1,1">
             <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox_60"/>
+             <widget class="QComboBox" name="comboBox_60" />
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_156">
@@ -9494,77 +8822,7 @@ QPushButton:pressed {
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QKeySequenceEdit" name="keySequenceEdit_2"/>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_41">
-           <property name="title">
-            <string>如果按下目标按键，则</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_73">
-            <item>
-             <widget class="QRadioButton" name="radioButton_22">
-              <property name="text">
-               <string>停止等待</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <layout class="QGridLayout" name="gridLayout_46" columnstretch="1,1,1,1">
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_133">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="text">
-                 <string>分支名称：</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignmentFlag::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QComboBox" name="comboBox_41">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="2">
-               <widget class="QLabel" name="label_132">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="text">
-                 <string>开始位置：</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignmentFlag::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="3">
-               <widget class="QComboBox" name="comboBox_42">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0" colspan="4">
-               <widget class="QRadioButton" name="radioButton_21">
-                <property name="text">
-                 <string>跳转分支（如果为其他按键则自动跳过）</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QKeySequenceEdit" name="keySequenceEdit_2" />
             </item>
            </layout>
           </widget>
@@ -9639,7 +8897,7 @@ QPushButton:pressed {
            </property>
            <layout class="QGridLayout" name="gridLayout_51" columnstretch="1,1">
             <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox_48"/>
+             <widget class="QComboBox" name="comboBox_48" />
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_140">
@@ -9707,7 +8965,7 @@ QPushButton:pressed {
            </property>
            <layout class="QGridLayout" name="gridLayout_72" columnstretch="1,1">
             <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox_73"/>
+             <widget class="QComboBox" name="comboBox_73" />
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_175">
@@ -9994,177 +9252,6 @@ QPushButton:pressed {
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tab_36">
-        <attribute name="title">
-         <string>变量判断</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_41">
-         <item>
-          <widget class="QGroupBox" name="groupBox_48">
-           <property name="title">
-            <string>如果（变量比较）：</string>
-           </property>
-           <property name="checkable">
-            <bool>false</bool>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_78">
-            <item>
-             <layout class="QGridLayout" name="gridLayout_53">
-              <item row="1" column="2">
-               <widget class="QComboBox" name="comboBox_51"/>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_143">
-                <property name="text">
-                 <string>变量1：</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QLabel" name="label_144">
-                <property name="text">
-                 <string>变量2：</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QComboBox" name="comboBox_49"/>
-              </item>
-              <item row="1" column="1">
-               <widget class="QComboBox" name="comboBox_50">
-                <item>
-                 <property name="text">
-                  <string>=</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>≠</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>&gt;</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>&lt;</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>包含</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QPushButton" name="pushButton_38">
-                <property name="font">
-                 <font>
-                  <family>微软雅黑</family>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>设置变量</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QComboBox" name="comboBox_54">
-                <item>
-                 <property name="text">
-                  <string>字符串</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>数字</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>日期或时间</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="2" column="2">
-               <widget class="QComboBox" name="comboBox_55">
-                <item>
-                 <property name="text">
-                  <string>字符串</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>数字</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>日期或时间</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_49">
-           <property name="title">
-            <string>则跳转分支：</string>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_18" stretch="1,1,1,1">
-            <item>
-             <widget class="QLabel" name="label_146">
-              <property name="text">
-               <string>分支名称：</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="comboBox_52"/>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_145">
-              <property name="text">
-               <string>开始位置：</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="comboBox_53"/>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_31">
-           <property name="orientation">
-            <enum>Qt::Orientation::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>270</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </widget>
        <widget class="QWidget" name="tab_37">
         <attribute name="title">
          <string>运行Python</string>
@@ -10188,14 +9275,14 @@ QPushButton:pressed {
                  </font>
                 </property>
                 <property name="html">
-                 <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+                 <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name="qrichtext" content="1" /&gt;&lt;meta charset="utf-8" /&gt;&lt;style type="text/css"&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Cascadia Code'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Cascadia Code,微软雅黑,微软雅黑';&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+li.unchecked::marker { content: "\2610"; }
+li.checked::marker { content: "\2612"; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=" font-family:'Cascadia Code'; font-size:10pt; font-weight:400; font-style:normal;"&gt;
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Cascadia Code,微软雅黑,微软雅黑';"&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="placeholderText">
                  <string>执行pythond代码...</string>
@@ -10278,7 +9365,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QComboBox" name="comboBox_56"/>
+             <widget class="QComboBox" name="comboBox_56" />
             </item>
            </layout>
           </widget>
@@ -10539,14 +9626,14 @@ QPushButton:pressed {
                  </font>
                 </property>
                 <property name="html">
-                 <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+                 <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name="qrichtext" content="1" /&gt;&lt;meta charset="utf-8" /&gt;&lt;style type="text/css"&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Cascadia Code'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Cascadia Code,微软雅黑,微软雅黑';&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+li.unchecked::marker { content: "\2610"; }
+li.checked::marker { content: "\2612"; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=" font-family:'Cascadia Code'; font-size:10pt; font-weight:400; font-style:normal;"&gt;
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Cascadia Code,微软雅黑,微软雅黑';"&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="placeholderText">
                  <string>执行CMD命令行...</string>
@@ -10596,7 +9683,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                <enum>Qt::LayoutDirection::LeftToRight</enum>
               </property>
               <property name="styleSheet">
-               <string notr="true"/>
+               <string notr="true" />
               </property>
               <property name="editable">
                <bool>false</bool>
@@ -11236,7 +10323,7 @@ QPushButton:pressed {
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QComboBox" name="comboBox_57"/>
+               <widget class="QComboBox" name="comboBox_57" />
               </item>
               <item row="1" column="0">
                <widget class="QLabel" name="label_151">
@@ -11249,7 +10336,7 @@ QPushButton:pressed {
                </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QComboBox" name="comboBox_58"/>
+               <widget class="QComboBox" name="comboBox_58" />
               </item>
               <item row="2" column="0">
                <widget class="QLabel" name="label_152">
@@ -11640,7 +10727,7 @@ QPushButton:pressed {
            </property>
            <layout class="QGridLayout" name="gridLayout_59" columnstretch="1,1">
             <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox_59"/>
+             <widget class="QComboBox" name="comboBox_59" />
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_154">
@@ -11945,13 +11032,6 @@ QPushButton:pressed {
              </property>
             </widget>
            </item>
-           <item row="1" column="3">
-            <widget class="QComboBox" name="comboBox_11">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="0" colspan="4">
             <widget class="QLineEdit" name="lineEdit_5">
              <property name="alignment">
@@ -11979,11 +11059,6 @@ QPushButton:pressed {
                <string>提示异常并停止</string>
               </property>
              </item>
-             <item>
-              <property name="text">
-               <string>跳转分支</string>
-              </property>
-             </item>
             </widget>
            </item>
            <item row="0" column="1">
@@ -11996,33 +11071,6 @@ QPushButton:pressed {
              </property>
              <property name="maximum">
               <number>999</number>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_34">
-             <property name="text">
-              <string>分支名称：</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QLabel" name="label_35">
-             <property name="text">
-              <string>开始位置：</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QComboBox" name="comboBox_10">
-             <property name="enabled">
-              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -12169,7 +11217,7 @@ QPushButton:pressed {
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true"/>
+          <string notr="true" />
          </property>
          <property name="text">
           <string>添加指令</string>
@@ -12190,7 +11238,7 @@ QPushButton:pressed {
   </layout>
  </widget>
  <resources>
-  <include location="../images.qrc"/>
+  <include location="../images.qrc" />
  </resources>
  <connections>
   <connection>

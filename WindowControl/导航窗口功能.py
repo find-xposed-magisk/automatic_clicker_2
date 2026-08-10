@@ -40,7 +40,6 @@ from 功能类 import (
     MultipleImagesClick,
     RunCmd,
     GetClipboard,
-    ColorJudgment,
 )
 from WindowControl.变量池窗口 import VariablePool_Win
 from WindowControl.图像点击位置 import ClickPosition
@@ -146,13 +145,6 @@ class Na(QWidget, Ui_navigation):
         self.pushButton_2.clicked.connect(lambda: self.save_data())
         # 获取鼠标位置参数
         self.mouse_position_function = None
-        # 调整异常处理选项时，控制窗口控件的状态
-        self.comboBox_9.activated.connect(
-            lambda: self.exception_handling_judgment_type("报错处理")
-        )
-        self.comboBox_10.activated.connect(
-            lambda: self.exception_handling_judgment_type("分支名称")
-        )
         self.combo_image_preview = {  # 需要图像预览功能
             "图像点击": (self.comboBox_8, self.comboBox),
             "图像等待": (self.comboBox_17, self.comboBox_18),
@@ -169,13 +161,6 @@ class Na(QWidget, Ui_navigation):
             "运行Python": self.textEdit_5,
             "写入单元格": self.textEdit_6,
             "运行cmd": self.textEdit_7,
-        }
-        self.branch_jump_control = {  # 需要分支跳转的功能
-            "功能区参数": (self.comboBox_10, self.comboBox_11),
-            "跳转分支": (self.comboBox_37, self.comboBox_38),
-            "变量判断": (self.comboBox_52, self.comboBox_53),
-            "按键等待": (self.comboBox_41, self.comboBox_42),
-            "颜色判断": (self.comboBox_74, self.comboBox_75),
         }
         self.pushButton_9.clicked.connect(lambda: self.on_button_clicked("查看"))
         self.pushButton_10.clicked.connect(lambda: self.on_button_clicked("删除"))
@@ -207,7 +192,6 @@ class Na(QWidget, Ui_navigation):
             "提示音": (lambda x: self.play_voice_function(x), False),
             "倒计时窗口": (lambda x: self.wait_window_function(x), False),
             "提示窗口": (lambda x: self.dialog_window_function(x), False),
-            "跳转分支": (lambda x: self.branch_jump_function(x), False),
             "终止流程": (lambda x: self.termination_process_function(x), False),
             "窗口控制": (lambda x: self.window_control_function(x), True),
             "按键等待": (lambda x: self.key_wait_function(x), False),
@@ -215,7 +199,6 @@ class Na(QWidget, Ui_navigation):
             "获取Excel": (lambda x: self.gain_excel_function(x), False),
             "获取对话框": (lambda x: self.get_dialog_function(x), False),
             "获取剪切板": (lambda x: self.get_clipboard_function(x), False),
-            "变量判断": (lambda x: self.contrast_variables_function(x), False),
             "运行Python": (lambda x: self.run_python_function(x), False),
             "运行cmd": (lambda x: self.run_cmd_function(x), False),
             "运行外部文件": (lambda x: self.run_external_file_function(x), True),
@@ -223,7 +206,6 @@ class Na(QWidget, Ui_navigation):
             "OCR识别": (lambda x: self.ocr_recognition_function(x), False),
             "获取鼠标位置": (lambda x: self.get_mouse_position_function(x), False),
             "窗口焦点等待": (lambda x: self.window_focus_wait_function(x), True),
-            "颜色判断": (lambda x: self.color_judgment_function(x), False),
         }
         # 加载功能窗口的按钮功能
         for func_name in self.function_mapping:
@@ -240,8 +222,6 @@ class Na(QWidget, Ui_navigation):
         self.lineEdit_5.clear()  # 清空备注
         self.textBrowser.clear()  # 清空测试输出
         self.comboBox_9.setCurrentIndex(0)  # 异常处理方式
-        self.comboBox_10.clear()  # 分支表名
-        self.disable_exception_handling_control(False)  # 禁用异常处理控件
 
     def closeEvent(self, a0) -> None:
         """关闭窗口时,触发的动作"""
@@ -284,20 +264,6 @@ class Na(QWidget, Ui_navigation):
                 "提示异常并停止",
             }:
                 self.comboBox_9.setCurrentText(exception_handling_text)
-            elif "-" in exception_handling_text:
-                # 处理跳转分支的情况
-                select_branch_table_name, branch_index = exception_handling_text.split(
-                    "-"
-                )
-                self.comboBox_9.setCurrentText("跳转分支")
-                # 解除异常处理方式的禁用，加载分支表名
-                self.comboBox_10.addItems(self.db.get_branch_info(True))
-                self.find_controls("分支", "功能区参数")
-                # self.comboBox_10.setEnabled(True)
-                # self.comboBox_11.setEnabled(True)
-                # 设置分支表名和分支序号
-                self.comboBox_10.setCurrentText(select_branch_table_name)
-                self.comboBox_11.setCurrentText(branch_index)
 
         try:
             tab_index = self.tab_title_list.index(name)
@@ -354,17 +320,6 @@ class Na(QWidget, Ui_navigation):
             selected_text = self.comboBox_9.currentText()
             if selected_text in {"自动跳过", "提示异常并暂停", "提示异常并停止"}:
                 exception_handling_text = selected_text
-            elif selected_text == "跳转分支":
-                select_branch_table_name = self.comboBox_10.currentText()
-                if self.comboBox_11.currentText() == "":
-                    QMessageBox.critical(
-                        self, "错误", "分支表下无指令，请检查分支表名是否正确！", QMessageBox.StandardButton.Ok,
-                        QMessageBox.StandardButton.NoButton
-                    )
-                    raise ValueError
-                exception_handling_text = (
-                    f"{select_branch_table_name}-{int(self.comboBox_11.currentText())}"
-                )
             return exception_handling_text
 
         # 当前页的index
@@ -378,7 +333,7 @@ class Na(QWidget, Ui_navigation):
 
     def find_controls(self, type_, ins_name: str) -> None:
         """加载不同的控件变量
-        :param type_: 加载类型（图像、excel、分支）
+        :param type_: 加载类型（图像、excel）
         :param ins_name: 指令的名称"""
 
         def find_images() -> None:
@@ -420,24 +375,10 @@ class Na(QWidget, Ui_navigation):
             comboBox_after.clear()
             comboBox_after.addItems(excel_sheet_name)
 
-        def find_branch_count() -> None:
-            """当分支表名改变时，加载分支中的命令序号"""
-            comboBox_branch_name, comboBox_branch_order = self.branch_jump_control.get(
-                ins_name
-            )
-            count_record_ = self.db.get_branch_count(comboBox_branch_name.currentText())
-            comboBox_branch_order.clear()
-            # 加载分支中的命令序号
-            branch_order_ = [str(i) for i in range(1, count_record_ + 1)]
-            if len(branch_order_) != 0:
-                comboBox_branch_order.addItems(branch_order_)
-
         if type_ == "图像":
             find_images()
         elif type_ == "excel":
             find_excel_sheet_name()
-        elif type_ == "分支":
-            find_branch_count()
 
     def mouseMoveEvent(self, event):
         self.merge_additional_functions("get_mouse_position")
@@ -452,7 +393,6 @@ class Na(QWidget, Ui_navigation):
             self.label_35.setVisible(disable_control_)
             self.comboBox_9.setCurrentIndex(0)
             self.comboBox_9.setVisible(disable_control_)
-            self.disable_exception_handling_control(False)
 
         try:
             # 获取当前活动页面的标题
@@ -473,18 +413,6 @@ class Na(QWidget, Ui_navigation):
         :param function_name: 功能名称
         """
 
-        def get_rgb_value():
-            """获取颜色的rgb值"""
-            # 获取鼠标位置的rgb值
-            rgb = pyautogui.pixel(x, y)
-            self.spinBox_26.setValue(rgb[0])
-            self.spinBox_29.setValue(rgb[1])
-            self.spinBox_30.setValue(rgb[2])
-            # 设置标签的背景色
-            self.label_191.setStyleSheet(
-                f"background-color:rgb({rgb[0]},{rgb[1]},{rgb[2]})"
-            )
-
         if function_name == "get_mouse_position":
             # 获取鼠标位置
             x, y = pyautogui.position()
@@ -500,14 +428,6 @@ class Na(QWidget, Ui_navigation):
             elif self.mouse_position_function == "指定坐标":
                 self.lineEdit_29.setText(str(x))
                 self.lineEdit_30.setText(str(y))
-            elif self.mouse_position_function == "颜色判断":
-                self.label_197.setText(str(x))
-                self.label_195.setText(str(y))
-                # 获取鼠标位置的rgb值
-                get_rgb_value()
-            elif self.mouse_position_function == "获取颜色":
-                # 获取鼠标位置的rgb值
-                get_rgb_value()
         elif function_name == "change_get_mouse_position_function":
             # 改变获取鼠标位置功能
             self.mouse_position_function = pars_1
@@ -516,37 +436,6 @@ class Na(QWidget, Ui_navigation):
             variable_pool.exec_()
         elif function_name == "打开变量选择":
             self.variable_sel_win.show()
-
-    def disable_exception_handling_control(self, judge: bool = False):
-        """禁用控件"""
-        self.comboBox_10.clear()
-        self.label_34.setVisible(judge)
-        self.comboBox_10.setVisible(judge)
-        self.comboBox_11.clear()
-        self.label_35.setVisible(judge)
-        self.comboBox_11.setVisible(judge)
-
-    def exception_handling_judgment_type(self, type_):
-        """判断异常护理选项并调整控件
-        :param type_: 判断类型（报错处理、分支名称）"""
-
-        try:
-            if type_ == "报错处理":  # 报错处理下拉列表变化触发
-                if self.comboBox_9.currentText() == "自动跳过":
-                    self.disable_exception_handling_control(False)
-                elif self.comboBox_9.currentText() == "提示异常并暂停":
-                    self.disable_exception_handling_control(False)
-                elif self.comboBox_9.currentText() == "提示异常并停止":
-                    self.disable_exception_handling_control(False)
-                elif self.comboBox_9.currentText() == "跳转分支":
-                    self.disable_exception_handling_control(True)
-                    self.comboBox_10.addItems(self.db.get_branch_info(True))
-                    self.comboBox_10.setCurrentIndex(0)
-                    self.find_controls("分支", "功能区参数")
-            elif type_ == "分支名称":  # 分支表名下拉列表变化触发
-                self.find_controls("分支", "功能区参数")
-        except sqlite3.OperationalError:
-            pass
 
     def quick_screenshot(self, control_name, judge):
         """截图功能
@@ -611,8 +500,6 @@ class Na(QWidget, Ui_navigation):
         try:
             with sqlite3.connect(self.db.db_path) as con:
                 cursor = con.cursor()
-                branch_name = self.main_window.comboBox.currentText()
-
                 query_params = (
                     image_,
                     instruction_,
@@ -623,20 +510,19 @@ class Na(QWidget, Ui_navigation):
                     repeat_number_,
                     exception_handling_,
                     remarks_,
-                    branch_name,
                 )
                 if self.pushButton_2.text() == "添加指令":
                     cursor.execute(
                         "INSERT INTO 命令"
-                        "(图像名称,指令类型,参数1,参数2,参数3,参数4,重复次数,异常处理,备注,隶属分支) "
-                        "VALUES (?,?,?,?,?,?,?,?,?,?)",
+                        "(图像名称,指令类型,参数1,参数2,参数3,参数4,重复次数,异常处理,备注) "
+                        "VALUES (?,?,?,?,?,?,?,?,?)",
                         query_params,
                     )
 
                 elif self.pushButton_2.text() == "修改指令":
                     cursor.execute(
                         "UPDATE 命令 "
-                        "SET 图像名称=?,指令类型=?,参数1=?,参数2=?,参数3=?,参数4=?,重复次数=?,异常处理=?,备注=?,隶属分支=? "
+                        "SET 图像名称=?,指令类型=?,参数1=?,参数2=?,参数3=?,参数4=?,重复次数=?,异常处理=?,备注=? "
                         "WHERE ID=?",
                         query_params + (self.modify_id,),
                     )
@@ -654,8 +540,8 @@ class Na(QWidget, Ui_navigation):
                     # 插入新的命令
                     cursor.execute(
                         "INSERT INTO 命令"
-                        "(ID,图像名称,指令类型,参数1,参数2,参数3,参数4,重复次数,异常处理,备注,隶属分支) "
-                        "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                        "(ID,图像名称,指令类型,参数1,参数2,参数3,参数4,重复次数,异常处理,备注) "
+                        "VALUES (?,?,?,?,?,?,?,?,?,?)",
                         (self.modify_id,) + query_params,
                     )
 
@@ -664,8 +550,8 @@ class Na(QWidget, Ui_navigation):
                     try:
                         cursor.execute(
                             "INSERT INTO 命令"
-                            "(ID,图像名称,指令类型,参数1,参数2,参数3,参数4,重复次数,异常处理,备注,隶属分支) "
-                            "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                            "(ID,图像名称,指令类型,参数1,参数2,参数3,参数4,重复次数,异常处理,备注) "
+                            "VALUES (?,?,?,?,?,?,?,?,?,?)",
                             (self.modify_id + 1,) + query_params,
                         )
                     except sqlite3.IntegrityError:
@@ -681,8 +567,8 @@ class Na(QWidget, Ui_navigation):
                         # 插入新的命令
                         cursor.execute(
                             "INSERT INTO 命令"
-                            "(ID,图像名称,指令类型,参数1,参数2,参数3,参数4,重复次数,异常处理,备注,隶属分支) "
-                            "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                            "(ID,图像名称,指令类型,参数1,参数2,参数3,参数4,重复次数,异常处理,备注) "
+                            "VALUES (?,?,?,?,?,?,?,?,?,?)",
                             (self.modify_id + 1,) + query_params,
                         )
 
@@ -2577,61 +2463,6 @@ class Na(QWidget, Ui_navigation):
         elif type_ == "还原参数":
             put_parameters(self.parameter_1)
 
-    def branch_jump_function(self, type_):
-        """跳转分支的功能
-        :param type_: 功能名称（按钮功能、主要功能）"""
-
-        def get_parameters():
-            """从tab页获取参数"""
-            # 检查参数是否有异常
-            if self.comboBox_37.currentText() == "" or self.comboBox_38.currentText() == "":
-                QMessageBox.critical(self, "错误", "分支参数错误！", QMessageBox.StandardButton.Ok,
-                                     QMessageBox.StandardButton.NoButton)
-                raise ValueError
-            # 返回参数字典
-            parameter_dic = {
-                "分支": f"{self.comboBox_37.currentText()}-{self.comboBox_38.currentText()}"
-            }
-            exception_handling = f"{self.comboBox_37.currentText()}-{self.comboBox_38.currentText()}"
-            return exception_handling, parameter_dic
-
-        def put_parameters(parameter_dic):
-            """将参数还原到控件"""
-            # 设置分支
-            branch = parameter_dic["分支"]
-            branch_name, branch_count = branch.split("-")
-            index = self.comboBox_37.findText(branch_name)
-            if index >= 0:
-                self.comboBox_37.setCurrentIndex(index)
-            # 设置跳转分支
-            index = self.comboBox_38.findText(branch_count)
-            if index >= 0:
-                self.comboBox_38.setCurrentIndex(index)
-
-        if type_ == "按钮功能":
-            self.comboBox_37.activated.connect(
-                lambda: self.find_controls("分支", "跳转分支")
-            )
-
-        elif type_ == "写入参数":
-            exception_handling_, parameter_dic_ = get_parameters()
-            # 将命令写入数据库
-            func_info_dic = self.get_func_info()  # 获取功能区的参数
-            self.writes_commands_to_the_database(
-                instruction_=func_info_dic.get("指令类型"),
-                repeat_number_=func_info_dic.get("重复次数"),
-                exception_handling_=exception_handling_,
-                parameter_1_=parameter_dic_,
-                remarks_=func_info_dic.get("备注"),
-            )
-        elif type_ == "加载信息":
-            self.comboBox_37.addItems(self.db.get_branch_info(True))
-            self.comboBox_37.setCurrentIndex(0)
-            # 获取分支表名中的指令数量
-            self.find_controls("分支", "跳转分支")
-        elif type_ == "还原参数":
-            put_parameters(self.parameter_1)
-
     def termination_process_function(self, type_):
         """终止流程的功能
         :param self:
@@ -2749,64 +2580,15 @@ class Na(QWidget, Ui_navigation):
                 QMessageBox.critical(self, "错误", "该功能暂不支持复合按键！", QMessageBox.StandardButton.Ok,
                                      QMessageBox.StandardButton.NoButton)
                 raise ValueError
-            if self.radioButton_21.isChecked() and (
-                    self.comboBox_41.currentText() == ""
-                    or self.comboBox_42.currentText() == ""
-            ):
-                QMessageBox.critical(self, "错误", "分支异常，请先添加！", QMessageBox.StandardButton.Ok,
-                                     QMessageBox.StandardButton.NoButton)
-                raise ValueError
-            # 返回参数字典
-            if self.radioButton_22.isChecked():  # 按键等待
-                parameter_dic_ = {
-                    "按键": key_name,
-                    "等待类型": "按键等待",
-                }
-                exception_handling = '提示异常并暂停'
-                return parameter_dic_, exception_handling
-            elif self.radioButton_21.isChecked():  # 跳转分支
-                parameter_dic_ = {
-                    "按键": key_name,
-                    "等待类型": "跳转分支",
-                    "分支": f"{self.comboBox_41.currentText()}-{self.comboBox_42.currentText()}",
-                }
-                exception_handling = f"{self.comboBox_41.currentText()}-{self.comboBox_42.currentText()}"
-                return parameter_dic_, exception_handling
+            return {"按键": key_name, "等待类型": "按键等待"}, '提示异常并暂停'
 
         def put_parameters(parameter_dic_):
             """将参数还原到控件"""
             # 设置按键
             self.keySequenceEdit_2.setKeySequence(QKeySequence(parameter_dic_["按键"]))
-            # 设置等待类型
-            if parameter_dic_["等待类型"] == "按键等待":
-                self.radioButton_22.setChecked(True)
-            elif parameter_dic_["等待类型"] == "跳转分支":
-                self.radioButton_21.setChecked(True)
-                # 设置分支
-                self.comboBox_41.setCurrentText(parameter_dic_["分支"].split("-")[0])
-                self.comboBox_42.setCurrentText(parameter_dic_["分支"].split("-")[1])
-
-        def set_branch_name():
-            """当选择跳转分支功能时，加载分支表名"""
-            disable_control(True)
-            self.comboBox_41.addItems(self.db.get_branch_info(True))
-            self.find_controls("分支", "按键等待")
-
-        def disable_control(judge_: bool):
-            """禁用控件"""
-            self.comboBox_41.clear()
-            self.comboBox_42.clear()
-            self.label_133.setEnabled(judge_)
-            self.label_132.setEnabled(judge_)
-            self.comboBox_41.setEnabled(judge_)
-            self.comboBox_42.setEnabled(judge_)
 
         if type_ == "按钮功能":
-            self.radioButton_21.toggled.connect(set_branch_name)
-            self.radioButton_22.toggled.connect(lambda: disable_control(False))
-            self.comboBox_41.activated.connect(
-                lambda: self.find_controls("分支", "按键等待")
-            )
+            pass
 
         elif type_ == "写入参数":
             parameter_dic, exception_handling_ = get_parameters()
@@ -3121,99 +2903,6 @@ class Na(QWidget, Ui_navigation):
             self.comboBox_73.clear()
             self.comboBox_73.addItems(self.db.get_variable_info("list"))
         elif type_ == '还原参数':
-            put_parameters(self.parameter_1)
-
-    def contrast_variables_function(self, type_):
-        """变量比较的功能
-        :param self:
-        :param type_: 功能名称（按钮功能、主要功能）"""
-
-        def get_parameters():
-            """从tab页获取参数"""
-            parameter_dic_ = {
-                "变量1": self.comboBox_49.currentText(),
-                "类型1": self.comboBox_54.currentText(),
-                "比较符": self.comboBox_50.currentText(),
-                "变量2": self.comboBox_51.currentText(),
-                "类型2": self.comboBox_55.currentText(),
-                "分支": self.comboBox_52.currentText(),
-                "位置": self.comboBox_53.currentText(),
-            }
-            # 比较符-变量类型
-            exception_handling_ = (
-                f"{self.comboBox_52.currentText()}" f"-{self.comboBox_53.currentText()}"
-            )  # 分支表名-分支序号
-            # 检查参数是否有异常
-            if (
-                    self.comboBox_49.currentText() == ""
-                    or self.comboBox_50.currentText() == ""
-                    or self.comboBox_51.currentText() == ""
-            ):
-                QMessageBox.critical(self, "错误", "变量未设置！", QMessageBox.StandardButton.Ok,
-                                     QMessageBox.StandardButton.NoButton)
-                raise ValueError
-            if (
-                    self.comboBox_52.currentText() == ""
-                    or self.comboBox_53.currentText() == ""
-            ):
-                QMessageBox.critical(self, "错误", "分支未设置！", QMessageBox.StandardButton.Ok,
-                                     QMessageBox.StandardButton.NoButton)
-                raise ValueError
-            return parameter_dic_, exception_handling_
-
-        def put_parameters(parameter_dic_):
-            """将参数还原到控件"""
-            self.comboBox_49.setCurrentText(parameter_dic_.get("变量1", ""))
-            self.comboBox_54.setCurrentText(parameter_dic_.get("类型1", ""))
-            self.comboBox_50.setCurrentText(parameter_dic_.get("比较符", ""))
-            self.comboBox_51.setCurrentText(parameter_dic_.get("变量2", ""))
-            self.comboBox_55.setCurrentText(parameter_dic_.get("类型2", ""))
-            self.comboBox_52.setCurrentText(parameter_dic_.get("分支", ""))
-            self.comboBox_53.setCurrentText(parameter_dic_.get("位置", ""))
-
-        def sync_combo_boxes(sender):
-            if sender == self.comboBox_54:
-                self.comboBox_55.setCurrentIndex(self.comboBox_54.currentIndex())
-            else:
-                self.comboBox_54.setCurrentIndex(self.comboBox_55.currentIndex())
-
-        if type_ == "按钮功能":
-            self.comboBox_52.activated.connect(  # 当分支表名改变时，加载分支中的命令序号
-                lambda: self.find_controls("分支", "变量判断")
-            )
-            self.pushButton_38.clicked.connect(
-                lambda: self.merge_additional_functions("打开变量池")
-            )
-            self.comboBox_54.currentIndexChanged.connect(
-                lambda: sync_combo_boxes(self.comboBox_54)
-            )
-            self.comboBox_55.currentIndexChanged.connect(
-                lambda: sync_combo_boxes(self.comboBox_55)
-            )
-
-        elif type_ == "写入参数":
-            parameter_dic, exception_handling = get_parameters()
-            # 将命令写入数据库
-            func_info_dic = self.get_func_info()  # 获取功能区的参数
-            self.writes_commands_to_the_database(
-                instruction_=func_info_dic.get("指令类型"),
-                repeat_number_=func_info_dic.get("重复次数"),
-                exception_handling_=exception_handling,
-                parameter_1_=parameter_dic,
-                remarks_=func_info_dic.get("备注"),
-            )
-        elif type_ == "加载信息":
-            # 当t导航业显示时，加载信息到控件
-            self.comboBox_49.clear()
-            self.comboBox_49.addItems(self.db.get_variable_info("list"))
-            self.comboBox_51.clear()
-            self.comboBox_51.addItems(self.db.get_variable_info("list"))
-            self.comboBox_52.clear()
-            self.comboBox_52.addItems(self.db.get_branch_info(True))
-            self.comboBox_52.setCurrentIndex(0)
-            # 获取分支表名中的指令数量
-            self.find_controls("分支", "变量判断")
-        elif type_ == "还原参数":
             put_parameters(self.parameter_1)
 
     def run_python_function(self, type_):
@@ -3751,120 +3440,4 @@ class Na(QWidget, Ui_navigation):
                 remarks_=func_info_dic.get("备注"),
             )
         elif type_ == "还原参数":
-            put_parameters(self.parameter_1)
-
-    def color_judgment_function(self, type_):
-        """颜色判断的功能
-        :param self:
-        :param type_: 功能名称（按钮功能、主要功能）"""
-
-        def set_label_color():
-            """设置标签颜色"""
-            r = self.spinBox_26.value()
-            g = self.spinBox_29.value()
-            b = self.spinBox_30.value()
-            color = f"background-color: rgb({r}, {g}, {b})"
-            self.label_191.setStyleSheet(color)
-
-        def open_color_picker():
-            """打开颜色选择器"""
-            color = QColorDialog.getColor()
-            if color.isValid():
-                self.spinBox_26.setValue(color.red())
-                self.spinBox_29.setValue(color.green())
-                self.spinBox_30.setValue(color.blue())
-                set_label_color()
-
-        def get_parameters(judge=False):
-            """从tab页获取参数"""
-            if not judge:
-                if self.comboBox_74.currentText() == "" or self.comboBox_75.currentText() == "":
-                    QMessageBox.critical(self, "错误", "分支未设置！", QMessageBox.StandardButton.Ok,
-                                         QMessageBox.StandardButton.NoButton)
-                    raise ValueError
-            # 返回参数字典
-            parameter_dic_ = {
-                '像素坐标': f"({self.label_197.text()}, {self.label_195.text()})",
-                '目标颜色': f"({self.spinBox_26.value()}, {self.spinBox_29.value()}, {self.spinBox_30.value()})",
-                '误差范围': self.spinBox_31.value(),
-                '分支': f"{self.comboBox_74.currentText()}-{self.comboBox_75.currentText()}",
-            }
-            exception_handling_ = f"{self.comboBox_74.currentText()}-{self.comboBox_75.currentText()}"
-            return parameter_dic_, exception_handling_
-
-        def put_parameters(parameter_dic_):
-            """将参数还原到tab页"""
-            rgb_tuple = eval(parameter_dic_['目标颜色'])
-            crosshair = eval(parameter_dic_['像素坐标'])
-            self.label_197.setText(str(crosshair[0]))
-            self.label_195.setText(str(crosshair[1]))
-            self.spinBox_26.setValue(rgb_tuple[0])
-            self.spinBox_29.setValue(rgb_tuple[1])
-            self.spinBox_30.setValue(rgb_tuple[2])
-            self.spinBox_31.setValue(int(parameter_dic_['误差范围']))
-            self.comboBox_74.setCurrentText(parameter_dic_['分支'].split('-')[0])
-            self.comboBox_75.setCurrentText(parameter_dic_['分支'].split('-')[1])
-
-        def test():
-            """测试功能"""
-            try:
-                parameter_dic_, exception_handling_ = get_parameters(True)
-                dic_ = self.get_test_dic(repeat_number_=int(self.spinBox.value()),
-                                         parameter_1_=parameter_dic_
-                                         )
-
-                # 测试用例
-                test_class = ColorJudgment(self.out_mes, dic_)
-                test_class.is_test = True
-                test_class.start_execute()
-
-            except Exception as e:
-                print(e)
-                self.out_mes.out_mes(f'指令错误请重试！', True)
-
-        if type_ == '按钮功能':
-            self.pushButton_79.pressed.connect(
-                lambda: self.merge_additional_functions(
-                    "change_get_mouse_position_function", "颜色判断"
-                )
-            )
-            self.pushButton_82.pressed.connect(
-                lambda: self.merge_additional_functions(
-                    "change_get_mouse_position_function", "获取颜色"
-                )
-            )
-            self.spinBox_26.valueChanged.connect(set_label_color)
-            self.spinBox_29.valueChanged.connect(set_label_color)
-            self.spinBox_30.valueChanged.connect(set_label_color)
-            self.pushButton_80.clicked.connect(open_color_picker)
-            # 分支选择
-            self.comboBox_74.activated.connect(
-                lambda: self.find_controls("分支", "颜色判断")
-            )
-            # 显示坐标
-            self.toolButton_3.clicked.connect(
-                lambda: pyautogui.moveTo(int(self.label_197.text()), int(self.label_195.text()))
-            )
-            # 测试按钮
-            self.pushButton_81.clicked.connect(test)
-
-        elif type_ == '写入参数':
-            parameter_dic, exception_handling = get_parameters()
-            # 将命令写入数据库
-            func_info_dic = self.get_func_info()  # 获取功能区的参数
-            self.writes_commands_to_the_database(instruction_=func_info_dic.get('指令类型'),
-                                                 repeat_number_=func_info_dic.get('重复次数'),
-                                                 exception_handling_=exception_handling,
-                                                 parameter_1_=parameter_dic,
-                                                 remarks_=func_info_dic.get('备注'))
-        elif type_ == '加载信息':
-            # 当t导航业显示时，加载信息到控件
-            set_label_color()
-            self.comboBox_74.clear()
-            self.comboBox_74.addItems(self.db.get_branch_info(True))
-            self.comboBox_74.setCurrentIndex(0)
-            # 获取分支表名中的指令数量
-            self.find_controls("分支", "颜色判断")
-
-        elif type_ == '还原参数':
             put_parameters(self.parameter_1)

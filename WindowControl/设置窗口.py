@@ -1,7 +1,6 @@
-from PySide6 import QtWidgets
 from PySide6.QtCore import Qt, QUrl
-from PySide6.QtGui import QKeySequence, QDesktopServices
-from PySide6.QtWidgets import QDialog, QHeaderView, QMessageBox
+from PySide6.QtGui import QDesktopServices
+from PySide6.QtWidgets import QDialog, QMessageBox
 from system_hotkey import SystemHotkey
 
 from functions import is_hotkey_valid
@@ -22,7 +21,6 @@ class Setting(QDialog, Ui_Setting):
         self.setupUi(self)
         self.db = getattr(parent, "db", None) or DatabaseOperation()
         install_window_state(self, self.db, self.windowTitle())
-        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         # 绑定快捷键事件
         self.main_window_open = True  # 设置窗口是否是主窗口打开，如果不是则不注册全局快捷键，并隐藏快捷键设置
         self.unregister_global_shortcut_keys()
@@ -30,11 +28,6 @@ class Setting(QDialog, Ui_Setting):
         self.pushButton.clicked.connect(self.save_setting)  # 点击保存（应用）按钮
         self.pushButton_2.clicked.connect(lambda: self.open_link(BAIDU_OCR))  # 打开百度OCR链接
         self.pushButton_4.clicked.connect(lambda: self.open_link(YUN_CODE))  # 打开云码链接
-        # 分支管理
-        self.pushButton_7.clicked.connect(self.add_branch)  # 添加分支
-        self.pushButton_8.clicked.connect(self.delete_branch)  # 删除分支
-        self.pushButton_5.clicked.connect(lambda: self.move_branch('up'))  # 上移分支
-        self.pushButton_6.clicked.connect(lambda: self.move_branch('down'))  # 下移分支
         self.load_setting_data()  # 加载设置数据
 
     def unregister_global_shortcut_keys(self):
@@ -85,14 +78,11 @@ class Setting(QDialog, Ui_Setting):
         key_mapping = {
             '开始运行': self.keySequenceEdit,
             '结束运行': self.keySequenceEdit_2,
-            '分支选择': self.keySequenceEdit_3,
             '暂停和恢复': self.keySequenceEdit_4
         }
         for action, key_sequence_edit in key_mapping.items():
             validate_and_set_hotkey(SystemHotkey(), key_sequence_edit, action)
 
-        # 保存分支信息
-        self.save_branch_info()
 
     def save_setting(self):
         """保存按钮事件"""
@@ -128,109 +118,7 @@ class Setting(QDialog, Ui_Setting):
         global_shortcut_dic = self.db.get_global_shortcut()
         self.keySequenceEdit.setKeySequence('+'.join(global_shortcut_dic['开始运行']))
         self.keySequenceEdit_2.setKeySequence('+'.join(global_shortcut_dic['结束运行']))
-        self.keySequenceEdit_3.setKeySequence('+'.join(global_shortcut_dic['分支选择']))
         self.keySequenceEdit_4.setKeySequence('+'.join(global_shortcut_dic['暂停和恢复']))
-
-        # 加载分支管理
-        self.load_branch_info()
-
-    def load_branch_info(self):
-        """向表格中加载分支信息"""
-        branch_info = self.db.get_branch_info()
-        if branch_info:
-            # 在表格中写入数据，branch_info为列表，每个元素为元组
-            self.tableWidget.setRowCount(len(branch_info))
-            for i in range(len(branch_info)):
-                item = QtWidgets.QTableWidgetItem(branch_info[i][0])
-                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)  # 设置文本居中
-                self.tableWidget.setItem(i, 0, item)
-                # 使用 QKeySequenceEdit 控件显示快捷键
-                key_sequence = QKeySequence(branch_info[i][1])
-                key_sequence_edit = QtWidgets.QKeySequenceEdit(key_sequence)
-                self.tableWidget.setCellWidget(i, 1, key_sequence_edit)
-                # 使用 QSpinBox 控件显示重复次数
-                spin_box = QtWidgets.QSpinBox()
-                spin_box.setMaximum(1000000)
-                spin_box.setMinimum(-1)
-                spin_box.setValue(branch_info[i][2])
-                spin_box.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                self.tableWidget.setCellWidget(i, 2, spin_box)
-
-    def save_branch_info(self):
-        """保存分支信息"""
-        branch_info = []
-        for i in range(self.tableWidget.rowCount()):
-            branch_name = self.tableWidget.item(i, 0).text()
-            key_sequence = self.tableWidget.cellWidget(i, 1).keySequence().toString()
-            repeat_times = self.tableWidget.cellWidget(i, 2).value()
-            # 检查快捷键是否为组合键
-            if '+' in key_sequence:
-                QMessageBox.critical(self, '错误', '分支快捷键暂不支持设置为组合键！', QMessageBox.StandardButton.Ok,
-                                     QMessageBox.StandardButton.NoButton)
-                raise Exception('分支快捷键不能为组合键！')
-            if (',' in key_sequence) and (len(key_sequence) > 1):
-                QMessageBox.critical(self, '错误', '分支快捷键暂不支持设置为多个按键！', QMessageBox.StandardButton.Ok,
-                                     QMessageBox.StandardButton.NoButton)
-                raise Exception('分支快捷键不能为组合键！')
-            # 检查快捷键是否重复，只有在快捷键非空时进行检查
-            if key_sequence:
-                for j in range(self.tableWidget.rowCount()):
-                    if i != j and key_sequence == self.tableWidget.cellWidget(j, 1).keySequence().toString():
-                        QMessageBox.critical(self, '错误', '分支快捷键重复，请重新设置！', QMessageBox.StandardButton.Ok,
-                                             QMessageBox.StandardButton.NoButton)
-                        raise Exception('分支快捷键已存在！')
-            branch_info.append((branch_name, key_sequence, repeat_times))
-        # 写入分支信息到数据库
-        for branch_name, key_sequence, repeat_times in branch_info:
-            self.db.writes_to_branch_info(branch_name, key_sequence, repeat_times)
-
-    def add_branch(self):
-        """添加分支"""
-        # 弹出输入框
-        branch_name, ok = QtWidgets.QInputDialog.getText(
-            self, '添加分支', '请输入分支名称：', flags=Qt.WindowType.WindowCloseButtonHint
-        )
-        if ok and branch_name:
-            # 检查分支名称是否已存在
-            if any(
-                    branch_name == self.tableWidget.item(i, 0).text() for i
-                    in range(self.tableWidget.rowCount())
-            ):
-                QMessageBox.critical(self, '错误', '分支名称已存在！', QMessageBox.StandardButton.Ok,
-                                     QMessageBox.StandardButton.NoButton)
-                return
-            # 在数据库中添加分支信息
-            self.db.writes_to_branch_info(branch_name, '', 1)
-            self.load_branch_info()  # 刷新表格
-            # 选中新添加的分支，最后一行
-            self.tableWidget.selectRow(self.tableWidget.rowCount() - 1)
-
-    def delete_branch(self):
-        """删除分支"""
-        selected_row = self.tableWidget.currentRow()
-        if selected_row != -1:
-            branch_name = self.tableWidget.item(selected_row, 0).text()
-            if branch_name == '主流程':
-                QMessageBox.critical(self, '错误', '主流程不能删除，也不能移动！', QMessageBox.StandardButton.Ok,
-                                     QMessageBox.StandardButton.NoButton)
-                return
-            if self.db.del_branch_info(branch_name):
-                self.load_branch_info()
-            else:
-                QMessageBox.critical(self, '错误', '删除分支失败！请重试！', QMessageBox.StandardButton.Ok,
-                                     QMessageBox.StandardButton.NoButton)
-
-    def move_branch(self, direction: str):
-        """移动分支
-        :param direction: 移动方向（上移、下移）"""
-        selected_row = self.tableWidget.currentRow()
-        if selected_row != -1:
-            branch_name = self.tableWidget.item(selected_row, 0).text()
-            if self.db.move_branch_info(branch_name, direction):
-                self.load_branch_info()
-                self.tableWidget.selectRow(
-                    selected_row - 1 if direction == 'up' else selected_row + 1
-                )
 
     @staticmethod
     def open_link(url):
@@ -241,5 +129,3 @@ class Setting(QDialog, Ui_Setting):
         if self.main_window_open:  # 如果是主窗口打开
             # 注册全局快捷键
             self.parent().register_global_shortcut_keys()
-            # 刷新主窗口的分支信息
-            self.parent().load_branch_to_combobox()

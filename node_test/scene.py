@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QGraphicsScene
 from node_test.edge import EdgeItem
 from node_test.node import NodeItem, PortItem
 from node_test.style import (
+    AUTO_CONNECT_DISTANCE,
     BACKGROUND_COLOR,
     GRID_LARGE_COLOR,
     GRID_SMALL_COLOR,
@@ -38,6 +39,7 @@ class NodeScene(QGraphicsScene):
         self.clearSelection()
         node.setSelected(True)
         self.emit_graph_changed()
+        self.auto_connect_nearby_ports(node)
         return node
 
     def connect_ports(self, source_port, target_port):
@@ -47,6 +49,35 @@ class NodeScene(QGraphicsScene):
         self.addItem(edge)
         self.emit_graph_changed()
         return edge
+
+    def auto_connect_nearby_ports(self, node):
+        """Connect compatible ports close to a newly placed or moved node."""
+        if not isinstance(node, NodeItem) or node.scene() is not self:
+            return []
+
+        candidates = []
+        node_ports = node.input_ports + node.output_ports
+        other_ports = [
+            item
+            for item in self.items()
+            if isinstance(item, PortItem) and item.node is not node
+        ]
+        for node_port in node_ports:
+            for other_port in other_ports:
+                source_port = node_port if node_port.direction == "output" else other_port
+                target_port = node_port if node_port.direction == "input" else other_port
+                if not self.can_connect(source_port, target_port):
+                    continue
+                distance = QLineF(source_port.scenePos(), target_port.scenePos()).length()
+                if distance <= AUTO_CONNECT_DISTANCE:
+                    candidates.append((distance, source_port, target_port))
+
+        connected_edges = []
+        for _distance, source_port, target_port in sorted(candidates, key=lambda item: item[0]):
+            edge = self.connect_ports(source_port, target_port)
+            if edge is not None:
+                connected_edges.append(edge)
+        return connected_edges
 
     @staticmethod
     def can_connect(source_port, target_port):

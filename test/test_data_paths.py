@@ -36,14 +36,12 @@ class DataPathTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary_directory:
             source = DatabaseOperation(os.path.join(temporary_directory, "source.db"))
             source.set_setting_value("测试值", "已写入")
-            source.writes_to_branch_info("测试分支", "K", 3)
             workbook = Workbook()
             source.export_settings_to_excel(workbook)
 
             target = DatabaseOperation(os.path.join(temporary_directory, "target.db"))
             self.assertTrue(target.import_settings_from_excel(workbook))
             self.assertEqual(target.get_setting_value("测试值"), "已写入")
-            self.assertIn(("测试分支", "K", 3), target.get_branch_info())
 
             with contextlib.closing(sqlite3.connect(target.db_path)) as connection:
                 tables = {
@@ -59,7 +57,18 @@ class DataPathTests(unittest.TestCase):
                 setting_types = dict(
                     connection.execute("SELECT 设置项, 类型 FROM 设置")
                 )
-            self.assertTrue({"设置", "窗口大小", "分支", "资源文件夹"} <= tables)
+                command_columns = [
+                    row[1] for row in connection.execute("PRAGMA table_info('命令')")
+                ]
+            self.assertTrue({"设置", "窗口大小", "资源文件夹", "命令"} <= tables)
+            self.assertNotIn("分支", tables)
+            self.assertEqual(
+                command_columns,
+                [
+                    "ID", "图像名称", "指令类型", "参数1", "参数2", "参数3",
+                    "参数4", "重复次数", "异常处理", "备注",
+                ],
+            )
             self.assertEqual(
                 setting_columns,
                 [("类型", 1, 0), ("设置项", 1, 1), ("值", 1, 0)],
@@ -82,11 +91,20 @@ class DataPathTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary_directory:
             database_path = os.path.join(temporary_directory, "commands.db")
             with contextlib.closing(sqlite3.connect(database_path)) as connection:
-                connection.execute("CREATE TABLE 命令(指令类型 TEXT NOT NULL)")
+                connection.execute(
+                    "CREATE TABLE 命令("
+                    "ID INTEGER NOT NULL PRIMARY KEY, 图像名称 TEXT, "
+                    "指令类型 TEXT NOT NULL, 参数1 TEXT, 参数2 TEXT, 参数3 TEXT, "
+                    "参数4 TEXT, 重复次数 INTEGER NOT NULL, 异常处理 TEXT, 备注 TEXT)"
+                )
                 connection.executemany(
-                    "INSERT INTO 命令 VALUES (?)",
-                    [(command_type,) for command_type in REMOVED_COMMAND_TYPES]
-                    + [("图像点击",)],
+                    "INSERT INTO 命令 VALUES (?, NULL, ?, NULL, NULL, NULL, NULL, 1, '自动跳过', NULL)",
+                    [
+                        (index, command_type)
+                        for index, command_type in enumerate(
+                            REMOVED_COMMAND_TYPES + ("图像点击",), start=1
+                        )
+                    ],
                 )
                 connection.commit()
 
@@ -97,6 +115,29 @@ class DataPathTests(unittest.TestCase):
                     "SELECT 指令类型 FROM 命令 ORDER BY 指令类型"
                 ).fetchall()
             self.assertEqual(command_types, [("图像点击",)])
+
+    def test_legacy_branch_command_schema_is_rejected_without_data_loss(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            database_path = os.path.join(temporary_directory, "legacy-commands.db")
+            with contextlib.closing(sqlite3.connect(database_path)) as connection:
+                connection.execute(
+                    "CREATE TABLE 命令("
+                    "ID INTEGER NOT NULL PRIMARY KEY, 图像名称 TEXT, "
+                    "指令类型 TEXT NOT NULL, 参数1 TEXT, 参数2 TEXT, 参数3 TEXT, "
+                    "参数4 TEXT, 重复次数 INTEGER NOT NULL, 异常处理 TEXT, "
+                    "备注 TEXT, 隶属分支 TEXT)"
+                )
+                connection.execute(
+                    "INSERT INTO 命令 VALUES (1, NULL, '图像点击', NULL, NULL, NULL, "
+                    "NULL, 1, '自动跳过', NULL, '主流程')"
+                )
+                connection.commit()
+
+            with self.assertRaisesRegex(RuntimeError, "10 列单流程结构"):
+                DatabaseOperation(database_path)
+
+            with contextlib.closing(sqlite3.connect(database_path)) as connection:
+                self.assertEqual(connection.execute("SELECT COUNT(*) FROM 命令").fetchone()[0], 1)
 
     def test_removed_settings_are_deleted_from_existing_database(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -135,6 +176,16 @@ class DataPathTests(unittest.TestCase):
             database = DatabaseOperation(os.path.join(temporary_directory, "test.db"))
             self.assertFalse(database.import_settings_from_excel(workbook))
             self.assertIsNone(database.get_setting_value("测试值"))
+
+    def test_branch_settings_rows_are_rejected(self):
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "设置"
+        sheet.append(["类型", "名称", "值", "附加值", "排序"])
+        sheet.append(["分支", "旧分支", "K", 3, 1])
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            database = DatabaseOperation(os.path.join(temporary_directory, "test.db"))
+            self.assertFalse(database.import_settings_from_excel(workbook))
 
     def test_excel_settings_without_category_are_classified_on_import(self):
         workbook = Workbook()
@@ -195,7 +246,6 @@ class DataPathTests(unittest.TestCase):
                 )
                 connection.commit()
             database = DatabaseOperation(database_path)
-            self.assertIn("旧分支", database.get_branch_info(True))
             self.assertEqual(
                 database.extract_resource_folder_path()[0], functions.IMAGES_FOLDER
             )

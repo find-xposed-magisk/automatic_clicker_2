@@ -47,6 +47,5 @@
     <file>Window/res/查看.png</file>
     <file>Window/res/修改指令.png</file>
     <file>Window/res/复制.png</file>
-    <file>Window/res/移动到分支.png</file>
   </qresource>
 </RCC>

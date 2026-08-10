@@ -1479,23 +1479,6 @@ class DialogWindow:
         pymsgbox.alert(text=text, title=title, icon=icon_dic.get(icon_))
 
 
-class BranchJump:
-    """跳转分支的功能"""
-
-    def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
-        self.time_sleep = 0.5  # 等待时间
-        self.out_mes = outputmessage  # 用于输出信息到不同的窗口
-        self.ins_dic = ins_dic  # 指令字典
-
-        self.is_test = False  # 是否测试
-        self.cycle_number = cycle_number  # 循环次数
-
-    def start_execute(self):
-        """开始执行鼠标点击事件"""
-        raise IndexError
-
-
 class TerminationProcess:
     """终止流程的功能"""
 
@@ -1603,15 +1586,9 @@ class KeyWait:
         """开始执行鼠标点击事件"""
         parameter_dic_ = eval(self.ins_dic.get("参数1（键鼠指令）"))
         key = parameter_dic_.get("按键")
-        type_ = parameter_dic_.get("等待类型")
         self.out_mes.out_mes(f"等待按键{key}按下中...", self.is_test)
-        if type_ == "按键等待":
-            keyboard.wait(key.lower())
-            self.out_mes.out_mes(f"按键{key}已被按下", self.is_test)
-        elif type_ == "跳转分支":
-            keyboard.wait(key.lower())
-            self.out_mes.out_mes(f"按键{key}已被按下！跳转分支。", self.is_test)
-            raise ValueError(f"按键{key}已被按下！")
+        keyboard.wait(key.lower())
+        self.out_mes.out_mes(f"按键{key}已被按下", self.is_test)
 
 
 class GetTimeValue:
@@ -1816,86 +1793,6 @@ class GetClipboard:
         finally:
             win32clipboard.CloseClipboard()
         return text
-
-
-class ContrastVariables:
-    """变量判断的功能"""
-
-    def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
-        self.time_sleep: float = 0.5  # 等待时间
-        self.out_mes = outputmessage  # 用于输出信息到不同的窗口
-        self.ins_dic: dict = ins_dic  # 指令字典
-
-        self.is_test: bool = False  # 是否测试
-        self.cycle_number: int = cycle_number  # 循环次数
-
-    def parsing_ins_dic(self):
-        """从指令字典中解析出指令参数"""
-        parameter_dic_ = eval(self.ins_dic.get("参数1（键鼠指令）"))
-        return {
-            "变量1": parameter_dic_.get("变量1"),
-            "变量2": parameter_dic_.get("变量2"),
-            "比较符": parameter_dic_.get("比较符"),
-            "变量类型": parameter_dic_.get("类型1"),
-        }
-
-    def start_execute(self):
-        """开始执行鼠标点击事件"""
-        ins_dic = self.parsing_ins_dic()
-        variable_dic = DatabaseOperation().get_variable_info("dict")  # 获取变量字典
-        # 获取变量名称
-        variable1_name = ins_dic.get("变量1")
-        variable2_name = ins_dic.get("变量2")
-        variable_symbol = ins_dic.get("比较符")
-        # 获取变量值
-        variable1 = variable_dic.get(variable1_name)
-        variable2 = variable_dic.get(variable2_name)
-        # 执行变量判断
-        result = self.comparison_variable(
-            variable1, variable_symbol, variable2, ins_dic.get("变量类型")
-        )
-        # 输出信息
-        self.out_mes.out_mes(
-            f'变量判断"{variable1_name}{variable_symbol}{variable2_name}"结果：{result}',
-            self.is_test,
-        )
-        if result:
-            raise ValueError("变量判断结果为真，跳转分支。")
-
-    @staticmethod
-    def comparison_variable(variable1, comparison_symbol, variable2, variable_type):
-        """比较变量"""
-
-        def try_parse_date(variable):
-            """尝试将变量解析为日期时间对象"""
-            try:
-                return parse(variable)
-            except ValueError:
-                return None
-
-        variable1_ = variable1
-        variable2_ = variable2
-        if variable_type == "日期或时间":
-            variable1_ = try_parse_date(variable1)
-            variable2_ = try_parse_date(variable2)
-        elif variable_type == "数字":
-            variable1_ = eval(variable1)
-            variable2_ = eval(variable2)
-        elif variable_type == "字符串":
-            variable1_ = str(variable1)
-            variable2_ = str(variable2)
-
-        if comparison_symbol == "=":
-            return variable1_ == variable2_
-        elif comparison_symbol == "≠":
-            return variable1_ != variable2_
-        elif comparison_symbol == ">":
-            return variable1_ > variable2_
-        elif comparison_symbol == "<":
-            return variable1_ < variable2_
-        elif comparison_symbol == "包含":
-            return variable2_ in variable1_
 
 
 class RunPython:
@@ -2256,34 +2153,3 @@ class WindowFocusWait:
                 raise TimeoutError("窗口超过指定时间未获取到焦点" if wait_for_focus else "窗口超过指定时间未失去焦点")
 
             time.sleep(frequency)
-
-
-class ColorJudgment:
-    """颜色判断功能"""
-
-    def __init__(self, outputmessage, ins_dic, cycle_number=1):
-        # 设置参数
-        self.time_sleep: float = 0.5  # 等待时间
-        self.out_mes = outputmessage  # 用于输出信息到不同的窗口
-        self.ins_dic: dict = ins_dic  # 指令字典
-
-        self.is_test: bool = False  # 是否测试
-        self.cycle_number: int = cycle_number  # 循环次数
-
-    def start_execute(self):
-        params = eval(self.ins_dic.get('参数1（键鼠指令）'))
-        pixel_coords = eval(params.get('像素坐标'))
-        target_color = eval(params.get('目标颜色'))
-        tolerance = int(params.get('误差范围'))
-        # 判断像素颜色是否匹配
-        if pyautogui.pixelMatchesColor(
-                pixel_coords[0],
-                pixel_coords[1],
-                target_color,
-                tolerance
-        ):
-            self.out_mes.out_mes(f"像素颜色匹配成功", self.is_test)
-            if not self.is_test:
-                raise ValueError("像素颜色匹配")
-        else:
-            self.out_mes.out_mes(f"像素颜色不匹配！坐标：{pixel_coords}", self.is_test)

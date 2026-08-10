@@ -1,17 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <ui version="4.0">
- <class>Branch</class>
- <widget class="QWidget" name="Branch">
+ <class>VariableSelection</class>
+ <widget class="QDialog" name="VariableSelection">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
-    <height>242</height>
+    <width>240</width>
+    <height>276</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>微软雅黑</family>
+   </font>
+  </property>
   <property name="windowTitle">
-   <string>分支执行</string>
+   <string>选择变量</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -115,7 +120,7 @@
       </font>
      </property>
      <property name="text">
-      <string>双击名称或按下快捷键执行分支</string>
+      <string>双击变量名称进行选择</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -123,60 +128,115 @@
     </widget>
    </item>
    <item>
-    <widget class="QTableWidget" name="tableWidget">
+    <widget class="QListView" name="listView">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="Text">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>255</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>0</red>
+           <green>0</green>
+           <blue>255</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="Text">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>255</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>0</red>
+           <green>0</green>
+           <blue>255</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="Text">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>120</red>
+           <green>120</green>
+           <blue>120</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="128">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
+     </property>
+     <property name="font">
+      <font>
+       <family>微软雅黑</family>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
      <property name="editTriggers">
       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
-     </property>
-     <property name="dragDropMode">
-      <enum>QAbstractItemView::DragDropMode::NoDragDrop</enum>
      </property>
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
      </property>
-     <property name="showGrid">
+     <property name="flow">
+      <enum>QListView::Flow::TopToBottom</enum>
+     </property>
+     <property name="viewMode">
+      <enum>QListView::ViewMode::ListMode</enum>
+     </property>
+     <property name="selectionRectVisible">
       <bool>true</bool>
      </property>
-     <property name="gridStyle">
-      <enum>Qt::PenStyle::SolidLine</enum>
-     </property>
-     <attribute name="horizontalHeaderCascadingSectionResizes">
-      <bool>false</bool>
-     </attribute>
-     <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-      <bool>false</bool>
-     </attribute>
-     <attribute name="horizontalHeaderStretchLastSection">
-      <bool>true</bool>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>分支名称</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>快捷键</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>重复次数</string>
-      </property>
-     </column>
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>提示：重复次数-1为无限运行</string>
+    <widget class="QPushButton" name="pushButton">
+     <property name="font">
+      <font>
+       <family>微软雅黑</family>
+       <bold>true</bold>
+      </font>
      </property>
-     <property name="alignment">
-      <set>Qt::AlignmentFlag::AlignCenter</set>
+     <property name="text">
+      <string>显示主窗口</string>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
- <resources/>
- <connections/>
+ <resources />
+ <connections />
 </ui>

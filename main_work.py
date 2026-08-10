@@ -33,17 +33,11 @@ class CommandThread(QThread):
         self.start_state: bool = True
         self.suspended: bool = False
         # 运行时的参数
-        self.branch_name_index: int = 0  # 分支表名索引
         self.run_mode: tuple = ('全部指令', 0)  # 运行模式
-        self.branch_table_name: list = []
         # 互斥锁,用于暂停线程
         self.mutex = QMutex()
         self.condition = QWaitCondition()
         self.is_paused: bool = False
-
-    def set_branch_name_index(self, branch_name_index_):
-        """设置分支表名索引"""
-        self.branch_name_index = branch_name_index_
 
     def set_run_mode(self, mode: str, info: int):
         """设置运行模式
@@ -93,7 +87,7 @@ class CommandThread(QThread):
         while (self.start_state and loop_type == '无限循环') or \
                 (loop_type == '有限循环' and self.number <= self.number_cycles):
             # 执行指令集中的指令
-            self.execute_instructions(self.branch_name_index, current_index, list_instructions)
+            self.execute_instructions(current_index, list_instructions)
             self.send_message.emit('换行')
             self.send_message.emit(f'完成第{self.number}次循环')
             self.number += 1
@@ -120,27 +114,12 @@ class CommandThread(QThread):
             self.condition.wait(self.mutex)
         self.mutex.unlock()
 
-    def execute_instructions(self, current_list_index, current_index, list_instructions_):
+    def execute_instructions(self, current_index, list_instructions_):
         """执行接受到的操作指令"""
         # 读取指令
-        while current_index < len(list_instructions_[current_list_index]) and not self.check_mutex():
+        while current_index < len(list_instructions_) and not self.check_mutex():
             try:
-                elem_ = list_instructions_[current_list_index][current_index]
-                # 【指令集合【指令分支（指令元素[元素索引]）】】
-                # print('执行当前指令：', elem_)
-                # [
-                #     [
-                #         (13, None, '时间等待', "{'类型': '时间等待', '时长': 5, '单位': '秒'}", None, None, None, 1,
-                #          '提示异常并暂停', '', '主流程'),
-                #         (14, None, '坐标点击', "{'动作': '左键单击', '坐标': '1086-1414', '自定义次数': 0}", None, None,
-                #          None, 1, '提示异常并暂停', '', '主流程')
-                #     ],
-                #     [
-                #         (16, None, '鼠标点击',
-                #          "{'鼠标': '左键', '次数': 1, '间隔': 100, '按压': 100}", None,
-                #          None, None, 1, '提示异常并暂停', '', '分支1')
-                #     ]
-                # ]
+                elem_ = list_instructions_[current_index]
                 dic_ = {
                     'ID': elem_[0],
                     '图像路径': elem_[1],
@@ -176,7 +155,6 @@ class CommandThread(QThread):
                         "提示音": (PlayVoice, self.out_mes, dic_),
                         "倒计时窗口": (WaitWindow, self.out_mes, dic_),
                         "提示窗口": (DialogWindow, self.out_mes, dic_),
-                        "跳转分支": (BranchJump, self.out_mes, dic_),
                         "终止流程": (TerminationProcess, self.out_mes, dic_),
                         "窗口控制": (WindowControl, self.out_mes, dic_),
                         "按键等待": (KeyWait, self.out_mes, dic_),
@@ -184,7 +162,6 @@ class CommandThread(QThread):
                         "获取Excel": (GetExcelCellValue, self.out_mes, dic_, self.number),
                         "获取对话框": (GetDialogValue, self.out_mes, dic_),
                         "获取剪切板": (GetClipboard, self.out_mes, dic_),
-                        "变量判断": (ContrastVariables, self.out_mes, dic_),
                         "运行Python": (RunPython, self.out_mes, dic_),
                         "运行cmd": (RunCmd, self.out_mes, dic_),
                         "运行外部文件": (RunExternalFile, self.out_mes, dic_),
@@ -192,7 +169,6 @@ class CommandThread(QThread):
                         "OCR识别": (TextRecognition, self.out_mes, dic_),
                         "获取鼠标位置": (GetMousePositon, self.out_mes, dic_),
                         "窗口焦点等待": (WindowFocusWait, self.out_mes, dic_),
-                        "颜色判断": (ColorJudgment, self.out_mes, dic_),
                     }
                     # 根据命令类型执行相应操作
                     if cmd_type in command_mapping:
@@ -258,20 +234,13 @@ class CommandThread(QThread):
                         self.start_state = False
                         break
 
-                    # 跳转分支指令
-                    else:  # 跳转分支
-                        self.send_message.emit(f'转到分支：{exception_handling}')
-                        target_branch_name = exception_handling.split('-')[0]  # 分支表名
-                        # 目标分支表名在分支表名中的索引
-                        self.branch_table_name = self.db.get_branch_info(True)
-                        branch_table_name_index = self.branch_table_name.index(target_branch_name)
-                        # 分支表中要跳转的指令索引
-                        branch_ins_index = exception_handling.split('-')[1]
-                        x = int(branch_table_name_index)
-                        y = int(branch_ins_index) - 1
-                        self.execute_instructions(x, y, list_instructions_)
+                    else:
+                        self.send_message.emit(
+                            f'ID为{str_id}的指令异常处理方式无效，任务已停止。'
+                        )
+                        self.start_state = False
                         break
-
-            except IndexError:
-                self.send_message.emit('无法进行分支跳转')
+            except (IndexError, TypeError) as error_:
+                self.send_message.emit(f'指令数据格式无效，任务已停止：{error_}')
+                self.start_state = False
                 break

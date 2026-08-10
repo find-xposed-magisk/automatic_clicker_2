@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'branchwin.ui'
+## Form generated from reading UI file 'variable_selection.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.0
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -19,17 +19,17 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QDialog, QLabel,
     QListView, QPushButton, QSizePolicy, QVBoxLayout,
     QWidget)
 
-class Ui_branch(object):
-    def setupUi(self, branch):
-        if not branch.objectName():
-            branch.setObjectName(u"branch")
-        branch.resize(240, 276)
+class Ui_VariableSelection(object):
+    def setupUi(self, VariableSelection):
+        if not VariableSelection.objectName():
+            VariableSelection.setObjectName(u"VariableSelection")
+        VariableSelection.resize(240, 276)
         font = QFont()
         font.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
-        branch.setFont(font)
-        self.verticalLayout = QVBoxLayout(branch)
+        VariableSelection.setFont(font)
+        self.verticalLayout = QVBoxLayout(VariableSelection)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.label = QLabel(branch)
+        self.label = QLabel(VariableSelection)
         self.label.setObjectName(u"label")
         palette = QPalette()
         brush = QBrush(QColor(0, 0, 255, 255))
@@ -65,7 +65,7 @@ class Ui_branch(object):
 
         self.verticalLayout.addWidget(self.label)
 
-        self.listView = QListView(branch)
+        self.listView = QListView(VariableSelection)
         self.listView.setObjectName(u"listView")
         self.listView.setMinimumSize(QSize(0, 100))
         palette1 = QPalette()
@@ -94,7 +94,7 @@ class Ui_branch(object):
 
         self.verticalLayout.addWidget(self.listView)
 
-        self.pushButton = QPushButton(branch)
+        self.pushButton = QPushButton(VariableSelection)
         self.pushButton.setObjectName(u"pushButton")
         font3 = QFont()
         font3.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
@@ -104,14 +104,14 @@ class Ui_branch(object):
         self.verticalLayout.addWidget(self.pushButton)
 
 
-        self.retranslateUi(branch)
+        self.retranslateUi(VariableSelection)
 
-        QMetaObject.connectSlotsByName(branch)
+        QMetaObject.connectSlotsByName(VariableSelection)
     # setupUi
 
-    def retranslateUi(self, branch):
-        branch.setWindowTitle(QCoreApplication.translate("branch", u"\u5206\u652f\u6267\u884c", None))
-        self.label.setText(QCoreApplication.translate("branch", u"\u53cc\u51fb\u5206\u652f\u540d\u79f0\u5f00\u59cb\u6267\u884c", None))
-        self.pushButton.setText(QCoreApplication.translate("branch", u"\u663e\u793a\u4e3b\u7a97\u53e3", None))
+    def retranslateUi(self, VariableSelection):
+        VariableSelection.setWindowTitle(QCoreApplication.translate("VariableSelection", u"\u9009\u62e9\u53d8\u91cf", None))
+        self.label.setText(QCoreApplication.translate("VariableSelection", u"\u53cc\u51fb\u53d8\u91cf\u540d\u79f0\u8fdb\u884c\u9009\u62e9", None))
+        self.pushButton.setText(QCoreApplication.translate("VariableSelection", u"\u663e\u793a\u4e3b\u7a97\u53e3", None))
     # retranslateUi
 

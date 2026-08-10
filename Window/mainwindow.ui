@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
@@ -23,7 +23,7 @@
     <normaloff>:/按钮图标/Window/res/图标.png</normaloff>:/按钮图标/Window/res/图标.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true" />
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_4">
@@ -217,14 +217,14 @@
            <palette>
             <active>
              <colorrole role="Text">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>255</red>
-               <green>255</green>
-               <blue>255</blue>
-              </color>
-             </brush>
-            </colorrole>
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </brush>
+             </colorrole>
              <colorrole role="AlternateBase">
               <brush brushstyle="SolidPattern">
                <color alpha="255">
@@ -235,25 +235,25 @@
               </brush>
              </colorrole>
              <colorrole role="PlaceholderText">
-             <brush brushstyle="NoBrush">
-              <color alpha="128">
-               <red>255</red>
-               <green>255</green>
-               <blue>255</blue>
-              </color>
-             </brush>
-            </colorrole>
+              <brush brushstyle="NoBrush">
+               <color alpha="128">
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </brush>
+             </colorrole>
             </active>
             <inactive>
              <colorrole role="Text">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>255</red>
-               <green>255</green>
-               <blue>255</blue>
-              </color>
-             </brush>
-            </colorrole>
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </brush>
+             </colorrole>
              <colorrole role="AlternateBase">
               <brush brushstyle="SolidPattern">
                <color alpha="255">
@@ -264,14 +264,14 @@
               </brush>
              </colorrole>
              <colorrole role="PlaceholderText">
-             <brush brushstyle="NoBrush">
-              <color alpha="128">
-               <red>255</red>
-               <green>255</green>
-               <blue>255</blue>
-              </color>
-             </brush>
-            </colorrole>
+              <brush brushstyle="NoBrush">
+               <color alpha="128">
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </brush>
+             </colorrole>
             </inactive>
             <disabled>
              <colorrole role="Text">
@@ -370,7 +370,7 @@
           </column>
           <column>
            <property name="text">
-            <string>分支处理</string>
+            <string>异常处理</string>
            </property>
           </column>
           <column>
@@ -405,67 +405,6 @@
             <property name="spacing">
              <number>0</number>
             </property>
-            <item>
-             <widget class="QLabel" name="label">
-              <property name="palette">
-               <palette>
-                <active>
-                 <colorrole role="WindowText">
-                  <brush brushstyle="SolidPattern">
-                   <color alpha="255">
-                    <red>0</red>
-                    <green>0</green>
-                    <blue>0</blue>
-                   </color>
-                  </brush>
-                 </colorrole>
-                </active>
-                <inactive>
-                 <colorrole role="WindowText">
-                  <brush brushstyle="SolidPattern">
-                   <color alpha="255">
-                    <red>0</red>
-                    <green>0</green>
-                    <blue>0</blue>
-                   </color>
-                  </brush>
-                 </colorrole>
-                </inactive>
-                <disabled>
-                 <colorrole role="WindowText">
-                  <brush brushstyle="SolidPattern">
-                   <color alpha="255">
-                    <red>120</red>
-                    <green>120</green>
-                    <blue>120</blue>
-                   </color>
-                  </brush>
-                 </colorrole>
-                </disabled>
-               </palette>
-              </property>
-              <property name="text">
-               <string>当前分支：</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="comboBox"/>
-            </item>
-            <item>
-             <widget class="QToolButton" name="toolButton_2">
-              <property name="text">
-               <string>添加分支</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../images.qrc">
-                <normaloff>:/按钮图标/Window/res/add.png</normaloff>:/按钮图标/Window/res/add.png</iconset>
-              </property>
-             </widget>
-            </item>
            </layout>
           </item>
           <item>
@@ -473,17 +412,6 @@
             <property name="spacing">
              <number>0</number>
             </property>
-            <item>
-             <widget class="QToolButton" name="toolButton">
-              <property name="text">
-               <string>删除分支</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../images.qrc">
-                <normaloff>:/按钮图标/Window/res/删除.png</normaloff>:/按钮图标/Window/res/删除.png</iconset>
-              </property>
-             </widget>
-            </item>
             <item>
              <widget class="QPushButton" name="pushButton_3">
               <property name="font">
@@ -702,7 +630,7 @@ QPushButton:pressed {
            </font>
           </property>
           <property name="styleSheet">
-           <string notr="true"/>
+           <string notr="true" />
           </property>
           <property name="text">
            <string>添加指令（Ctrl+Enter）</string>
@@ -1095,7 +1023,7 @@ QPushButton:pressed {
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true"/>
+       <string notr="true" />
       </property>
       <property name="title">
        <string>操作</string>
@@ -1173,13 +1101,6 @@ QPushButton:pressed {
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QPushButton" name="pushButton_4">
-         <property name="text">
-          <string>选择分支运行（shift+1）</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </item>
@@ -1202,42 +1123,42 @@ QPushButton:pressed {
      <property name="title">
       <string>另存为</string>
      </property>
-     <addaction name="actiona"/>
+     <addaction name="actiona" />
     </widget>
     <widget class="QMenu" name="menuzv">
      <property name="title">
       <string>最近打开</string>
      </property>
     </widget>
-    <addaction name="menu_5"/>
-    <addaction name="separator"/>
-    <addaction name="actionf"/>
-    <addaction name="menuzv"/>
+    <addaction name="menu_5" />
+    <addaction name="separator" />
+    <addaction name="actionf" />
+    <addaction name="menuzv" />
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
      <string>帮助</string>
     </property>
-    <addaction name="actionabout"/>
-    <addaction name="actionhelp"/>
-    <addaction name="actionk"/>
+    <addaction name="actionabout" />
+    <addaction name="actionhelp" />
+    <addaction name="actionk" />
    </widget>
    <widget class="QMenu" name="menu_4">
     <property name="title">
      <string>工具</string>
     </property>
-    <addaction name="actions_2"/>
+    <addaction name="actions_2" />
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
      <string>视图</string>
     </property>
-    <addaction name="actiong"/>
+    <addaction name="actiong" />
    </widget>
-   <addaction name="menu"/>
-   <addaction name="menu_3"/>
-   <addaction name="menu_4"/>
-   <addaction name="menu_2"/>
+   <addaction name="menu" />
+   <addaction name="menu_3" />
+   <addaction name="menu_4" />
+   <addaction name="menu_2" />
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="enabled">
@@ -1252,12 +1173,12 @@ QPushButton:pressed {
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionx"/>
-   <addaction name="actionf"/>
-   <addaction name="separator"/>
-   <addaction name="actions_2"/>
-   <addaction name="actionhelp"/>
-   <addaction name="actionabout"/>
+   <addaction name="actionx" />
+   <addaction name="actionf" />
+   <addaction name="separator" />
+   <addaction name="actions_2" />
+   <addaction name="actionhelp" />
+   <addaction name="actionabout" />
   </widget>
   <action name="actionabout">
    <property name="icon">
@@ -1375,7 +1296,7 @@ QPushButton:pressed {
   </action>
  </widget>
  <resources>
-  <include location="../images.qrc"/>
+  <include location="../images.qrc" />
  </resources>
  <connections>
   <connection>

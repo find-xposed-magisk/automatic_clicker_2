@@ -13,7 +13,6 @@ class Icon:
         self.view = self.get_icon(":/按钮图标/Window/res/查看.png")
         self.modify_instruction = self.get_icon(":/按钮图标/Window/res/修改指令.png")
         self.copy = self.get_icon(":/按钮图标/Window/res/复制.png")
-        self.move_to_branch = self.get_icon(":/按钮图标/Window/res/移动到分支.png")
 
     @staticmethod
     def get_icon(path):

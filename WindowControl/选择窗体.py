@@ -7,44 +7,30 @@ from PySide6.QtWidgets import QDialog, QHeaderView, QTableWidgetItem, QApplicati
 
 from WindowControl.变量池窗口 import VariablePool_Win
 from 数据库操作 import DatabaseOperation
-from Window.branchwin_ui import Ui_branch
+from Window.variable_selection_ui import Ui_VariableSelection
 from WindowControl.窗口状态 import install_window_state
 
 
-class Variable_selection_win(QDialog, Ui_branch):
-    """弹出选择执行分支的窗体"""
+class Variable_selection_win(QDialog, Ui_VariableSelection):
+    """变量选择窗口。"""
 
-    def __init__(self, parent=None, modes='分支选择'):
+    def __init__(self, parent=None, modes='变量选择'):
         super().__init__(parent)
         self.setupUi(self)
         self.db = getattr(parent, "db", None) or DatabaseOperation()
         # self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
-        self.modes = modes
-        # 根据不同的模式设置窗体样式
-        self.set_window_style(self.modes)
+        del modes
+        self.setWindowTitle('选择变量')
+        self.label.setText('请选择要插入的变量')
+        self.pushButton.setText('设置变量')
+        self.listView.doubleClicked.connect(self.write_to_textedit)
+        self.pushButton.clicked.connect(self.show_variable_pool)
         install_window_state(
             self, self.db, self.windowTitle(), center=False, enable_maximize_button=False
         )
         self.listView.installEventFilter(self)  # 安装事件过滤器,重新设置表格的快捷键
 
-    def set_window_style(self, modes):
-        """根据不同的模式设置窗体样式"""
-        if modes == '分支选择':
-            self.setWindowTitle('执行分支')
-            self.label.setText('请选择要执行的分支')
-            self.pushButton.setText('显示主窗口')
-            # 绑定事件
-            self.listView.doubleClicked.connect(self.open_select_option)  # 双击执行分支
-            self.pushButton.clicked.connect(lambda: self.show_main(modes))
-        elif modes == '变量选择':
-            self.setWindowTitle('选择变量')
-            self.label.setText('请选择要插入的变量')
-            self.pushButton.setText('设置变量')
-            # 绑定事件
-            self.listView.doubleClicked.connect(self.write_to_textedit)
-            self.pushButton.clicked.connect(lambda: self.show_main(modes))
-
-    def load_lists(self, modes):
+    def load_lists(self):
         """设置初始参数"""
 
         def add_listview(list_, listview):
@@ -56,59 +42,35 @@ class Variable_selection_win(QDialog, Ui_branch):
                 item = str(list_.index(item) + 1) + '. ' + item
                 model.appendRow(QStandardItem(item))
 
-        if modes == '分支选择':
-            branch_list = self.db.get_branch_info(True)
-            add_listview(branch_list, self.listView)
-        elif modes == '变量选择':
-            variable_list = self.db.get_variable_info('list')
-            add_listview(variable_list, self.listView)
-
-    def open_select_option(self):
-        """打开选中的listview中的文件夹路径"""
-        try:
-            indexes = self.listView.selectedIndexes()
-            if indexes:
-                selected_text = indexes[0].data().split('. ')[1]  # 直接获取选中项的文本值
-                self.parent().comboBox.setCurrentText(selected_text)  # 设置分支
-                self.parent().start()  # 执行分支
-                self.close()
-        except Exception as e:
-            print(e)
+        variable_list = self.db.get_variable_info('list')
+        add_listview(variable_list, self.listView)
 
     def trigger_using_number_keys(self, number):
         """设置到对应的行"""
         if number <= self.listView.model().rowCount():
             self.listView.setCurrentIndex(self.listView.model().index(number - 1, 0))
-            self.open_select_option()  # 触发双击事件
+            self.write_to_textedit()
 
     def write_to_textedit(self):
         """将选中的值写入textedit，用于写入变量的模式"""
         try:
             indexes = self.listView.selectedIndexes()
             value = self.listView.model().itemFromIndex(indexes[0]).text().split('. ')[1]  # 获取选中的值
-            self.parent().write_value_to_textedit(value)  # 设置分支
+            self.parent().write_value_to_textedit(value)
             self.close()
         except Exception as e:
             print(e)
 
-    def show_main(self, modes='分支选择'):
-        """显示主窗体"""
-        if modes == '分支选择':
-            # 如果父窗体最小化则显示
-            if self.parent().isMinimized():
-                self.parent().showNormal()
-            self.close()
-        elif modes == '变量选择':
-            # 打开变量选择窗体
-            variable_pool = VariablePool_Win(self)
-            variable_pool.exec_()
+    def show_variable_pool(self):
+        variable_pool = VariablePool_Win(self)
+        variable_pool.exec_()
 
     def showEvent(self, a0) -> None:
         # 移动窗口到鼠标位置
         cursor_pos = QCursor.pos()
         # 移动窗口使窗口中心与鼠标位置重合
         self.move(cursor_pos.x() - int(self.width() / 2), cursor_pos.y() - int(self.height() / 2))
-        self.load_lists(self.modes)  # 加载设置
+        self.load_lists()
 
     def eventFilter(self, obj, event):
         # 重写self.tableWidget的快捷键事件
